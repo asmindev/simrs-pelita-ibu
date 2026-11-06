@@ -1,4 +1,5 @@
 import type { Auth } from '@/types/auth';
+import type { Flash } from '@/types/flash';
 
 declare module 'react' {
     interface InputHTMLAttributes<T> {
@@ -11,6 +12,7 @@ declare module '@inertiajs/core' {
         sharedPageProps: {
             name: string;
             auth: Auth;
+            flash: Flash;
             sidebarOpen: boolean;
             [key: string]: unknown;
         };

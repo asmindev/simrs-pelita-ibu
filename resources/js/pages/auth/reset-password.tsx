@@ -1,6 +1,8 @@
 import { Head, useForm } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 
+import { route } from '@/shared/lib/route';
+
 type Props = {
     email: string;
     token: string;
@@ -17,7 +19,7 @@ export default function ResetPassword({ email, token, passwordRules }: Props) {
 
     function submit(event: FormEvent) {
         event.preventDefault();
-        post('/reset-password');
+        post(route('password.update'));
     }
 
     return (

@@ -1,6 +1,8 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 
+import { route } from '@/shared/lib/route';
+
 type Props = {
     status?: string;
 };
@@ -12,7 +14,7 @@ export default function ForgotPassword({ status }: Props) {
 
     function submit(event: FormEvent) {
         event.preventDefault();
-        post('/forgot-password');
+        post(route('password.email'));
     }
 
     return (
@@ -57,7 +59,7 @@ export default function ForgotPassword({ status }: Props) {
                     </button>
 
                     <Link
-                        href="/login"
+                        href={route('login')}
                         className="block text-center text-sm underline"
                     >
                         Back to log in

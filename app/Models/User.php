@@ -6,9 +6,11 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Spatie\Permission\Traits\HasRoles;
 
 /**
  * @property int $id
@@ -28,7 +30,7 @@ use Illuminate\Support\Carbon;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * Get the attributes that should be cast.
@@ -41,5 +43,33 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * @return BelongsToMany<Unit, $this>
+     */
+    public function units(): BelongsToMany
+    {
+        return $this->belongsToMany(Unit::class, 'user_unit')
+            ->withPivot('is_primary')
+            ->withTimestamps();
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    public function unitIds(): array
+    {
+        return $this->units()->pluck('units.id')->all();
+    }
+
+    public function hasUnitAccess(int $unitId): bool
+    {
+        return $this->units()->where('units.id', $unitId)->exists();
+    }
+
+    public function primaryUnit(): ?Unit
+    {
+        return $this->units()->wherePivot('is_primary', true)->first();
     }
 }

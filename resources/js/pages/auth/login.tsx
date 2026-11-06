@@ -1,6 +1,8 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 
+import { route } from '@/shared/lib/route';
+
 type Props = {
     canResetPassword: boolean;
     status?: string;
@@ -15,7 +17,7 @@ export default function Login({ canResetPassword, status }: Props) {
 
     function submit(event: FormEvent) {
         event.preventDefault();
-        post('/login', {
+        post(route('login'), {
             onFinish: () => reset('password'),
         });
     }
@@ -95,7 +97,7 @@ export default function Login({ canResetPassword, status }: Props) {
 
                     {canResetPassword && (
                         <Link
-                            href="/forgot-password"
+                            href={route('password.request')}
                             className="block text-center text-sm underline"
                         >
                             Forgot your password?

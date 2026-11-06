@@ -1,3 +1,5 @@
+import type { PermissionName, RoleName } from '@/types/permissions';
+
 export type User = {
     id: number;
     name: string;
@@ -10,5 +12,7 @@ export type User = {
 };
 
 export type Auth = {
-    user: User;
+    user: User | null;
+    roles?: RoleName[];
+    permissions?: PermissionName[];
 };

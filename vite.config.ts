@@ -58,6 +58,7 @@ export default defineConfig({
         ignorePatterns: [
             '.github/**',
             'composer.json',
+            'resources/js/types/ziggy.d.ts',
             'resources/views/mail/*',
         ],
         sortTailwindcss: {
