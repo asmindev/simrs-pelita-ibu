@@ -4,11 +4,13 @@ namespace App\Providers;
 
 use App\Enums\RoleName;
 use App\Models\BreakGlassGrant;
+use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\PatientAccessLog;
 use App\Models\Unit;
 use App\Models\User;
 use App\Policies\BreakGlassGrantPolicy;
+use App\Policies\DoctorPolicy;
 use App\Policies\PatientAccessLogPolicy;
 use App\Policies\PatientPolicy;
 use App\Policies\UnitPolicy;
@@ -44,6 +46,7 @@ class AppServiceProvider extends ServiceProvider
     protected function configureAuthorization(): void
     {
         Gate::policy(Unit::class, UnitPolicy::class);
+        Gate::policy(Doctor::class, DoctorPolicy::class);
         Gate::policy(Patient::class, PatientPolicy::class);
         Gate::policy(PatientAccessLog::class, PatientAccessLogPolicy::class);
         Gate::policy(BreakGlassGrant::class, BreakGlassGrantPolicy::class);

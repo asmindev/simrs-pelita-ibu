@@ -18,6 +18,73 @@ declare module 'ziggy-js' {
     "password.confirm.store": [],
     "home": [],
     "master-data.index": [],
+    "master-data.units.index": [],
+    "master-data.units.create": [],
+    "master-data.units.store": [],
+    "master-data.units.edit": [
+        {
+            "name": "unit",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "master-data.units.update": [
+        {
+            "name": "unit",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "master-data.units.destroy": [
+        {
+            "name": "unit",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "master-data.doctors.index": [],
+    "master-data.doctors.create": [],
+    "master-data.doctors.store": [],
+    "master-data.doctors.edit": [
+        {
+            "name": "doctor",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "master-data.doctors.update": [
+        {
+            "name": "doctor",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "master-data.doctors.destroy": [
+        {
+            "name": "doctor",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "master-data.doctors.schedules.store": [
+        {
+            "name": "doctor",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "master-data.doctors.schedules.destroy": [
+        {
+            "name": "doctor",
+            "required": true,
+            "binding": "id"
+        },
+        {
+            "name": "schedule",
+            "required": true,
+            "binding": "id"
+        }
+    ],
     "master-data.patients.index": [],
     "master-data.patients.duplicates": [],
     "master-data.patients.create": [],

@@ -21,6 +21,7 @@ class UnitFactory extends Factory
         return [
             'code' => strtoupper(fake()->unique()->numerify('UNIT-####')),
             'name' => fake()->unique()->words(2, true),
+            'description' => fake()->optional()->sentence(),
             'type' => fake()->randomElement(UnitType::cases()),
             'is_active' => true,
         ];

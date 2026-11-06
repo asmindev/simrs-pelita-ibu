@@ -1,7 +1,7 @@
 # PRD — Master Data
 
-Status: IN PROGRESS — CRUD pasien, pencarian, dan deteksi duplikat selesai;
-referensi lain dan merge menyusul.
+Status: IN PROGRESS — CRUD pasien, unit, dokter, dan jadwal praktik selesai;
+obat, tarif, penjamin, dan merge menyusul.
 
 ## Tujuan
 
@@ -58,7 +58,8 @@ pengiriman password plaintext.
 
 - `patients`: nomor rekam medis, NIK, nama, jenis kelamin, tanggal lahir,
   alamat, telepon, penjamin default, golongan darah (opsional), status.
-- `doctors`: user, spesialisasi, nomor izin.
+- `doctors`: kode, nama, spesialisasi, nomor izin, telepon, email, status;
+  tautan user menyusul saat UI user tersedia.
 - `doctor_schedules`: dokter, unit, hari, jam mulai/selesai, kuota.
 - `units`: `code` unik, `name`, tipe (`outpatient`, `inpatient`, `emergency`,
   `laboratory`, `radiology`, `pharmacy`, `other`), `is_active`.
@@ -91,6 +92,7 @@ master-data.guarantor.manage
 
 - Nomor rekam medis unik dan tidak berubah.
 - NIK unik jika diisi.
+- Jadwal dokter tidak boleh tumpang tindih pada hari yang sama.
 - Delete pasien hanya jika belum punya kunjungan; selain itu nonaktifkan.
 - Merge pasien wajib memilih data master dan tercatat di audit.
 

@@ -1,6 +1,7 @@
 # Fase 2 — Master Data
 
-Status: sebagian (pasien selesai; referensi lain menyusul).
+Status: sebagian (pasien, unit, dokter, dan jadwal selesai; obat, tarif,
+penjamin, dan merge menyusul).
 
 ## Referensi legacy
 
@@ -13,13 +14,19 @@ Status: sebagian (pasien selesai; referensi lain menyusul).
 ## Backend
 
 - [x] Migration `patients`.
-- [ ] Migration `doctors`, `doctor_schedules`, `drug_categories`, `drugs`,
-      `tariffs`, `insurers`.
+- [x] Migration deskripsi `units`.
+- [x] Migration `doctors`.
+- [x] Migration `doctor_schedules`.
+- [ ] Migration `drug_categories`, `drugs`, `tariffs`, `insurers`.
 - [x] Model + factory + cast pasien.
-- [ ] Model + factory dokter, jadwal, kategori/obat, tarif, penjamin.
+- [x] Model + factory unit.
+- [x] Model + factory dokter.
+- [x] Model + factory jadwal dokter.
+- [ ] Model + factory kategori/obat, tarif, penjamin.
 - [x] Controller pasien (index/create/store/edit/update/destroy).
-- [ ] CRUD unit (tabel `units` sudah ada).
-- [ ] CRUD dokter + jadwal praktik.
+- [x] CRUD unit (tabel `units` sudah ada).
+- [x] CRUD dokter (profil).
+- [x] CRUD jadwal praktik dokter (validasi tumpang tindih).
 - [ ] CRUD kategori + obat (harga, produsen, status).
 - [ ] CRUD tarif/tindakan dan penjamin.
 - [x] FormRequest validasi pasien.
@@ -30,6 +37,9 @@ Status: sebagian (pasien selesai; referensi lain menyusul).
 - [ ] Field golongan darah pasien (ditunda sampai blood bank disetujui).
 - [x] Permission enum Master Data.
 - [x] Test CRUD pasien + permission + duplikat.
+- [x] Test CRUD unit + permission + audit.
+- [x] Test CRUD dokter + permission + audit.
+- [x] Test CRUD jadwal dokter + permission + audit.
 - [ ] Test CRUD referensi lain.
 - [ ] Test merge pasien.
 
@@ -37,8 +47,9 @@ Status: sebagian (pasien selesai; referensi lain menyusul).
 
 - [x] `pages/master-data/index.tsx` sebagai landing.
 - [x] `pages/master-data/patient/{index,create,edit}.tsx`.
-- [ ] `pages/master-data/unit/{index,create,edit}.tsx`.
-- [ ] `pages/master-data/doctor/{index,create,edit}.tsx`.
+- [x] `pages/master-data/unit/{index,create,edit}.tsx`.
+- [x] `pages/master-data/doctor/{index,create,edit}.tsx`.
+- [x] Jadwal praktik di halaman edit dokter.
 - [ ] `pages/master-data/drug/{index,create,edit}.tsx`.
 - [ ] `pages/master-data/tariff/{index,create,edit}.tsx`.
 - [ ] `pages/master-data/insurer/{index,create,edit}.tsx`.
@@ -52,5 +63,7 @@ Status: sebagian (pasien selesai; referensi lain menyusul).
 ## Kriteria
 
 - Pencarian dan duplikat berfungsi.
+- CRUD unit dan dokter berfungsi dan perubahan tercatat di activity log.
+- Jadwal dokter menolak jam tumpang tindih dan unit nonaktif.
 - Permission diuji; scoping unit menyusul saat data terikat unit ada.
 - Audit perubahan referensi tercatat.
