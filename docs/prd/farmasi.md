@@ -28,6 +28,15 @@ Tidak termasuk:
 - Pengadaan/pembelian.
 - Klaim penjamin.
 
+## Referensi legacy
+
+- `pharmacist/manage_medicine_category.php` dan `manage_medicine.php` →
+  kategori/obat di Master Data.
+- `pharmacist/manage_prescription.php` (catatan apoteker) → verifikasi resep
+  dan catatan dispensing.
+- Legacy tidak punya stok, batch, kedaluwarsa, FEFO, atau retur; semua itu
+  fitur baru di SIMRS, bukan hasil porting.
+
 ## Alur utama
 
 1. Resep masuk dari rekam medis.

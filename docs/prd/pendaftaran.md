@@ -27,6 +27,16 @@ Tidak termasuk:
 - Penjadwalan operasi.
 - Pendaftaran rawat inap (ada di Rawat Inap).
 
+## Referensi legacy
+
+- `admin/view_appointment.php`, `doctor/manage_appointment.php`, dan
+  `patient/view_appointment.php`: appointment datar berisi dokter, pasien, dan
+  waktu.
+- Di SIMRS baru menjadi `encounters` + `queues`, dengan tambahan unit, jenis
+  kunjungan, penjamin, status, dan nomor antrean.
+- Jadwal praktik berasal dari Master Data dokter, bukan dari legacy.
+- Kunjungan terjadwal dan walk-in memakai satu alur antrean yang sama.
+
 ## Alur utama
 
 1. Petugas mencari pasien.

@@ -24,6 +24,7 @@ Termasuk:
 - Tindakan/prosedur.
 - Catatan sensitif (psikiatri, HIV) dengan permission khusus.
 - Order penunjang dan resep.
+- Laporan tindakan/operasi, kelahiran, dan kematian.
 - Draft autosave untuk form panjang.
 - Riwayat kunjungan pasien.
 - Audit akses baca/tulis.
@@ -42,6 +43,16 @@ Tidak termasuk:
 5. Order penunjang/resep dikirim ke domain terkait.
 6. Encounter ditutup setelah selesai.
 7. Setiap akses data pasien tercatat.
+
+## Referensi legacy
+
+- `doctor/manage_prescription.php`: `case_history`, `medication`, `description`
+  → asesmen + resep terstruktur.
+- `doctor/manage_report.php` dan `nurse/manage_report.php`: laporan
+  operasi/kelahiran/kematian.
+- Upload `diagnosis_report` legacy masuk domain Penunjang, bukan Rekam Medis.
+- Diperluas menjadi SOAP, diagnosis terstruktur, alergi, catatan sensitif, dan
+  addendum.
 
 ## Field sensitif
 
@@ -71,6 +82,8 @@ medical-record.encounter.update
 medical-record.assessment.update
 medical-record.diagnosis.manage
 medical-record.procedure.manage
+medical-record.report.view
+medical-record.report.manage
 medical-record.sensitive-note.view
 medical-record.sensitive-note.update
 medical-record.resume.export

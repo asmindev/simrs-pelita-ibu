@@ -31,6 +31,16 @@ Tidak termasuk:
 - Integrasi alat laboratorium otomatis.
 - PACS/radiologi imaging viewer.
 
+## Referensi legacy
+
+- `laboratorist/manage_prescription.php` + upload `diagnosis_report`
+  (`report_type`, `document_type`, `description`, file) → service order dan
+  hasil.
+- File tetap didukung dengan validasi tipe/ukuran dan akses berbasis
+  permission.
+- Legacy tidak punya katalog test, reference range, verifikasi, atau rilis
+  hasil; itu fitur baru di SIMRS.
+
 ## Alur utama
 
 1. Dokter membuat order.

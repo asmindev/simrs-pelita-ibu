@@ -13,6 +13,12 @@ Satu fase harus selesai dan terverifikasi sebelum fase berikutnya dimulai.
 | 6    | [06-penunjang-rawat-inap.md](./06-penunjang-rawat-inap.md) | Lab/radiologi, admisi, bed        | Belum    |
 | 7    | [07-rbac-audit-ui.md](./07-rbac-audit-ui.md)               | UI RBAC dan audit                 | Belum    |
 
+## Legacy parity
+
+Pemetaan layar `simrs2` ada di `docs/prd/README.md`. Item porting dicatat di
+fase terkait; jangan menyalin kode legacy. Backlog opsional yang belum masuk
+fase inti: blood bank/donor, noticeboard, settings, dan patient portal.
+
 ## Definition of done per fase
 
 - Permission matrix diuji.

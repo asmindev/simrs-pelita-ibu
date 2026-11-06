@@ -30,6 +30,15 @@ Tidak termasuk:
 - Manajemen operasi.
 - Penjadwalan jaga dokter.
 
+## Referensi legacy
+
+- `nurse/manage_bed.php`: nomor/tipe/status bed.
+- `nurse/manage_bed_allotment.php` dan `doctor/manage_bed_allotment.php`: bed,
+  pasien, waktu masuk, dan waktu keluar.
+- Diperluas menjadi `admissions`, `bed_assignments`, `transfers`,
+  `daily_notes`, dan `discharges`; legacy tidak punya transfer atau ringkasan
+  pulang terstruktur.
+
 ## Alur utama
 
 1. Pasien diadmisi ke ruang rawat.

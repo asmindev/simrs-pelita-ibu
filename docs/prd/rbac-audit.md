@@ -46,6 +46,17 @@ UI tersebut masuk v1.1. Di v1, pengelolaan memakai seeder/CLI.
 6. Perubahan role/permission tercatat di activity log.
 7. Auditor meninjau log lewat query/CLI sampai UI tersedia.
 
+## Referensi legacy
+
+- `admin/manage_admin/doctor/nurse/pharmacist/laboratorist/accountant/patient.php`
+  → user management + role (UI masuk Fase 7).
+- Tabel `log` dan `view_log.php` legacy tidak pernah dipakai; diganti
+  `activity_log` + `patient_access_logs`.
+- Tidak diadopsi: sesi role per tabel, plaintext password, `login_as`, dan
+  impersonation.
+- Patient portal legacy masih pertanyaan terbuka; jika diadopsi, tambahkan
+  role `patient` dan scope khusus.
+
 ## Entitas
 
 - `roles`, `permissions`, `model_has_roles`, `role_has_permissions`

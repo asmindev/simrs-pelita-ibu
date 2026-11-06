@@ -30,6 +30,17 @@ Tidak termasuk:
 - Akuntansi penuh dan jurnal.
 - Integrasi payment gateway.
 
+## Referensi legacy
+
+- `accountant/manage_invoice.php`: invoice satu judul/satu nominal + status
+  paid.
+- `accountant/take_cash_payment.php`: pembayaran tunai.
+- `accountant/payment_history.php` dan `view_payment.php` (jika ada): riwayat
+  pembayaran.
+- Diperluas menjadi invoice item, pajak/diskon, klaim, void/refund, dan IDR.
+- Tidak diadopsi: PayPal/patient portal legacy dan field metode pembayaran yang
+  tidak konsisten.
+
 ## Alur utama
 
 1. Kasir membuka kunjungan.

@@ -31,6 +31,21 @@ Tidak termasuk:
 - Integrasi penjamin eksternal dan klaim.
 - Manajemen stok obat (ada di Farmasi).
 
+## Referensi legacy
+
+- `admin/manage_department.php` → CRUD unit (nama, deskripsi).
+- `admin/manage_doctor.php` → CRUD dokter + jadwal praktik.
+- `admin/manage_patient.php` → CRUD pasien (sudah diimplementasikan).
+- `pharmacist/manage_medicine_category.php` + `manage_medicine.php` →
+  kategori dan obat (nama, kategori, harga, produsen, status).
+- `admin/manage_admin/doctor/nurse/pharmacist/laboratorist/accountant.php` →
+  user + role (dikerjakan bersama Fase 7).
+
+Field legacy yang dipertahankan: deskripsi unit, profil dokter, harga/produsen
+obat, status aktif, dan golongan darah pasien (ditambahkan saat blood bank
+disetujui). Tidak diadopsi: akun pasien dengan password di tabel pasien dan
+pengiriman password plaintext.
+
 ## Alur utama
 
 1. Admin mencari pasien berdasarkan NIK/nama/nomor rekam medis.
@@ -42,11 +57,13 @@ Tidak termasuk:
 ## Entitas
 
 - `patients`: nomor rekam medis, NIK, nama, jenis kelamin, tanggal lahir,
-  alamat, telepon, penjamin default, status.
+  alamat, telepon, penjamin default, golongan darah (opsional), status.
 - `doctors`: user, spesialisasi, nomor izin.
+- `doctor_schedules`: dokter, unit, hari, jam mulai/selesai, kuota.
 - `units`: `code` unik, `name`, tipe (`outpatient`, `inpatient`, `emergency`,
   `laboratory`, `radiology`, `pharmacy`, `other`), `is_active`.
-- `drugs`: nama, bentuk, kekuatan, satuan, status.
+- `drug_categories`: nama, deskripsi.
+- `drugs`: nama, kategori, bentuk, kekuatan, satuan, harga, produsen, status.
 - `tariffs`: kode, nama, kategori, harga.
 - `insurers`: nama, tipe, status.
 

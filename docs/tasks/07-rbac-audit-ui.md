@@ -3,8 +3,18 @@
 Fase ini setelah domain inti stabil. Backend RBAC/audit sudah berjalan sejak
 Fase 1.
 
+## Referensi legacy
+
+- `admin/manage_admin/doctor/nurse/pharmacist/laboratorist/accountant/patient.php`
+  → user management + role.
+- `view_log.php`/tabel `log` tidak dipakai; ganti dengan `activity_log` dan
+  `patient_access_logs`.
+- Tidak memakai sesi role per tabel, plaintext password, atau `login_as`.
+- Patient portal menunggu keputusan; jika diadopsi tambahkan role `patient`.
+
 ## Backend
 
+- [ ] CRUD user/staff dari layar `manage_*` legacy.
 - [ ] CRUD role (tanpa permission langsung ke user).
 - [ ] Assign/revoke role ke user.
 - [ ] Endpoint review break-glass.

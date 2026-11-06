@@ -1,9 +1,21 @@
 # Fase 6 — Penunjang & Rawat Inap
 
+## Referensi legacy
+
+- Penunjang: `laboratorist/manage_prescription.php` + upload
+  `diagnosis_report` (`report_type`, `document_type`, `description`, file).
+- Rawat inap: `nurse/manage_bed.php`,
+  `nurse/manage_bed_allotment.php`, `doctor/manage_bed_allotment.php`.
+- Upload legacy dipertahankan dengan validasi tipe/ukuran.
+- Bed/allotment legacy diperluas menjadi admission, transfer, daily note, dan
+  discharge.
+- Blood bank/donor adalah backlog opsional, belum masuk PRD inti.
+
 ## Penunjang backend
 
 - [ ] Migration service_order, sample, lab_result, radiology_result, critical_value.
 - [ ] Alur order, input, verifikasi, rilis.
+- [ ] Upload hasil legacy dengan validasi tipe/ukuran.
 - [ ] Pelaporan nilai kritis.
 - [ ] Permission enum Diagnostics.
 - [ ] Test status dan rilis hasil.
