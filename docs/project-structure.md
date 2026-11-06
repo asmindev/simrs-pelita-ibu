@@ -4,12 +4,17 @@
 
 - Frontend **feature-based langsung di `resources/js/pages`**. Tidak ada folder
   `features/`.
-- `pages/<domain>/index.tsx` adalah implementasi halaman, bukan re-export.
-- Folder domain tidak boleh mengimpor domain lain. Kode generik naik ke
+- Setiap halaman Inertia adalah folder dengan `index.tsx`. Nama komponen di
+  `Inertia::render` adalah path folder ditambah `/index`.
+- Halaman daftar memakai folder `list`; landing domain memakai `home`;
+  create/edit memakai `create`/`edit`.
+- Folder pendukung mengikuti tingkat pemakaian: route, resource, domain, lalu
   `shared/`.
-- Folder pendukung di dalam domain: `components/`, `hooks/`, `types/`, `lib/`.
-- Nama halaman dan folder memakai `lowercase-kebab` agar cocok dengan path Linux
-  dan `@vite` per halaman di `app.blade.php`.
+- Tidak ada `utils/` atau `helpers/`. Fungsi murni masuk `lib`; state/perilaku
+  masuk `hooks`.
+- Domain tidak boleh mengimpor domain lain. Kode generik naik ke `shared/`.
+- Nama folder memakai `lowercase-kebab` agar cocok dengan path Linux dan
+  `@vite` per halaman di `app.blade.php`.
 
 ## Frontend (terpasang)
 
@@ -17,29 +22,51 @@
 resources/js/
   app.tsx                       # createInertiaApp + default layout
   pages/                        # route tree sekaligus feature root
-    welcome.tsx
+    welcome/
+      home/index.tsx
     auth/
-      login.tsx
-      forgot-password.tsx
-      reset-password.tsx
+      login/index.tsx
+      forgot-password/index.tsx
+      reset-password/index.tsx
+    errors/
+      403/index.tsx
+      404/index.tsx
+      500/index.tsx
     master-data/
-      index.tsx                 # implementasi halaman
-      components/
+      home/index.tsx
+      components/               # dipakai >1 resource master-data
       hooks/
       types/
       lib/
-      patient/                  # contoh halaman turunan
-        index.tsx
-        create.tsx
+      patient/
+        list/index.tsx
+        create/index.tsx
+        edit/index.tsx
+        components/             # PatientForm/PatientFilters
+        hooks/                  # use-patient-duplicates
+        types/
+        lib/
+      doctor/
+        list/index.tsx
+        create/index.tsx
+        edit/index.tsx
+        components/
+        types/
+      unit/
+        list/index.tsx
+        create/index.tsx
+        edit/index.tsx
+        components/
+        types/
     registration/
-      index.tsx
+      home/index.tsx
       components/
       hooks/
       types/
       lib/
       visit/
-        index.tsx
-        create.tsx
+        list/index.tsx
+        create/index.tsx
   shared/
     ui/                         # primitive shadcn (button, input, dialog, ...)
     components/                 # komposisi generik lintas domain
@@ -53,43 +80,45 @@ scripts/
   check-import-boundaries.mjs   # penegak batas import
 ```
 
+Folder `components/`, `hooks/`, `types/`, dan `lib/` di dalam folder route
+dibuat hanya jika route itu punya kode khusus. Jangan membuat folder kosong.
+
 ## Batas komponen
 
-| Lokasi                      | Isi                                                                       | Boleh tahu domain?       |
-| --------------------------- | ------------------------------------------------------------------------- | ------------------------ |
-| `shared/ui`                 | Primitive shadcn                                                          | Tidak                    |
-| `shared/components`         | Komposisi generik (DataTable, PageHeader, EmptyState, Can, ConfirmDialog) | Tidak                    |
-| `pages/<domain>/components` | Komponen domain (PatientPicker, QueueCard)                                | Ya, hanya domain sendiri |
-| `pages/<domain>/index.tsx`  | Implementasi + komposisi halaman                                          | Ya                       |
+| Lokasi                                          | Isi                                                                       | Boleh tahu domain?   |
+| ----------------------------------------------- | ------------------------------------------------------------------------- | -------------------- |
+| `shared/ui`                                     | Primitive shadcn                                                          | Tidak                |
+| `shared/components`                             | Komposisi generik (DataTable, PageHeader, EmptyState, Can, ConfirmDialog) | Tidak                |
+| `pages/<domain>/components`                     | Komposisi lintas resource dalam domain                                    | Ya, domain sendiri   |
+| `pages/<domain>/<resource>/components`          | Komposisi lintas route dalam resource                                     | Ya, resource sendiri |
+| `pages/<domain>/<resource>/<action>/components` | Komponen khusus route                                                     | Ya, route sendiri    |
+| `pages/<domain>/<resource>/<action>/index.tsx`  | Implementasi + komposisi halaman                                          | Ya                   |
+
+Aturan promosi: route → resource → domain → `shared/`. Naik satu lapisan saat
+dipakai oleh 2+ route/resource/domain. Jangan promosi sebelum ada pemakai kedua.
 
 Pengecualian lintas domain yang disetujui:
 
 - `shared/components/patient-context-bar.tsx` + `PatientSummary` di
   `shared/types` karena dipakai rekam medis, farmasi, kasir, dan penunjang.
 
-Kode generik dipindahkan ke `shared/` sejak awal (keputusan proyek). Kode yang
-mengetahui konsep domain tetap di `pages/<domain>/`.
-
 ## Multi-halaman per domain
 
-Struktur mencerminkan URL:
-
 ```
-pages/master-data/index.tsx
-pages/master-data/patient/index.tsx
-pages/master-data/patient/create.tsx
-pages/master-data/patient/edit.tsx
+pages/master-data/patient/list/index.tsx
+pages/master-data/patient/create/index.tsx
+pages/master-data/patient/edit/index.tsx
 ```
 
 Pemetaan backend:
 
 ```php
-Inertia::render('master-data/patient/create');
+Inertia::render('master-data/patient/create/index');
 ```
 
-File: `resources/js/pages/master-data/patient/create.tsx`.
+File: `resources/js/pages/master-data/patient/create/index.tsx`.
 
-Halaman error: `pages/errors/{403,404,500}.tsx` dengan komponen bersama
+Halaman error: `pages/errors/{403,404,500}/index.tsx` dengan komponen bersama
 `shared/components/error-page.tsx`.
 
 ## Batas import
@@ -98,6 +127,10 @@ Ditegakkan oleh `scripts/check-import-boundaries.mjs` yang dijalankan lewat
 `npm run check`:
 
 - `pages/<domain-a>` tidak boleh mengimpor `pages/<domain-b>`.
+- Folder route tidak boleh mengimpor folder route lain.
+- Kode bersama resource tidak boleh mengimpor route; kode bersama domain tidak
+  boleh mengimpor resource/route.
+- Halaman tidak boleh mengimpor halaman lain.
 - File langsung di `pages/` tidak boleh mengimpor folder domain.
 - `shared/` tidak boleh mengimpor `pages/`.
 - Import ke `features/` dianggap error karena folder tersebut sudah dihapus.

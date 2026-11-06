@@ -30,7 +30,7 @@ class PatientController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return Inertia::render('master-data/patient/index', [
+        return Inertia::render('master-data/patient/list/index', [
             'patients' => $patients,
             'filters' => [
                 'search' => $search,
@@ -43,7 +43,7 @@ class PatientController extends Controller
     {
         Gate::authorize('create', Patient::class);
 
-        return Inertia::render('master-data/patient/create');
+        return Inertia::render('master-data/patient/create/index');
     }
 
     public function store(StorePatientRequest $request): RedirectResponse
@@ -59,7 +59,7 @@ class PatientController extends Controller
     {
         Gate::authorize('update', $patient);
 
-        return Inertia::render('master-data/patient/edit', [
+        return Inertia::render('master-data/patient/edit/index', [
             'patient' => $patient,
         ]);
     }

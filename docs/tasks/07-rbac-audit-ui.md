@@ -23,11 +23,11 @@ Fase 1.
 
 ## Frontend
 
-- [ ] `pages/rbac/user/{index,show}.tsx`.
-- [ ] `pages/rbac/role/index.tsx` dengan matrix role x permission.
-- [ ] `pages/rbac/break-glass/index.tsx` untuk review.
-- [ ] `pages/audit/log/index.tsx`.
-- [ ] `pages/audit/patient-access/index.tsx`.
+- [ ] `pages/rbac/user/{list,show}/index.tsx`.
+- [ ] `pages/rbac/role/list/index.tsx` dengan matrix role x permission.
+- [ ] `pages/rbac/break-glass/list/index.tsx` untuk review.
+- [ ] `pages/audit/log/list/index.tsx`.
+- [ ] `pages/audit/patient-access/list/index.tsx`.
 - [ ] Semua aksi dibungkus `Can` dan dikonfirmasi `ConfirmDialog`.
 
 ## Kriteria

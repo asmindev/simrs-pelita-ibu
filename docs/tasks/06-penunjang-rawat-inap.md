@@ -22,8 +22,8 @@
 
 ## Penunjang frontend
 
-- [ ] `pages/diagnostics/order/{index,show}.tsx`.
-- [ ] `pages/diagnostics/result/{index,show}.tsx`.
+- [ ] `pages/diagnostics/order/{list,show}/index.tsx`.
+- [ ] `pages/diagnostics/result/{list,show}/index.tsx`.
 - [ ] `usePoll` untuk status order.
 - [ ] Cetak hasil memakai PDF backend.
 
@@ -37,9 +37,9 @@
 
 ## Rawat inap frontend
 
-- [ ] `pages/inpatient/admission/{index,create}.tsx`.
-- [ ] `pages/inpatient/bed/index.tsx`.
-- [ ] `pages/inpatient/patient/{index,show}.tsx`.
+- [ ] `pages/inpatient/admission/{list,create}/index.tsx`.
+- [ ] `pages/inpatient/bed/list/index.tsx`.
+- [ ] `pages/inpatient/patient/{list,show}/index.tsx`.
 - [ ] `usePoll` untuk ketersediaan bed.
 
 ## Kriteria

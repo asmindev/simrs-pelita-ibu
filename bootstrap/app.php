@@ -47,7 +47,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 && ! $request->expectsJson()
                 && ! app()->runningUnitTests()
             ) {
-                return Inertia::render('errors/'.$status)
+                return Inertia::render('errors/'.$status.'/index')
                     ->toResponse($request)
                     ->setStatusCode($status);
             }

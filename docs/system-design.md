@@ -23,7 +23,7 @@ Browser
   v
 Laravel route + middleware (auth, verified, permission)
   |
-  +--> Controller / Inertia::render('domain/halaman')
+  +--> Controller / Inertia::render('domain/halaman/index')
   |        |
   |        +--> Policy (scoping baris) + FormRequest (validasi)
   |
@@ -34,8 +34,8 @@ resources/views/app.blade.php
   |-- @routes (Ziggy whitelist)
   |-- @vite([css, app.tsx, pages/{component}.tsx])
   v
-resources/js/pages/<domain>/<halaman>.tsx  (implementasi halaman)
-  |-- components/, hooks/, types/, lib/
+resources/js/pages/<domain>/<halaman>/index.tsx  (implementasi halaman)
+  |-- components/, hooks/, types/, lib/  (route/resource/domain)
   |-- shared/ui, shared/components, shared/hooks
   v
 React render
@@ -45,7 +45,7 @@ React render
 
 1. Route Laravel menjalankan middleware `auth`, `verified`, dan permission.
 2. Controller memuat data, menerapkan Policy/query scope, lalu memanggil
-   `Inertia::render('domain/halaman', $props)`.
+   `Inertia::render('domain/halaman/index', $props)`.
 3. `HandleInertiaRequests` membagikan `auth.user`, `auth.roles`,
    `auth.permissions`, dan `name`.
 4. Halaman di `resources/js/pages/<domain>/` adalah implementasi domain.
@@ -58,10 +58,14 @@ React render
 
 - Implementasi domain langsung di `resources/js/pages/<domain>/`.
 - Tidak ada folder `features/` dan tidak ada halaman re-export.
+- Setiap halaman adalah folder dengan `index.tsx`; nama komponen di
+  `Inertia::render` adalah path folder ditambah `/index`.
+- Halaman daftar memakai folder `list`, landing domain memakai `home`,
+  create/edit memakai `create`/`edit`.
+- Folder pendukung mengikuti tingkat pemakaian: route, resource, domain, lalu
+  `shared/`. Tidak ada `utils/` atau `helpers/`.
 - Tidak ada import antar-domain. Data lintas domain lewat props Inertia atau
   kontrak di `shared/types`.
-- Struktur domain: halaman (`index.tsx`, `patient/create.tsx`), `components`,
-  `hooks`, `types`, `lib`.
 - Batas import ditegakkan `scripts/check-import-boundaries.mjs` lewat
   `npm run check`.
 
@@ -76,9 +80,10 @@ React render
 - `shared/types`: kontrak lintas domain.
 
 Keputusan proyek: hook dan komponen dibuat sejak awal untuk setiap fitur, bukan
-menunggu pemakaian kedua. Kode generik dipindahkan ke `shared/` sejak awal;
-kode yang mengetahui konsep domain tetap di `pages/<domain>/`. Tetap hindari
-hook yang hanya meneruskan props.
+menunggu pemakaian kedua. Kode yang dipakai beberapa route naik ke resource,
+yang dipakai beberapa resource naik ke domain, dan yang dipakai 2+ domain naik
+ke `shared/`. Kode yang mengetahui konsep domain tetap di `pages/<domain>/`.
+Tetap hindari hook yang hanya meneruskan props.
 
 ### 4.3 Hook vs komponen
 
@@ -92,7 +97,7 @@ hook yang hanya meneruskan props.
 - `AppLayout` global untuk halaman terautentikasi.
 - Sub-layout per domain memakai layout array Inertia v3; contoh clinical layout
   dengan patient context bar untuk rekam medis, farmasi, kasir, penunjang.
-- `welcome` dan `auth/*` tidak memakai `AppLayout`.
+- `welcome/*` dan `auth/*` tidak memakai `AppLayout`.
 
 ### 4.5 Navigasi
 

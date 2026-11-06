@@ -30,7 +30,7 @@ test('doctor index lists and filters doctors', function () {
         ->get(route('master-data.doctors.index'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('master-data/doctor/index')
+            ->component('master-data/doctor/list/index')
             ->has('doctors.data', 2)
             ->where('filters.search', '')
             ->where('filters.status', ''));
@@ -59,7 +59,7 @@ test('doctor create page requires manage permission', function () {
     $this->actingAs($this->admin)
         ->get(route('master-data.doctors.create'))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page->component('master-data/doctor/create'));
+        ->assertInertia(fn (Assert $page) => $page->component('master-data/doctor/create/index'));
 
     $user = User::factory()->create();
     $user->assignRole(RoleName::Doctor->value);

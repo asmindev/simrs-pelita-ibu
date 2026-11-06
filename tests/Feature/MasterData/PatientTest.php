@@ -24,7 +24,7 @@ test('patient index lists patients for users with permission', function () {
         ->get(route('master-data.patients.index'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('master-data/patient/index')
+            ->component('master-data/patient/list/index')
             ->has('patients.data', 1)
             ->where('patients.data.0.id', $patient->id)
             ->where('filters.search', '')
@@ -59,7 +59,7 @@ test('patient create page requires create permission', function () {
     $this->actingAs($this->admin)
         ->get(route('master-data.patients.create'))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page->component('master-data/patient/create'));
+        ->assertInertia(fn (Assert $page) => $page->component('master-data/patient/create/index'));
 
     $user = User::factory()->create();
     $user->assignRole(RoleName::Doctor->value);

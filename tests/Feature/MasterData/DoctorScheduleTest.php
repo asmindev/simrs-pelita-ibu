@@ -29,7 +29,7 @@ test('doctor edit page includes schedules and active units', function () {
         ->get(route('master-data.doctors.edit', $this->doctor))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('master-data/doctor/edit')
+            ->component('master-data/doctor/edit/index')
             ->has('schedules', 1)
             ->where('schedules.0.id', $schedule->id)
             ->has('units', 1)

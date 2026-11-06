@@ -33,7 +33,7 @@ class UnitController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return Inertia::render('master-data/unit/index', [
+        return Inertia::render('master-data/unit/list/index', [
             'units' => $units,
             'filters' => [
                 'search' => $search,
@@ -47,7 +47,7 @@ class UnitController extends Controller
     {
         Gate::authorize('create', Unit::class);
 
-        return Inertia::render('master-data/unit/create');
+        return Inertia::render('master-data/unit/create/index');
     }
 
     public function store(StoreUnitRequest $request): RedirectResponse
@@ -63,7 +63,7 @@ class UnitController extends Controller
     {
         Gate::authorize('update', $unit);
 
-        return Inertia::render('master-data/unit/edit', [
+        return Inertia::render('master-data/unit/edit/index', [
             'unit' => $unit,
         ]);
     }

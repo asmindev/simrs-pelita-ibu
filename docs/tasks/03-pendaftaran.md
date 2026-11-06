@@ -23,8 +23,8 @@
 
 ## Frontend
 
-- [ ] `pages/registration/index.tsx`.
-- [ ] `pages/registration/visit/{index,create}.tsx`.
+- [ ] `pages/registration/home/index.tsx`.
+- [ ] `pages/registration/visit/{list,create}/index.tsx`.
 - [ ] Tampilkan jadwal dokter dari Master Data di form kunjungan.
 - [ ] `QueueBoard` dan `EncounterForm` di components.
 - [ ] `usePoll` untuk antrean.

@@ -6,13 +6,13 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\UnitController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'welcome')->name('home');
+Route::inertia('/', 'welcome/home/index')->name('home');
 
 Route::middleware(['auth', 'verified'])
     ->prefix('master-data')
     ->name('master-data.')
     ->group(function (): void {
-        Route::inertia('/', 'master-data/index')->name('index');
+        Route::inertia('/', 'master-data/home/index')->name('index');
 
         Route::prefix('units')->name('units.')->group(function (): void {
             Route::get('/', [UnitController::class, 'index'])

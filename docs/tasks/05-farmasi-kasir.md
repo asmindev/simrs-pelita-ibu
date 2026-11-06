@@ -21,7 +21,7 @@
 
 ## Farmasi frontend
 
-- [ ] `pages/pharmacy/prescription/{index,show}.tsx`.
+- [ ] `pages/pharmacy/prescription/{list,show}/index.tsx`.
 - [ ] `PrescriptionItemRow`, `StockPicker` di components.
 - [ ] Label dan resep memakai PDF backend.
 
@@ -36,7 +36,7 @@
 
 ## Kasir frontend
 
-- [ ] `pages/cashier/invoice/{index,show}.tsx`.
+- [ ] `pages/cashier/invoice/{list,show}/index.tsx`.
 - [ ] `InvoiceSummary`, `PaymentForm` di components.
 - [ ] Invoice/kuitansi memakai PDF backend.
 

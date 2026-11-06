@@ -21,8 +21,33 @@
 
 - Tidak memakai `any`; gunakan tipe eksplisit atau `unknown` + narrowing.
 - Import lintas folder memakai alias `@/`.
-- Tipe kontrak lintas domain di `shared/types`.
+- Tipe mengikuti tingkat pemakaian: route, resource, domain, lalu
+  `shared/types` untuk kontrak lintas domain.
 - Tipe permission dan role di-generate dari backend, bukan ditulis manual.
+
+### Struktur halaman dan pendukung
+
+- Setiap halaman Inertia adalah folder dengan `index.tsx`. Nama komponen di
+  `Inertia::render` adalah path folder ditambah `/index`, misalnya
+  `Inertia::render('master-data/patient/list/index')`.
+- Halaman daftar memakai folder `list`; landing domain memakai `home`;
+  create/edit memakai `create`/`edit`.
+- Folder pendukung dibuat saat dibutuhkan, bukan folder kosong:
+    - route: `pages/<domain>/<resource>/<action>/{components,hooks,types,lib}`
+      untuk kode yang hanya dipakai route itu;
+    - resource: `pages/<domain>/<resource>/{components,hooks,types,lib}` untuk
+      kode yang dipakai beberapa route dalam resource yang sama;
+    - domain: `pages/<domain>/{components,hooks,types,lib}` untuk kode yang
+      dipakai beberapa resource dalam domain yang sama;
+    - `shared/` untuk kode yang dipakai 2+ domain.
+- Tidak ada `utils/` atau `helpers/`. Fungsi murni masuk `lib`; state/perilaku
+  masuk `hooks`.
+- Halaman adalah implementasi langsung, bukan re-export.
+- Route folder tidak boleh mengimpor route folder lain. Kode bersama naik ke
+  lapisan resource/domain. Kode resource tidak boleh mengimpor route; kode
+  domain tidak boleh mengimpor resource/route.
+- Domain tidak boleh mengimpor domain lain. Batas ini diperiksa oleh
+  `scripts/check-import-boundaries.mjs` lewat `npm run check`.
 
 ### Komponen dan hook
 
@@ -31,12 +56,9 @@
 - Komponen yang mengembalikan JSX adalah komponen, bukan hook.
 - Primitive shadcn dipakai langsung dari `@/shared/ui`; jangan membungkus ulang
   tanpa alasan.
-- Komponen spesifik domain tetap di `pages/<domain>/components`; kode generik
-  dipindahkan ke `shared/` sejak awal.
-- Halaman adalah implementasi langsung di `pages/<domain>/index.tsx` (atau
-  `pages/<domain>/<resource>/<action>.tsx`), bukan re-export.
-- Domain tidak boleh mengimpor domain lain. Batas ini diperiksa oleh
-  `scripts/check-import-boundaries.mjs` lewat `npm run check`.
+- Komponen khusus resource tetap di `pages/<domain>/<resource>/components`;
+  komponen lintas resource di `pages/<domain>/components`; kode generik di
+  `shared/`.
 - `DataTable` memakai API props-only: `columns`, `rows`, `rowKey`, `empty`.
 
 ### State dan data

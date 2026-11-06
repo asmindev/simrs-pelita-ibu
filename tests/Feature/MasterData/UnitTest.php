@@ -31,7 +31,7 @@ test('unit index lists and filters units', function () {
         ->get(route('master-data.units.index'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('master-data/unit/index')
+            ->component('master-data/unit/list/index')
             ->has('units.data', 2)
             ->where('filters.search', '')
             ->where('filters.type', '')
@@ -62,7 +62,7 @@ test('unit create page requires manage permission', function () {
     $this->actingAs($this->admin)
         ->get(route('master-data.units.create'))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page->component('master-data/unit/create'));
+        ->assertInertia(fn (Assert $page) => $page->component('master-data/unit/create/index'));
 
     $user = User::factory()->create();
     $user->assignRole(RoleName::Doctor->value);

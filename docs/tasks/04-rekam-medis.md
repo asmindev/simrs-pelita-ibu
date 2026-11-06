@@ -25,8 +25,8 @@
 
 ## Frontend
 
-- [ ] `pages/medical-record/encounter/{index,show,edit}.tsx`.
-- [ ] `pages/medical-record/report/{index,create,edit}.tsx`.
+- [ ] `pages/medical-record/encounter/{list,show,edit}/index.tsx`.
+- [ ] `pages/medical-record/report/{list,create,edit}/index.tsx`.
 - [ ] Sub-layout clinical dengan patient context bar.
 - [ ] `AssessmentForm`, `DiagnosisEditor`, `SensitiveNote` di components.
 - [ ] Draft autosave dan guard perubahan.

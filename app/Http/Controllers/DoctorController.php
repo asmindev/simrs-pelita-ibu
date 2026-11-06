@@ -30,7 +30,7 @@ class DoctorController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return Inertia::render('master-data/doctor/index', [
+        return Inertia::render('master-data/doctor/list/index', [
             'doctors' => $doctors,
             'filters' => [
                 'search' => $search,
@@ -43,7 +43,7 @@ class DoctorController extends Controller
     {
         Gate::authorize('create', Doctor::class);
 
-        return Inertia::render('master-data/doctor/create');
+        return Inertia::render('master-data/doctor/create/index');
     }
 
     public function store(StoreDoctorRequest $request): RedirectResponse
@@ -70,7 +70,7 @@ class DoctorController extends Controller
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        return Inertia::render('master-data/doctor/edit', [
+        return Inertia::render('master-data/doctor/edit/index', [
             'doctor' => $doctor,
             'schedules' => $schedules,
             'units' => $units,

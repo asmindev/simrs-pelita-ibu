@@ -45,17 +45,18 @@ penjamin, dan merge menyusul).
 
 ## Frontend
 
-- [x] `pages/master-data/index.tsx` sebagai landing.
-- [x] `pages/master-data/patient/{index,create,edit}.tsx`.
-- [x] `pages/master-data/unit/{index,create,edit}.tsx`.
-- [x] `pages/master-data/doctor/{index,create,edit}.tsx`.
+- [x] `pages/master-data/home/index.tsx` sebagai landing.
+- [x] `pages/master-data/patient/{list,create,edit}/index.tsx`.
+- [x] `pages/master-data/unit/{list,create,edit}/index.tsx`.
+- [x] `pages/master-data/doctor/{list,create,edit}/index.tsx`.
 - [x] Jadwal praktik di halaman edit dokter.
-- [ ] `pages/master-data/drug/{index,create,edit}.tsx`.
-- [ ] `pages/master-data/tariff/{index,create,edit}.tsx`.
-- [ ] `pages/master-data/insurer/{index,create,edit}.tsx`.
-- [ ] `PatientPicker` di `pages/master-data/components`.
-- [x] `PatientFilters`, `PatientForm` di `pages/master-data/components`.
-- [x] `use-patient-duplicates` di `pages/master-data/hooks`.
+- [ ] `pages/master-data/drug/{list,create,edit}/index.tsx`.
+- [ ] `pages/master-data/tariff/{list,create,edit}/index.tsx`.
+- [ ] `pages/master-data/insurer/{list,create,edit}/index.tsx`.
+- [ ] `PatientPicker` di `pages/master-data/patient/components`.
+- [x] `PatientFilters`, `PatientForm` di
+      `pages/master-data/patient/components`.
+- [x] `use-patient-duplicates` di `pages/master-data/patient/hooks`.
 - [x] Tabel pasien dengan filter di URL.
 - [x] Aksi create/update/delete dibungkus `Can`.
 - [x] Format tanggal/uang memakai `shared/lib/format`.

@@ -40,7 +40,7 @@ Tujuan: menyiapkan RBAC, audit, kontrak FE, dan kualitas kode sebelum domain.
 - [ ] Pakai `usePoll` bawaan Inertia (`background: 'pause'`) di halaman kritis.
 - [ ] Buat `useUnsavedChanges`.
 - [ ] Buat `ConfirmDialog`, `FormField`, `Pagination`, `StatusBadge`.
-- [x] Buat halaman `pages/errors/403.tsx`.
+- [x] Buat halaman `pages/errors/403/index.tsx`.
 - [ ] Tambah modal break-glass di halaman 403.
 - [x] Buat handler exception Inertia untuk 403.
 - [x] Buat handler exception Inertia untuk 404/500.
