@@ -4,9 +4,9 @@ import type { Auth } from '@/types/auth';
 import type { PermissionName, RoleName } from '@/types/permissions';
 
 export function usePermissions() {
-    const { auth } = usePage<{ auth: Auth }>().props;
-    const permissions = auth.permissions ?? [];
-    const roles = auth.roles ?? [];
+    const auth = usePage<{ auth?: Auth }>().props.auth;
+    const permissions = auth?.permissions ?? [];
+    const roles = auth?.roles ?? [];
 
     const can = (permission: PermissionName): boolean =>
         permissions.includes(permission);

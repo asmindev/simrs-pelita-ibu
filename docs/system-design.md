@@ -94,14 +94,16 @@ Tetap hindari hook yang hanya meneruskan props.
 
 ### 4.4 Layout
 
-- `AppLayout` global untuk halaman terautentikasi.
+- `AppLayout` global untuk halaman terautentikasi dengan sidebar yang bisa
+  diciutkan; navigasi mobile memakai sheet.
+- Dashboard global di `/dashboard`, menjadi tujuan redirect setelah login.
 - Sub-layout per domain memakai layout array Inertia v3; contoh clinical layout
   dengan patient context bar untuk rekam medis, farmasi, kasir, penunjang.
 - `welcome/*` dan `auth/*` tidak memakai `AppLayout`.
 
 ### 4.5 Navigasi
 
-- `shared/config/navigation.ts` mendefinisikan item menu, `routeName`, dan
+- `shared/config/navigation.ts` mendefinisikan grup menu, item, `routeName`, dan
   `permission`.
 - Item tampil jika `route().has(routeName)` dan `can(permission)`.
 - Menu tanpa izin disembunyikan sepenuhnya.

@@ -134,19 +134,26 @@ export default function PatientIndex({ patients, filters }: Props) {
                 }
             />
 
-            <PatientFilters filters={filters} />
-
             <DataTable
                 columns={columns}
                 rows={patients.data}
                 rowKey={(patient) => patient.id}
-            />
-
-            <Pagination
-                links={patients.links}
-                from={patients.from}
-                to={patients.to}
-                total={patients.total}
+                empty="Tidak ada pasien yang ditemukan."
+                toolbar={
+                    <PatientFilters
+                        filters={filters}
+                        current={patients.data.length}
+                        total={patients.total}
+                    />
+                }
+                footer={
+                    <Pagination
+                        links={patients.links}
+                        from={patients.from}
+                        to={patients.to}
+                        total={patients.total}
+                    />
+                }
             />
         </>
     );

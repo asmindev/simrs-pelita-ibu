@@ -50,11 +50,15 @@ Tujuan: menyiapkan RBAC, audit, kontrak FE, dan kualitas kode sebelum domain.
 
 ## Bootstrap admin pertama
 
-Belum ada UI/CLI pembuat user. Setelah user dibuat, beri role lewat tinker:
+Jalankan seeder setelah permission dan role:
 
 ```
-php artisan tinker --execute '$user = App\Models\User::first(); $user->assignRole(App\Enums\RoleName::SuperAdmin->value);'
+php artisan db:seed --class=SuperAdminSeeder
 ```
+
+Atur `SUPER_ADMIN_NAME`, `SUPER_ADMIN_EMAIL`, dan `SUPER_ADMIN_PASSWORD` di
+`.env`. Di production password wajib diisi; seeder melempar error jika kosong.
+Seeder idempotent dan tidak mereset password user yang sudah ada.
 
 ## Verifikasi
 

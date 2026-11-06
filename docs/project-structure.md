@@ -22,6 +22,8 @@
 resources/js/
   app.tsx                       # createInertiaApp + default layout
   pages/                        # route tree sekaligus feature root
+    dashboard/
+      index.tsx
     welcome/
       home/index.tsx
     auth/
@@ -166,10 +168,11 @@ routes/
   web.php
   console.php
 config/
+  simrs.php                       # konfigurasi SIMRS + kredensial seed super admin
   ziggy.php                       # whitelist route untuk FE
 database/
   migrations/
-  seeders/                        # DatabaseSeeder, PermissionSeeder, RoleSeeder
+  seeders/                        # DatabaseSeeder, PermissionSeeder, RoleSeeder, SuperAdminSeeder
 ```
 
 Jangan membuat folder basis baru (mis. `modules/`) tanpa persetujuan.

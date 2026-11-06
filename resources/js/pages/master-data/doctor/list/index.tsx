@@ -130,19 +130,26 @@ export default function DoctorIndex({ doctors, filters }: Props) {
                 }
             />
 
-            <DoctorFilters filters={filters} />
-
             <DataTable
                 columns={columns}
                 rows={doctors.data}
                 rowKey={(doctor) => doctor.id}
-            />
-
-            <Pagination
-                links={doctors.links}
-                from={doctors.from}
-                to={doctors.to}
-                total={doctors.total}
+                empty="Tidak ada dokter yang ditemukan."
+                toolbar={
+                    <DoctorFilters
+                        filters={filters}
+                        current={doctors.data.length}
+                        total={doctors.total}
+                    />
+                }
+                footer={
+                    <Pagination
+                        links={doctors.links}
+                        from={doctors.from}
+                        to={doctors.to}
+                        total={doctors.total}
+                    />
+                }
             />
         </>
     );

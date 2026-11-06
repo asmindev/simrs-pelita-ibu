@@ -3,6 +3,7 @@
 return [
     'only' => [
         'home',
+        'dashboard',
         'login',
         'login.store',
         'logout',

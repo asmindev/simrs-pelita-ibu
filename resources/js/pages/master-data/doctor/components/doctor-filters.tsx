@@ -1,7 +1,9 @@
 import { router } from '@inertiajs/react';
+import { Search, Stethoscope } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 
+import { TableToolbar } from '@/shared/components/table-toolbar';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
@@ -17,9 +19,11 @@ import type { DoctorFilters as Filters } from '../types/doctor';
 
 type Props = {
     filters: Filters;
+    current: number;
+    total: number;
 };
 
-export function DoctorFilters({ filters }: Props) {
+export function DoctorFilters({ filters, current, total }: Props) {
     const [search, setSearch] = useState(filters.search);
     const [status, setStatus] = useState(filters.status || 'all');
 
@@ -48,25 +52,35 @@ export function DoctorFilters({ filters }: Props) {
     }
 
     return (
-        <form onSubmit={submit} className="mb-4 flex flex-wrap items-end gap-2">
-            <div className="min-w-56 flex-1 space-y-1.5">
-                <label htmlFor="doctor-search" className="text-sm font-medium">
-                    Cari dokter
-                </label>
-                <Input
-                    id="doctor-search"
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Nama, kode, spesialisasi, atau SIP"
-                />
-            </div>
+        <TableToolbar
+            title="Daftar Dokter"
+            description="Profil dokter dan nomor izin praktik."
+            icon={Stethoscope}
+            current={current}
+            total={total}
+        >
+            <form
+                onSubmit={submit}
+                className="flex w-full flex-wrap items-center gap-2 sm:w-auto"
+            >
+                <div className="relative min-w-48 flex-1 sm:w-64 sm:flex-none">
+                    <Search className="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                        id="doctor-search"
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        placeholder="Nama, kode, spesialisasi, atau SIP"
+                        className="h-8 bg-background pl-8 text-xs"
+                        aria-label="Cari dokter"
+                    />
+                </div>
 
-            <div className="w-44 space-y-1.5">
-                <label htmlFor="doctor-status" className="text-sm font-medium">
-                    Status
-                </label>
                 <Select value={status} onValueChange={setStatus}>
-                    <SelectTrigger id="doctor-status">
+                    <SelectTrigger
+                        id="doctor-status"
+                        className="h-8 w-36 bg-background text-xs"
+                        aria-label="Status dokter"
+                    >
                         <SelectValue placeholder="Semua status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -75,12 +89,24 @@ export function DoctorFilters({ filters }: Props) {
                         <SelectItem value="inactive">Nonaktif</SelectItem>
                     </SelectContent>
                 </Select>
-            </div>
 
-            <Button type="submit">Terapkan</Button>
-            <Button type="button" variant="outline" onClick={reset}>
-                Reset
-            </Button>
-        </form>
+                <Button
+                    type="submit"
+                    size="sm"
+                    className="h-8 shrink-0 text-xs"
+                >
+                    Cari
+                </Button>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 shrink-0 text-xs"
+                    onClick={reset}
+                >
+                    Reset
+                </Button>
+            </form>
+        </TableToolbar>
     );
 }

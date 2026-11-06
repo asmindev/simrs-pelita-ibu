@@ -17,6 +17,7 @@ declare module 'ziggy-js' {
     "password.confirmation": [],
     "password.confirm.store": [],
     "home": [],
+    "dashboard": [],
     "master-data.index": [],
     "master-data.units.index": [],
     "master-data.units.create": [],

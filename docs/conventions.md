@@ -59,7 +59,8 @@
 - Komponen khusus resource tetap di `pages/<domain>/<resource>/components`;
   komponen lintas resource di `pages/<domain>/components`; kode generik di
   `shared/`.
-- `DataTable` memakai API props-only: `columns`, `rows`, `rowKey`, `empty`.
+- `DataTable` memakai API props-only: `columns`, `rows`, `rowKey`, `empty`,
+  `toolbar`, `footer`.
 
 ### State dan data
 

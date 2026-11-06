@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome/home/index')->name('home');
 
+Route::inertia('/dashboard', 'dashboard/index')
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
+
 Route::middleware(['auth', 'verified'])
     ->prefix('master-data')
     ->name('master-data.')

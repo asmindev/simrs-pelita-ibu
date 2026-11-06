@@ -1,6 +1,15 @@
 import type { ReactNode } from 'react';
 
 import { cn } from '@/shared/lib/utils';
+import { Card, CardContent } from '@/shared/ui/card';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/shared/ui/table';
 
 export type DataTableColumn<T> = {
     key: string;
@@ -14,6 +23,8 @@ type Props<T> = {
     rows: T[];
     rowKey: (row: T) => string | number;
     empty?: ReactNode;
+    toolbar?: ReactNode;
+    footer?: ReactNode;
     className?: string;
 };
 
@@ -22,58 +33,62 @@ export function DataTable<T>({
     rows,
     rowKey,
     empty,
+    toolbar,
+    footer,
     className,
 }: Props<T>) {
     return (
-        <div className={cn('overflow-x-auto rounded-lg border', className)}>
-            <table className="w-full text-sm">
-                <thead className="bg-muted/50 text-left">
-                    <tr>
-                        {columns.map((column) => (
-                            <th
-                                key={column.key}
-                                className={cn(
-                                    'px-3 py-2 font-medium whitespace-nowrap',
-                                    column.className,
-                                )}
-                            >
-                                {column.header}
-                            </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
+        <Card
+            className={cn(
+                'overflow-hidden border-none bg-muted p-0 shadow-none',
+                className,
+            )}
+        >
+            <CardContent className="flex flex-col p-0.5">
+                {toolbar}
+
+                <div className="overflow-hidden rounded-lg border bg-background">
                     {rows.length === 0 ? (
-                        <tr>
-                            <td
-                                colSpan={columns.length}
-                                className="px-3 py-8 text-center text-muted-foreground"
-                            >
-                                {empty ?? 'Tidak ada data.'}
-                            </td>
-                        </tr>
+                        <div className="bg-muted/30 px-3 py-12 text-center text-xs text-muted-foreground sm:text-sm">
+                            {empty ?? 'Tidak ada data.'}
+                        </div>
                     ) : (
-                        rows.map((row) => (
-                            <tr
-                                key={rowKey(row)}
-                                className="border-t hover:bg-muted/30"
-                            >
-                                {columns.map((column) => (
-                                    <td
-                                        key={column.key}
-                                        className={cn(
-                                            'px-3 py-2',
-                                            column.className,
-                                        )}
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    {columns.map((column) => (
+                                        <TableHead
+                                            key={column.key}
+                                            className={column.className}
+                                        >
+                                            {column.header}
+                                        </TableHead>
+                                    ))}
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {rows.map((row) => (
+                                    <TableRow
+                                        key={rowKey(row)}
+                                        className="transition-colors duration-150 hover:bg-accent/40"
                                     >
-                                        {column.render(row)}
-                                    </td>
+                                        {columns.map((column) => (
+                                            <TableCell
+                                                key={column.key}
+                                                className={column.className}
+                                            >
+                                                {column.render(row)}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
                                 ))}
-                            </tr>
-                        ))
+                            </TableBody>
+                        </Table>
                     )}
-                </tbody>
-            </table>
-        </div>
+                </div>
+
+                {footer}
+            </CardContent>
+        </Card>
     );
 }

@@ -1,89 +1,64 @@
-import { Link, router, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
-import { route } from 'ziggy-js';
 
-import { navigation } from '@/shared/config/navigation';
-import { usePermissions } from '@/shared/hooks/use-permissions';
-import { cn } from '@/shared/lib/utils';
+import {
+    SidebarInset,
+    SidebarProvider,
+    SidebarTrigger,
+} from '@/shared/ui/sidebar';
 import type { Auth } from '@/types/auth';
 import type { Flash } from '@/types/flash';
+
+import { AppSidebar } from './app-sidebar';
 
 type Props = {
     children: ReactNode;
 };
 
 export default function AppLayout({ children }: Props) {
-    const { auth, name, flash } = usePage<{
-        auth: Auth;
+    const { auth, name, flash, sidebarOpen } = usePage<{
+        auth?: Auth;
         name: string;
         flash: Flash;
+        sidebarOpen?: boolean;
     }>().props;
-    const { can } = usePermissions();
-    const current = route().current();
 
     return (
-        <div className="min-h-screen bg-background text-foreground">
-            <header className="border-b">
-                <div className="flex h-12 items-center gap-6 px-4">
-                    <Link href={route('home')} className="font-semibold">
-                        {name}
-                    </Link>
+        <SidebarProvider defaultOpen={sidebarOpen ?? true}>
+            <AppSidebar name={name ?? 'SIMRS'} user={auth?.user} />
 
-                    <nav className="flex items-center gap-1 text-sm">
-                        {navigation
-                            .filter((item) => route().has(item.routeName))
-                            .filter(
-                                (item) =>
-                                    !item.permission || can(item.permission),
-                            )
-                            .map((item) => (
-                                <Link
-                                    key={item.routeName}
-                                    href={route(item.routeName)}
-                                    className={cn(
-                                        'rounded px-2 py-1',
-                                        current === item.routeName
-                                            ? 'bg-muted'
-                                            : 'hover:bg-muted/60',
-                                    )}
-                                >
-                                    {item.title}
-                                </Link>
-                            ))}
-                    </nav>
+            <SidebarInset className="flex min-w-0 flex-col">
+                <header className="sticky top-0 z-30 flex h-12 shrink-0 items-center gap-2 border-b bg-background/95 px-4 shadow-xs backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                    <SidebarTrigger className="-ml-1" />
+                    <span className="hidden text-sm font-medium text-muted-foreground sm:inline">
+                        {name ?? 'SIMRS'}
+                    </span>
+                    <div className="flex-1" />
+                    <span className="truncate text-sm font-medium">
+                        {auth?.user?.name ?? ''}
+                    </span>
+                </header>
 
-                    <div className="ml-auto flex items-center gap-3 text-sm">
-                        <span>{auth.user?.name}</span>
-                        <button
-                            type="button"
-                            onClick={() => router.post(route('logout'))}
-                            className="underline underline-offset-4"
+                <main className="flex min-w-0 flex-1 flex-col gap-4 overflow-auto p-2 md:p-4">
+                    {flash?.success && (
+                        <div
+                            role="status"
+                            className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200"
                         >
-                            Keluar
-                        </button>
-                    </div>
-                </div>
-            </header>
-
-            <main className="p-4">
-                {flash?.success && (
-                    <div
-                        role="status"
-                        className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200"
-                    >
-                        {flash.success}
-                    </div>
-                )}
-                {flash?.error && (
-                    <div
-                        role="alert"
-                        className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-                    >
-                        {flash.error}
-                    </div>
-                )}
-                {children}
-            </main>
-        </div>
+                            {flash.success}
+                        </div>
+                    )}
+                    {flash?.error && (
+                        <div
+                            role="alert"
+                            className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+                        >
+                            {flash.error}
+                        </div>
+                    )}
+                    {children}
+                </main>
+            </SidebarInset>
+        </SidebarProvider>
     );
 }

@@ -121,19 +121,26 @@ export default function UnitIndex({ units, filters }: Props) {
                 }
             />
 
-            <UnitFilters filters={filters} />
-
             <DataTable
                 columns={columns}
                 rows={units.data}
                 rowKey={(unit) => unit.id}
-            />
-
-            <Pagination
-                links={units.links}
-                from={units.from}
-                to={units.to}
-                total={units.total}
+                empty="Tidak ada unit yang ditemukan."
+                toolbar={
+                    <UnitFilters
+                        filters={filters}
+                        current={units.data.length}
+                        total={units.total}
+                    />
+                }
+                footer={
+                    <Pagination
+                        links={units.links}
+                        from={units.from}
+                        to={units.to}
+                        total={units.total}
+                    />
+                }
             />
         </>
     );
