@@ -42,6 +42,7 @@ export default defineConfig({
             'public/**',
             'bootstrap/ssr/**',
             'tailwind.config.js',
+            'resources/js/ziggy.js',
         ],
         options: {
             denyWarnings: true,
@@ -58,6 +59,7 @@ export default defineConfig({
         ignorePatterns: [
             '.github/**',
             'composer.json',
+            'resources/js/ziggy.js',
             'resources/js/types/ziggy.d.ts',
             'resources/views/mail/*',
         ],

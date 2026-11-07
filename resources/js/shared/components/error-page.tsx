@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { route } from 'ziggy-js';
+import { route } from '@/shared/lib/route';
 
 import { Button } from '@/shared/ui/button';
 

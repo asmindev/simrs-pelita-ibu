@@ -5,7 +5,7 @@ import type { ComponentProps } from 'react';
 import { navigationSections } from '@/shared/config/navigation';
 import { usePermissions } from '@/shared/hooks/use-permissions';
 import { isNavigationItemActive } from '@/shared/lib/nav';
-import { route } from '@/shared/lib/route';
+import { route, useCurrentRoute } from '@/shared/lib/route';
 import { cn } from '@/shared/lib/utils';
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar';
 import {
@@ -55,7 +55,7 @@ function getInitials(name: string): string {
 
 export function AppSidebar({ name, user, ...props }: Props) {
     const { can, canAny } = usePermissions();
-    const current = route().current();
+    const current = useCurrentRoute();
     const sections = navigationSections
         .map((section) => ({
             ...section,
