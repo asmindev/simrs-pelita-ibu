@@ -43,6 +43,54 @@ declare module 'ziggy-js' {
             "binding": "id"
         }
     ],
+    "master-data.guarantors.index": [],
+    "master-data.guarantors.create": [],
+    "master-data.guarantors.store": [],
+    "master-data.guarantors.edit": [
+        {
+            "name": "guarantor",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "master-data.guarantors.update": [
+        {
+            "name": "guarantor",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "master-data.guarantors.destroy": [
+        {
+            "name": "guarantor",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "master-data.tariffs.index": [],
+    "master-data.tariffs.create": [],
+    "master-data.tariffs.store": [],
+    "master-data.tariffs.edit": [
+        {
+            "name": "tariff",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "master-data.tariffs.update": [
+        {
+            "name": "tariff",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "master-data.tariffs.destroy": [
+        {
+            "name": "tariff",
+            "required": true,
+            "binding": "id"
+        }
+    ],
     "master-data.doctors.index": [],
     "master-data.doctors.create": [],
     "master-data.doctors.store": [],
