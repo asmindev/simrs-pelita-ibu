@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\DoctorScheduleController;
+use App\Http\Controllers\GuarantorController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\UnitController;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,27 @@ Route::middleware(['auth', 'verified'])
                 ->name('update');
             Route::delete('{unit}', [UnitController::class, 'destroy'])
                 ->middleware('permission:master-data.unit.manage')
+                ->name('destroy');
+        });
+
+        Route::prefix('guarantors')->name('guarantors.')->group(function (): void {
+            Route::get('/', [GuarantorController::class, 'index'])
+                ->middleware('permission:master-data.guarantor.view')
+                ->name('index');
+            Route::get('create', [GuarantorController::class, 'create'])
+                ->middleware('permission:master-data.guarantor.manage')
+                ->name('create');
+            Route::post('/', [GuarantorController::class, 'store'])
+                ->middleware('permission:master-data.guarantor.manage')
+                ->name('store');
+            Route::get('{guarantor}/edit', [GuarantorController::class, 'edit'])
+                ->middleware('permission:master-data.guarantor.manage')
+                ->name('edit');
+            Route::put('{guarantor}', [GuarantorController::class, 'update'])
+                ->middleware('permission:master-data.guarantor.manage')
+                ->name('update');
+            Route::delete('{guarantor}', [GuarantorController::class, 'destroy'])
+                ->middleware('permission:master-data.guarantor.manage')
                 ->name('destroy');
         });
 

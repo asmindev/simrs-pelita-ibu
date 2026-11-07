@@ -7,6 +7,7 @@ use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Gate;
+use Inertia\Testing\AssertableInertia;
 
 beforeEach(function () {
     $this->seed([PermissionSeeder::class, RoleSeeder::class]);
@@ -105,4 +106,135 @@ test('guarantor policy checks view and manage permissions', function () {
         ->and(Gate::forUser($superAdmin)->allows('create', Guarantor::class))->toBeTrue()
         ->and(Gate::forUser($superAdmin)->allows('update', $guarantor))->toBeTrue()
         ->and(Gate::forUser($superAdmin)->allows('delete', $guarantor))->toBeTrue();
+});
+
+test('guarantor index lists and filters guarantors', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole(RoleName::Admin->value);
+
+    Guarantor::factory()->create([
+        'code' => 'BPJS-01',
+        'name' => 'BPJS Kesehatan',
+        'type' => GuarantorType::Bpjs,
+    ]);
+    Guarantor::factory()->inactive()->create([
+        'code' => 'ASR-01',
+        'name' => 'Asuransi Mandiri Inhealth',
+        'type' => GuarantorType::Insurance,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('master-data.guarantors.index'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('master-data/guarantor/list/index')
+            ->has('guarantors.data', 2)
+            ->where('filters.search', '')
+            ->where('filters.type', '')
+            ->where('filters.status', '')
+        );
+
+    $this->actingAs($admin)
+        ->get(route('master-data.guarantors.index', [
+            'search' => 'Mandiri',
+            'type' => 'insurance',
+            'status' => 'inactive',
+        ]))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->has('guarantors.data', 1)
+            ->where('guarantors.data.0.code', 'ASR-01')
+        );
+});
+
+test('guarantor index requires view permission', function () {
+    $auditor = User::factory()->create();
+    $auditor->assignRole(RoleName::Auditor->value);
+
+    $this->actingAs($auditor)
+        ->get(route('master-data.guarantors.index'))
+        ->assertForbidden();
+});
+
+test('admin can store valid guarantor with activity log', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole(RoleName::Admin->value);
+
+    $response = $this->actingAs($admin)
+        ->post(route('master-data.guarantors.store'), [
+            'code' => 'JASA-01',
+            'name' => 'PT Jasa Raharja',
+            'type' => 'insurance',
+            'description' => 'Asuransi kecelakaan lalu lintas',
+            'is_active' => true,
+        ]);
+
+    $response->assertRedirect(route('master-data.guarantors.index'))
+        ->assertSessionHas('success');
+
+    $this->assertDatabaseHas('guarantors', [
+        'code' => 'JASA-01',
+        'name' => 'PT Jasa Raharja',
+    ]);
+
+    $this->assertDatabaseHas('activity_log', [
+        'log_name' => 'master-data',
+        'event' => 'created',
+        'subject_type' => Guarantor::class,
+    ]);
+});
+
+test('store rejects duplicate code and invalid type', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole(RoleName::Admin->value);
+
+    Guarantor::factory()->create(['code' => 'EXISTING']);
+
+    $response = $this->actingAs($admin)
+        ->post(route('master-data.guarantors.store'), [
+            'code' => 'EXISTING',
+            'name' => 'Duplikat',
+            'type' => 'invalid_type',
+        ]);
+
+    $response->assertSessionHasErrors(['code', 'type']);
+});
+
+test('admin can update guarantor', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole(RoleName::Admin->value);
+
+    $guarantor = Guarantor::factory()->create([
+        'code' => 'BPJS-OLD',
+        'name' => 'BPJS Lama',
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->put(route('master-data.guarantors.update', $guarantor), [
+            'code' => 'BPJS-OLD',
+            'name' => 'BPJS Baru',
+            'type' => 'bpjs',
+            'is_active' => false,
+        ]);
+
+    $response->assertRedirect(route('master-data.guarantors.index'))
+        ->assertSessionHas('success');
+
+    expect($guarantor->fresh()->name)->toBe('BPJS Baru')
+        ->and($guarantor->fresh()->is_active)->toBeFalse();
+});
+
+test('admin can delete guarantor', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole(RoleName::Admin->value);
+
+    $guarantor = Guarantor::factory()->create();
+
+    $response = $this->actingAs($admin)
+        ->delete(route('master-data.guarantors.destroy', $guarantor));
+
+    $response->assertRedirect(route('master-data.guarantors.index'))
+        ->assertSessionHas('success');
+
+    $this->assertDatabaseMissing('guarantors', ['id' => $guarantor->id]);
 });
