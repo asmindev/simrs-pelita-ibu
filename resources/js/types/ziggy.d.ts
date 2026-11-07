@@ -91,6 +91,45 @@ declare module 'ziggy-js' {
             "binding": "id"
         }
     ],
+    "master-data.drugs.index": [],
+    "master-data.drugs.create": [],
+    "master-data.drugs.store": [],
+    "master-data.drugs.edit": [
+        {
+            "name": "drug",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "master-data.drugs.update": [
+        {
+            "name": "drug",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "master-data.drugs.destroy": [
+        {
+            "name": "drug",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "master-data.drug-categories.store": [],
+    "master-data.drug-categories.update": [
+        {
+            "name": "drugCategory",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "master-data.drug-categories.destroy": [
+        {
+            "name": "drugCategory",
+            "required": true,
+            "binding": "id"
+        }
+    ],
     "master-data.doctors.index": [],
     "master-data.doctors.create": [],
     "master-data.doctors.store": [],

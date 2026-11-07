@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\DoctorScheduleController;
+use App\Http\Controllers\DrugCategoryController;
+use App\Http\Controllers\DrugController;
 use App\Http\Controllers\GuarantorController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\TariffController;
@@ -80,6 +82,39 @@ Route::middleware(['auth', 'verified'])
                 ->name('update');
             Route::delete('{tariff}', [TariffController::class, 'destroy'])
                 ->middleware('permission:master-data.tariff.manage')
+                ->name('destroy');
+        });
+
+        Route::prefix('drugs')->name('drugs.')->group(function (): void {
+            Route::get('/', [DrugController::class, 'index'])
+                ->middleware('permission:master-data.drug.view')
+                ->name('index');
+            Route::get('create', [DrugController::class, 'create'])
+                ->middleware('permission:master-data.drug.manage')
+                ->name('create');
+            Route::post('/', [DrugController::class, 'store'])
+                ->middleware('permission:master-data.drug.manage')
+                ->name('store');
+            Route::get('{drug}/edit', [DrugController::class, 'edit'])
+                ->middleware('permission:master-data.drug.manage')
+                ->name('edit');
+            Route::put('{drug}', [DrugController::class, 'update'])
+                ->middleware('permission:master-data.drug.manage')
+                ->name('update');
+            Route::delete('{drug}', [DrugController::class, 'destroy'])
+                ->middleware('permission:master-data.drug.manage')
+                ->name('destroy');
+        });
+
+        Route::prefix('drug-categories')->name('drug-categories.')->group(function (): void {
+            Route::post('/', [DrugCategoryController::class, 'store'])
+                ->middleware('permission:master-data.drug.manage')
+                ->name('store');
+            Route::put('{drugCategory}', [DrugCategoryController::class, 'update'])
+                ->middleware('permission:master-data.drug.manage')
+                ->name('update');
+            Route::delete('{drugCategory}', [DrugCategoryController::class, 'destroy'])
+                ->middleware('permission:master-data.drug.manage')
                 ->name('destroy');
         });
 

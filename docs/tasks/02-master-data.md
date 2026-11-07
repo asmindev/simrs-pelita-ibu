@@ -18,22 +18,22 @@ penjamin, dan merge menyusul).
 - [x] Migration `doctors`.
 - [x] Migration `doctor_schedules`.
 - [x] Migration `guarantors` dan `tariffs`.
-- [ ] Migration `drug_categories` dan `drugs`.
+- [x] Migration `drug_categories` dan `drugs`.
 - [x] Model + factory + cast pasien.
 - [x] Model + factory unit.
 - [x] Model + factory dokter.
 - [x] Model + factory jadwal dokter.
 - [x] Model + factory penjamin dan tarif.
-- [ ] Model + factory kategori/obat.
+- [x] Model + factory kategori/obat.
 - [x] Controller pasien (index/create/store/edit/update/destroy).
 - [x] CRUD unit (tabel `units` sudah ada).
 - [x] CRUD dokter (profil).
 - [x] CRUD jadwal praktik dokter (validasi tumpang tindih).
 - [x] CRUD penjamin dan tarif/tindakan.
-- [ ] CRUD kategori + obat (harga, produsen, status).
+- [x] CRUD kategori + obat (harga, produsen, status).
 - [x] FormRequest validasi pasien.
 - [x] FormRequest penjamin dan tarif.
-- [ ] FormRequest kategori dan obat.
+- [x] FormRequest kategori dan obat.
 - [ ] Policy scoping unit untuk data yang terikat unit.
 - [x] Deteksi duplikat pasien (NIK atau nama + tanggal lahir).
 - [ ] Endpoint merge pasien.
@@ -44,7 +44,7 @@ penjamin, dan merge menyusul).
 - [x] Test CRUD dokter + permission + audit.
 - [x] Test CRUD jadwal dokter + permission + audit.
 - [x] Test CRUD penjamin dan tarif + permission + audit.
-- [ ] Test CRUD obat.
+- [x] Test CRUD obat.
 - [ ] Test merge pasien.
 
 ## Frontend
@@ -56,7 +56,7 @@ penjamin, dan merge menyusul).
 - [x] Jadwal praktik di halaman edit dokter.
 - [x] `pages/master-data/guarantor/{list,create,edit}/index.tsx`.
 - [x] `pages/master-data/tariff/{list,create,edit}/index.tsx`.
-- [ ] `pages/master-data/drug/{list,create,edit}/index.tsx`.
+- [x] `pages/master-data/drug/{list,create,edit}/index.tsx`.
 - [ ] `PatientPicker` di `pages/master-data/patient/components`.
 - [x] `PatientFilters`, `PatientForm` di
       `pages/master-data/patient/components`.

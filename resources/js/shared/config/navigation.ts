@@ -30,6 +30,7 @@ export const navigation: NavItem[] = [
             'master-data.unit.view',
             'master-data.guarantor.view',
             'master-data.tariff.view',
+            'master-data.drug.view',
         ] as const,
     },
     {

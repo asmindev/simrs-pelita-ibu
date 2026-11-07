@@ -74,6 +74,19 @@ export default function MasterDataIndex() {
                         </p>
                     </Link>
                 </Can>
+
+                <Can permission="master-data.drug.view">
+                    <Link
+                        href={route('master-data.drugs.index')}
+                        className="rounded-lg border p-4 hover:bg-muted/50"
+                    >
+                        <p className="font-medium">Obat & Farmasi</p>
+                        <p className="text-sm text-muted-foreground">
+                            Katalog obat, kekuatan sediaan, produsen, dan harga
+                            satuan dasar.
+                        </p>
+                    </Link>
+                </Can>
             </div>
         </>
     );
