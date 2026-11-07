@@ -2,12 +2,11 @@ import { Loader2, Search, UserCheck, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { route } from '@/shared/lib/route';
+import type { PatientSearchResult } from '@/shared/types/patient';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card } from '@/shared/ui/card';
 import { Input } from '@/shared/ui/input';
-
-import type { PatientSearchResult } from '../types/patient';
 
 type Props = {
     value?: PatientSearchResult | null;

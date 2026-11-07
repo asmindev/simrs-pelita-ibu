@@ -74,6 +74,14 @@ class Patient extends Model
     }
 
     /**
+     * @return HasMany<Encounter, $this>
+     */
+    public function encounters(): HasMany
+    {
+        return $this->hasMany(Encounter::class);
+    }
+
+    /**
      * @param  Builder<Patient>  $query
      * @return Builder<Patient>
      */

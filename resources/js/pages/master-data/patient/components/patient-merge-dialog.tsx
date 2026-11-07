@@ -4,6 +4,7 @@ import { type FormEvent, useEffect, useState } from 'react';
 
 import { Can } from '@/shared/components/can';
 import { FormField } from '@/shared/components/form-field';
+import { PatientPicker } from '@/shared/components/patient-picker';
 import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
@@ -19,7 +20,6 @@ import {
 import { Textarea } from '@/shared/ui/textarea';
 
 import type { Patient, PatientSearchResult } from '../types/patient';
-import { PatientPicker } from './patient-picker';
 
 type Props = {
     sourcePatient: Patient | PatientSearchResult;

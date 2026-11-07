@@ -206,6 +206,54 @@ declare module 'ziggy-js' {
             "binding": "id"
         }
     ],
+    "registration.index": [],
+    "registration.visits.index": [],
+    "registration.visits.create": [],
+    "registration.visits.store": [],
+    "registration.visits.show": [
+        {
+            "name": "encounter",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "registration.visits.cancel": [
+        {
+            "name": "encounter",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "registration.queues.board": [],
+    "registration.queues.data": [],
+    "registration.queues.call": [
+        {
+            "name": "queue",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "registration.queues.serve": [
+        {
+            "name": "queue",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "registration.queues.complete": [
+        {
+            "name": "queue",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "registration.queues.skip": [
+        {
+            "name": "queue",
+            "required": true,
+            "binding": "id"
+        }
+    ],
     "storage.local": [
         {
             "name": "path",

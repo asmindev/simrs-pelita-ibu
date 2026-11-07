@@ -6,6 +6,9 @@ use App\Http\Controllers\DrugCategoryController;
 use App\Http\Controllers\DrugController;
 use App\Http\Controllers\GuarantorController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\Registration\EncounterController;
+use App\Http\Controllers\Registration\QueueController;
+use App\Http\Controllers\Registration\RegistrationController;
 use App\Http\Controllers\TariffController;
 use App\Http\Controllers\UnitController;
 use Illuminate\Support\Facades\Route;
@@ -173,5 +176,53 @@ Route::middleware(['auth', 'verified'])
             Route::delete('{patient}', [PatientController::class, 'destroy'])
                 ->middleware('permission:master-data.patient.delete')
                 ->name('destroy');
+        });
+    });
+
+Route::middleware(['auth', 'verified'])
+    ->prefix('registration')
+    ->name('registration.')
+    ->group(function (): void {
+        Route::get('/', [RegistrationController::class, 'index'])
+            ->middleware('permission:registration.visit.view')
+            ->name('index');
+
+        Route::prefix('visits')->name('visits.')->group(function (): void {
+            Route::get('/', [EncounterController::class, 'index'])
+                ->middleware('permission:registration.visit.view')
+                ->name('index');
+            Route::get('create', [EncounterController::class, 'create'])
+                ->middleware('permission:registration.visit.create')
+                ->name('create');
+            Route::post('/', [EncounterController::class, 'store'])
+                ->middleware('permission:registration.visit.create')
+                ->name('store');
+            Route::get('{encounter}', [EncounterController::class, 'show'])
+                ->middleware('permission:registration.visit.view')
+                ->name('show');
+            Route::post('{encounter}/cancel', [EncounterController::class, 'cancel'])
+                ->middleware('permission:registration.visit.cancel')
+                ->name('cancel');
+        });
+
+        Route::prefix('queues')->name('queues.')->group(function (): void {
+            Route::get('board', [QueueController::class, 'board'])
+                ->middleware('permission:registration.queue.view')
+                ->name('board');
+            Route::get('data', [QueueController::class, 'data'])
+                ->middleware('permission:registration.queue.view')
+                ->name('data');
+            Route::post('{queue}/call', [QueueController::class, 'call'])
+                ->middleware('permission:registration.queue.call')
+                ->name('call');
+            Route::post('{queue}/serve', [QueueController::class, 'serve'])
+                ->middleware('permission:registration.queue.call')
+                ->name('serve');
+            Route::post('{queue}/complete', [QueueController::class, 'complete'])
+                ->middleware('permission:registration.queue.call')
+                ->name('complete');
+            Route::post('{queue}/skip', [QueueController::class, 'skip'])
+                ->middleware('permission:registration.queue.call')
+                ->name('skip');
         });
     });

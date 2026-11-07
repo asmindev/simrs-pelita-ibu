@@ -5,14 +5,18 @@ namespace App\Providers;
 use App\Enums\RoleName;
 use App\Models\BreakGlassGrant;
 use App\Models\Doctor;
+use App\Models\Encounter;
 use App\Models\Patient;
 use App\Models\PatientAccessLog;
+use App\Models\Queue;
 use App\Models\Unit;
 use App\Models\User;
 use App\Policies\BreakGlassGrantPolicy;
 use App\Policies\DoctorPolicy;
+use App\Policies\EncounterPolicy;
 use App\Policies\PatientAccessLogPolicy;
 use App\Policies\PatientPolicy;
+use App\Policies\QueuePolicy;
 use App\Policies\UnitPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
@@ -50,6 +54,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Patient::class, PatientPolicy::class);
         Gate::policy(PatientAccessLog::class, PatientAccessLogPolicy::class);
         Gate::policy(BreakGlassGrant::class, BreakGlassGrantPolicy::class);
+        Gate::policy(Encounter::class, EncounterPolicy::class);
+        Gate::policy(Queue::class, QueuePolicy::class);
 
         Gate::before(function (?User $user): ?bool {
             return $user?->hasRole(RoleName::SuperAdmin->value) ? true : null;

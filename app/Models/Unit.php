@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -54,6 +55,22 @@ class Unit extends Model
         return $this->belongsToMany(User::class, 'user_unit')
             ->withPivot('is_primary')
             ->withTimestamps();
+    }
+
+    /**
+     * @return HasMany<Encounter, $this>
+     */
+    public function encounters(): HasMany
+    {
+        return $this->hasMany(Encounter::class);
+    }
+
+    /**
+     * @return HasMany<Queue, $this>
+     */
+    public function queues(): HasMany
+    {
+        return $this->hasMany(Queue::class);
     }
 
     /**
