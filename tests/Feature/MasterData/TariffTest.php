@@ -8,6 +8,7 @@ use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Gate;
+use Inertia\Testing\AssertableInertia;
 
 beforeEach(function () {
     $this->seed([PermissionSeeder::class, RoleSeeder::class]);
@@ -110,4 +111,158 @@ test('tariff policy checks view and manage permissions', function () {
         ->and(Gate::forUser($superAdmin)->allows('create', Tariff::class))->toBeTrue()
         ->and(Gate::forUser($superAdmin)->allows('update', $tariff))->toBeTrue()
         ->and(Gate::forUser($superAdmin)->allows('delete', $tariff))->toBeTrue();
+});
+
+test('tariff index lists and filters tariffs by search, category, unit, and status', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole(RoleName::Admin->value);
+
+    $unit = Unit::factory()->create(['name' => 'Poli Umum']);
+    Tariff::factory()->create([
+        'code' => 'KONSUL-01',
+        'name' => 'Konsultasi Dokter Umum',
+        'category' => TariffCategory::Consultation,
+        'unit_id' => $unit->id,
+        'price' => 50000,
+        'is_active' => true,
+    ]);
+    Tariff::factory()->inactive()->create([
+        'code' => 'EKG-01',
+        'name' => 'Pemeriksaan EKG',
+        'category' => TariffCategory::Procedure,
+        'unit_id' => null,
+        'price' => 75000,
+        'is_active' => false,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('master-data.tariffs.index'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('master-data/tariff/list/index')
+            ->has('tariffs.data', 2)
+            ->where('filters.search', '')
+            ->where('filters.category', '')
+            ->where('filters.unit_id', '')
+            ->where('filters.status', '')
+        );
+
+    $this->actingAs($admin)
+        ->get(route('master-data.tariffs.index', [
+            'search' => 'Konsultasi',
+            'category' => 'consultation',
+            'unit_id' => (string) $unit->id,
+            'status' => 'active',
+        ]))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->has('tariffs.data', 1)
+            ->where('tariffs.data.0.code', 'KONSUL-01')
+        );
+});
+
+test('tariff index requires view permission', function () {
+    $auditor = User::factory()->create();
+    $auditor->assignRole(RoleName::Auditor->value);
+
+    $this->actingAs($auditor)
+        ->get(route('master-data.tariffs.index'))
+        ->assertForbidden();
+});
+
+test('admin can create tariff with valid unit and activity log', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole(RoleName::Admin->value);
+
+    $unit = Unit::factory()->create();
+
+    $response = $this->actingAs($admin)
+        ->post(route('master-data.tariffs.store'), [
+            'code' => 'DARAH-01',
+            'name' => 'Darah Lengkap Rutin',
+            'category' => 'laboratory',
+            'price' => 90000,
+            'unit_id' => $unit->id,
+            'description' => 'Pemeriksaan DL rutin',
+            'is_active' => true,
+        ]);
+
+    $response->assertRedirect(route('master-data.tariffs.index'))
+        ->assertSessionHas('success');
+
+    $this->assertDatabaseHas('tariffs', [
+        'code' => 'DARAH-01',
+        'price' => 90000,
+        'unit_id' => $unit->id,
+    ]);
+
+    $this->assertDatabaseHas('activity_log', [
+        'log_name' => 'master-data',
+        'event' => 'created',
+        'subject_type' => Tariff::class,
+    ]);
+});
+
+test('store rejects duplicate code, negative price, and invalid unit', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole(RoleName::Admin->value);
+
+    Tariff::factory()->create(['code' => 'EXISTING']);
+
+    $response = $this->actingAs($admin)
+        ->post(route('master-data.tariffs.store'), [
+            'code' => 'EXISTING',
+            'name' => 'Tarif Invalid',
+            'category' => 'consultation',
+            'price' => -5000,
+            'unit_id' => 999999,
+        ]);
+
+    $response->assertSessionHasErrors(['code', 'price', 'unit_id']);
+});
+
+test('admin can update tariff and change unit binding', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole(RoleName::Admin->value);
+
+    $unit1 = Unit::factory()->create();
+    $unit2 = Unit::factory()->create();
+
+    $tariff = Tariff::factory()->create([
+        'code' => 'RAWAT-01',
+        'unit_id' => $unit1->id,
+        'price' => 100000,
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->put(route('master-data.tariffs.update', $tariff), [
+            'code' => 'RAWAT-01',
+            'name' => 'Rawat Luka Sedang',
+            'category' => 'procedure',
+            'price' => 150000,
+            'unit_id' => $unit2->id,
+            'is_active' => false,
+        ]);
+
+    $response->assertRedirect(route('master-data.tariffs.index'))
+        ->assertSessionHas('success');
+
+    expect($tariff->fresh()->price)->toBe(150000)
+        ->and($tariff->fresh()->unit_id)->toBe($unit2->id)
+        ->and($tariff->fresh()->is_active)->toBeFalse();
+});
+
+test('admin can delete tariff', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole(RoleName::Admin->value);
+
+    $tariff = Tariff::factory()->create();
+
+    $response = $this->actingAs($admin)
+        ->delete(route('master-data.tariffs.destroy', $tariff));
+
+    $response->assertRedirect(route('master-data.tariffs.index'))
+        ->assertSessionHas('success');
+
+    $this->assertDatabaseMissing('tariffs', ['id' => $tariff->id]);
 });

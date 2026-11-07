@@ -4,6 +4,7 @@ use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\DoctorScheduleController;
 use App\Http\Controllers\GuarantorController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\TariffController;
 use App\Http\Controllers\UnitController;
 use Illuminate\Support\Facades\Route;
 
@@ -58,6 +59,27 @@ Route::middleware(['auth', 'verified'])
                 ->name('update');
             Route::delete('{guarantor}', [GuarantorController::class, 'destroy'])
                 ->middleware('permission:master-data.guarantor.manage')
+                ->name('destroy');
+        });
+
+        Route::prefix('tariffs')->name('tariffs.')->group(function (): void {
+            Route::get('/', [TariffController::class, 'index'])
+                ->middleware('permission:master-data.tariff.view')
+                ->name('index');
+            Route::get('create', [TariffController::class, 'create'])
+                ->middleware('permission:master-data.tariff.manage')
+                ->name('create');
+            Route::post('/', [TariffController::class, 'store'])
+                ->middleware('permission:master-data.tariff.manage')
+                ->name('store');
+            Route::get('{tariff}/edit', [TariffController::class, 'edit'])
+                ->middleware('permission:master-data.tariff.manage')
+                ->name('edit');
+            Route::put('{tariff}', [TariffController::class, 'update'])
+                ->middleware('permission:master-data.tariff.manage')
+                ->name('update');
+            Route::delete('{tariff}', [TariffController::class, 'destroy'])
+                ->middleware('permission:master-data.tariff.manage')
                 ->name('destroy');
         });
 
