@@ -59,7 +59,7 @@ export default function Login({ canResetPassword, status }: Props) {
                             {status && (
                                 <div
                                     role="status"
-                                    className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200"
+                                    className="rounded-lg border border-border bg-secondary p-3 text-xs text-secondary-foreground"
                                 >
                                     {status}
                                 </div>

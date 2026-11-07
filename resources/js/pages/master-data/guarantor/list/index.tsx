@@ -77,7 +77,7 @@ export default function GuarantorIndex({ guarantors, filters }: Props) {
             key: 'status',
             header: 'Status',
             render: (guarantor) => (
-                <Badge variant={guarantor.is_active ? 'success' : 'secondary'}>
+                <Badge variant={guarantor.is_active ? 'default' : 'outline'}>
                     {guarantor.is_active ? 'Aktif' : 'Nonaktif'}
                 </Badge>
             ),

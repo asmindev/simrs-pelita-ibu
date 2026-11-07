@@ -73,7 +73,7 @@ export default function DoctorIndex({ doctors, filters }: Props) {
             key: 'is_active',
             header: 'Status',
             render: (doctor) => (
-                <Badge variant={doctor.is_active ? 'success' : 'secondary'}>
+                <Badge variant={doctor.is_active ? 'default' : 'outline'}>
                     {doctor.is_active ? 'Aktif' : 'Nonaktif'}
                 </Badge>
             ),

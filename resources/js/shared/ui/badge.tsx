@@ -19,10 +19,7 @@ const badgeVariants = cva(
                 ghost: 'hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50',
                 link: 'text-primary underline-offset-4 hover:underline',
                 success:
-                    'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-300',
-                warning:
-                    'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-300',
-                info: 'border-teal-200 bg-teal-50 text-teal-800 dark:border-teal-800/60 dark:bg-teal-950/40 dark:text-teal-300',
+                    'bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80',
             },
         },
         defaultVariants: {

@@ -57,7 +57,7 @@ export function PatientForm({ patient }: Props) {
     return (
         <form onSubmit={submit} className="max-w-2xl space-y-4">
             {duplicates.length > 0 && (
-                <div className="space-y-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+                <div className="space-y-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
                     <p className="font-medium">Kemungkinan duplikat</p>
                     <ul className="space-y-1">
                         {duplicates.map((duplicate) => (
