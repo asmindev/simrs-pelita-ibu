@@ -62,6 +62,20 @@
 - `DataTable` memakai API props-only: `columns`, `rows`, `rowKey`, `empty`,
   `toolbar`, `footer`.
 
+### Styling dan Palet Warna
+
+- **Dilarang keras hardcode warna**: Jangan gunakan kelas warna statis Tailwind (seperti `bg-lime-50`, `text-emerald-800`, `border-amber-300`, `bg-blue-500`, dsb.) maupun nilai warna inline (`#hex`, `rgb()`, `oklch()`).
+- **Gunakan variabel semantik shadcn / CSS tokens dari `app.css`**:
+    - Background & Permukaan: `bg-background`, `bg-card`, `bg-popover`, `bg-muted`, `bg-secondary`, `bg-primary`, `bg-accent`.
+    - Teks: `text-foreground`, `text-card-foreground`, `text-muted-foreground`, `text-secondary-foreground`, `text-primary-foreground`, `text-destructive`.
+    - Border & Outline: `border-border`, `border-input`, `ring-ring`.
+    - Alpha/Opacity modifier diperbolehkan pada token semantik, misalnya `border-destructive/20`, `bg-destructive/10`, `bg-primary/10`, `ring-primary/20`.
+- **Status & Feedback**:
+    - Sukses / Konfirmasi: gunakan `border-border bg-secondary text-secondary-foreground` atau badge `variant="default"` / `variant="secondary"`.
+    - Error / Bahaya / Kritis: gunakan `border-destructive/20 bg-destructive/10 text-destructive` atau badge `variant="destructive"`.
+    - Netral / Peringatan Ringan: gunakan `border-border bg-muted/60 text-foreground` atau badge `variant="outline"`.
+- Aturan ini menjamin seluruh komponen beradaptasi otomatis terhadap Theme Switcher (`light`, `dark`, `system`) dan perubahan palet terpusat.
+
 ### State dan data
 
 - Server state berasal dari props Inertia. Jangan menyalinnya ke store global.
