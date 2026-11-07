@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -20,6 +22,8 @@ use Illuminate\Support\Carbon;
  * @property string|null $address
  * @property string|null $phone
  * @property bool $is_active
+ * @property int|null $merged_to_patient_id
+ * @property Carbon|null $merged_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -32,6 +36,8 @@ use Illuminate\Support\Carbon;
     'address',
     'phone',
     'is_active',
+    'merged_to_patient_id',
+    'merged_at',
 ])]
 class Patient extends Model
 {
@@ -47,7 +53,24 @@ class Patient extends Model
             'gender' => PatientGender::class,
             'birth_date' => 'date',
             'is_active' => 'boolean',
+            'merged_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return BelongsTo<Patient, $this>
+     */
+    public function mergedTo(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'merged_to_patient_id');
+    }
+
+    /**
+     * @return HasMany<Patient, $this>
+     */
+    public function mergedFrom(): HasMany
+    {
+        return $this->hasMany(self::class, 'merged_to_patient_id');
     }
 
     /**

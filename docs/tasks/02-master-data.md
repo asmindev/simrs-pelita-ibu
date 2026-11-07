@@ -1,7 +1,6 @@
 # Fase 2 — Master Data
 
-Status: sebagian (pasien, unit, dokter, dan jadwal selesai; obat, tarif,
-penjamin, dan merge menyusul).
+Status: selesai (pasien, unit, dokter, jadwal, penjamin, tarif, obat, dan merge pasien selesai).
 
 ## Referensi legacy
 
@@ -36,7 +35,7 @@ penjamin, dan merge menyusul).
 - [x] FormRequest kategori dan obat.
 - [ ] Policy scoping unit untuk data yang terikat unit.
 - [x] Deteksi duplikat pasien (NIK atau nama + tanggal lahir).
-- [ ] Endpoint merge pasien.
+- [x] Endpoint merge pasien.
 - [ ] Field golongan darah pasien (ditunda sampai blood bank disetujui).
 - [x] Permission enum Master Data.
 - [x] Test CRUD pasien + permission + duplikat.
@@ -45,7 +44,7 @@ penjamin, dan merge menyusul).
 - [x] Test CRUD jadwal dokter + permission + audit.
 - [x] Test CRUD penjamin dan tarif + permission + audit.
 - [x] Test CRUD obat.
-- [ ] Test merge pasien.
+- [x] Test merge pasien.
 
 ## Frontend
 
@@ -57,7 +56,7 @@ penjamin, dan merge menyusul).
 - [x] `pages/master-data/guarantor/{list,create,edit}/index.tsx`.
 - [x] `pages/master-data/tariff/{list,create,edit}/index.tsx`.
 - [x] `pages/master-data/drug/{list,create,edit}/index.tsx`.
-- [ ] `PatientPicker` di `pages/master-data/patient/components`.
+- [x] `PatientPicker` di `pages/master-data/patient/components`.
 - [x] `PatientFilters`, `PatientForm` di
       `pages/master-data/patient/components`.
 - [x] `use-patient-duplicates` di `pages/master-data/patient/hooks`.

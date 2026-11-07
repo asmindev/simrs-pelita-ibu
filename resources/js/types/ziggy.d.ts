@@ -175,8 +175,16 @@ declare module 'ziggy-js' {
     ],
     "master-data.patients.index": [],
     "master-data.patients.duplicates": [],
+    "master-data.patients.search": [],
     "master-data.patients.create": [],
     "master-data.patients.store": [],
+    "master-data.patients.merge": [
+        {
+            "name": "patient",
+            "required": true,
+            "binding": "id"
+        }
+    ],
     "master-data.patients.edit": [
         {
             "name": "patient",

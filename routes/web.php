@@ -152,12 +152,18 @@ Route::middleware(['auth', 'verified'])
             Route::get('duplicates', [PatientController::class, 'duplicates'])
                 ->middleware('permission:master-data.patient.view')
                 ->name('duplicates');
+            Route::get('search', [PatientController::class, 'search'])
+                ->middleware('permission:master-data.patient.view')
+                ->name('search');
             Route::get('create', [PatientController::class, 'create'])
                 ->middleware('permission:master-data.patient.create')
                 ->name('create');
             Route::post('/', [PatientController::class, 'store'])
                 ->middleware('permission:master-data.patient.create')
                 ->name('store');
+            Route::post('{patient}/merge', [PatientController::class, 'merge'])
+                ->middleware('permission:master-data.patient.merge')
+                ->name('merge');
             Route::get('{patient}/edit', [PatientController::class, 'edit'])
                 ->middleware('permission:master-data.patient.update')
                 ->name('edit');

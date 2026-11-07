@@ -1,6 +1,7 @@
 import { Link, useForm } from '@inertiajs/react';
-import type { FormEvent } from 'react';
+import { type FormEvent, useState } from 'react';
 
+import { Can } from '@/shared/components/can';
 import { FormField } from '@/shared/components/form-field';
 import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
@@ -18,13 +19,24 @@ import {
 import { Textarea } from '@/shared/ui/textarea';
 
 import { usePatientDuplicates } from '../hooks/use-patient-duplicates';
-import type { Patient, PatientGender, PatientInput } from '../types/patient';
+import type {
+    Patient,
+    PatientGender,
+    PatientInput,
+    PatientSearchResult,
+} from '../types/patient';
+import { PatientMergeDialog } from './patient-merge-dialog';
 
 type Props = {
     patient?: Patient;
 };
 
 export function PatientForm({ patient }: Props) {
+    const [mergeTarget, setMergeTarget] = useState<PatientSearchResult | null>(
+        null,
+    );
+    const [isMergeOpen, setIsMergeOpen] = useState(false);
+
     const { data, setData, post, put, processing, errors } =
         useForm<PatientInput>({
             medical_record_number: patient?.medical_record_number ?? '',
@@ -59,23 +71,66 @@ export function PatientForm({ patient }: Props) {
             {duplicates.length > 0 && (
                 <div className="space-y-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
                     <p className="font-medium">Kemungkinan duplikat</p>
-                    <ul className="space-y-1">
+                    <ul className="space-y-1.5">
                         {duplicates.map((duplicate) => (
-                            <li key={duplicate.id}>
-                                <Link
-                                    href={route(
-                                        'master-data.patients.edit',
-                                        duplicate.id,
+                            <li
+                                key={duplicate.id}
+                                className="flex items-center justify-between gap-2"
+                            >
+                                <div className="text-xs">
+                                    <Link
+                                        href={route(
+                                            'master-data.patients.edit',
+                                            duplicate.id,
+                                        )}
+                                        className="font-medium underline underline-offset-4"
+                                    >
+                                        {duplicate.name}
+                                    </Link>{' '}
+                                    · {duplicate.medical_record_number} ·{' '}
+                                    {duplicate.nik ?? 'NIK tidak diisi'}{' '}
+                                    <Badge
+                                        variant="outline"
+                                        className="text-[10px]"
+                                    >
+                                        {duplicate.is_active
+                                            ? 'Aktif'
+                                            : 'Nonaktif'}
+                                    </Badge>
+                                </div>
+                                {patient &&
+                                    !patient.merged_to_patient_id &&
+                                    duplicate.is_active && (
+                                        <Can permission="master-data.patient.merge">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setMergeTarget({
+                                                        id: duplicate.id,
+                                                        medical_record_number:
+                                                            duplicate.medical_record_number,
+                                                        nik: duplicate.nik,
+                                                        name: duplicate.name,
+                                                        gender: duplicate.gender,
+                                                        birth_date:
+                                                            duplicate.birth_date,
+                                                        address: null,
+                                                        phone: null,
+                                                        is_active:
+                                                            duplicate.is_active,
+                                                        merged_to_patient_id:
+                                                            null,
+                                                    });
+                                                    setIsMergeOpen(true);
+                                                }}
+                                                className="h-7 text-xs"
+                                            >
+                                                Gabungkan
+                                            </Button>
+                                        </Can>
                                     )}
-                                    className="underline underline-offset-4"
-                                >
-                                    {duplicate.name}
-                                </Link>{' '}
-                                · {duplicate.medical_record_number} ·{' '}
-                                {duplicate.nik ?? 'NIK tidak diisi'}{' '}
-                                <Badge variant="outline">
-                                    {duplicate.is_active ? 'Aktif' : 'Nonaktif'}
-                                </Badge>
                             </li>
                         ))}
                     </ul>
@@ -208,6 +263,15 @@ export function PatientForm({ patient }: Props) {
                     </Link>
                 </Button>
             </div>
+
+            {patient && (
+                <PatientMergeDialog
+                    sourcePatient={patient}
+                    initialTargetPatient={mergeTarget}
+                    open={isMergeOpen}
+                    onOpenChange={setIsMergeOpen}
+                />
+            )}
         </form>
     );
 }

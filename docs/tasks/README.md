@@ -6,7 +6,7 @@ Satu fase harus selesai dan terverifikasi sebelum fase berikutnya dimulai.
 | Fase | File                                                       | Fokus                             | Status   |
 | ---- | ---------------------------------------------------------- | --------------------------------- | -------- |
 | 1    | [01-foundation.md](./01-foundation.md)                     | Fondasi RBAC, audit, FE shell     | Sebagian |
-| 2    | [02-master-data.md](./02-master-data.md)                   | Pasien, dokter, unit, obat, tarif | Sebagian |
+| 2    | [02-master-data.md](./02-master-data.md)                   | Pasien, dokter, unit, obat, tarif | Selesai  |
 | 3    | [03-pendaftaran.md](./03-pendaftaran.md)                   | Kunjungan dan antrean             | Belum    |
 | 4    | [04-rekam-medis.md](./04-rekam-medis.md)                   | EMR, draft, field sensitif        | Belum    |
 | 5    | [05-farmasi-kasir.md](./05-farmasi-kasir.md)               | Resep, stok, invoice, pembayaran  | Belum    |
