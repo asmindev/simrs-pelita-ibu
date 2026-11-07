@@ -75,17 +75,21 @@ export function EncounterFiltersComponent({
         >
             <form
                 onSubmit={submit}
-                className="flex flex-wrap items-center gap-2"
+                className="flex w-full flex-wrap items-center gap-2 sm:w-auto"
             >
                 <Input
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="h-9 w-36 text-xs"
+                    className="h-8 w-36 bg-background text-xs"
+                    aria-label="Filter tanggal"
                 />
 
                 <Select value={unitId} onValueChange={setUnitId}>
-                    <SelectTrigger className="h-9 w-40 text-xs">
+                    <SelectTrigger
+                        className="h-8 w-40 bg-background text-xs"
+                        aria-label="Filter unit"
+                    >
                         <SelectValue placeholder="Semua Unit" />
                     </SelectTrigger>
                     <SelectContent>
@@ -99,7 +103,10 @@ export function EncounterFiltersComponent({
                 </Select>
 
                 <Select value={status} onValueChange={setStatus}>
-                    <SelectTrigger className="h-9 w-36 text-xs">
+                    <SelectTrigger
+                        className="h-8 w-36 bg-background text-xs"
+                        aria-label="Filter status"
+                    >
                         <SelectValue placeholder="Semua Status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -113,31 +120,31 @@ export function EncounterFiltersComponent({
                     </SelectContent>
                 </Select>
 
-                <div className="relative">
-                    <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+                <div className="relative min-w-44 flex-1 sm:w-52 sm:flex-none">
+                    <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
                     <Input
                         type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Cari pasien / No. RM..."
-                        className="h-9 w-48 pl-8 text-xs"
+                        className="h-8 bg-background pl-8 text-xs"
+                        aria-label="Cari kunjungan"
                     />
                 </div>
 
                 <Button
                     type="submit"
                     size="sm"
-                    variant="secondary"
-                    className="h-9"
+                    className="h-8 shrink-0 text-xs"
                 >
-                    Filter
+                    Cari
                 </Button>
                 <Button
                     type="button"
                     size="sm"
-                    variant="ghost"
+                    variant="outline"
                     onClick={reset}
-                    className="h-9"
+                    className="h-8 shrink-0 text-xs"
                 >
                     Reset
                 </Button>

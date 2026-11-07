@@ -154,25 +154,27 @@ export default function DrugIndex({ drugs, categories, filters }: Props) {
                 }
             />
 
-            <DrugFilters
-                filters={filters}
-                categories={categories}
-                current={drugs.data.length}
-                total={drugs.total}
-            />
-
             <DataTable
                 columns={columns}
                 rows={drugs.data}
                 rowKey={(drug) => drug.id}
                 empty="Belum ada data obat yang sesuai dengan kriteria pencarian."
-            />
-
-            <Pagination
-                links={drugs.links}
-                from={drugs.from}
-                to={drugs.to}
-                total={drugs.total}
+                toolbar={
+                    <DrugFilters
+                        filters={filters}
+                        categories={categories}
+                        current={drugs.data.length}
+                        total={drugs.total}
+                    />
+                }
+                footer={
+                    <Pagination
+                        links={drugs.links}
+                        from={drugs.from}
+                        to={drugs.to}
+                        total={drugs.total}
+                    />
+                }
             />
         </>
     );

@@ -55,75 +55,83 @@ export function DrugFilters({ filters, categories, current, total }: Props) {
         );
     }
 
-    const hasActiveFilters =
-        search !== '' || categoryId !== 'all' || status !== 'all';
-
     return (
-        <form onSubmit={submit} className="space-y-3">
-            <div className="flex flex-col gap-2 sm:flex-row">
-                <div className="relative flex-1">
-                    <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+        <TableToolbar
+            title="Katalog Obat"
+            description="Manajemen data master obat, sediaan, golongan, dan harga dasar."
+            icon={Pill}
+            current={current}
+            total={total}
+        >
+            <form
+                onSubmit={submit}
+                className="flex w-full flex-wrap items-center gap-2 sm:w-auto"
+            >
+                <div className="relative min-w-48 flex-1 sm:w-64 sm:flex-none">
+                    <Search className="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                        type="search"
-                        placeholder="Cari nama obat, kode, atau produsen..."
+                        id="drug-search"
                         value={search}
                         onChange={(event) => setSearch(event.target.value)}
-                        className="pl-9"
+                        placeholder="Nama, kode, atau produsen"
+                        className="h-8 bg-background pl-8 text-xs"
+                        aria-label="Cari obat"
                     />
                 </div>
 
-                <div className="flex flex-wrap gap-2">
-                    <Select value={categoryId} onValueChange={setCategoryId}>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Kategori" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Semua Kategori</SelectItem>
-                            {categories.map((category) => (
-                                <SelectItem
-                                    key={category.id}
-                                    value={String(category.id)}
-                                >
-                                    {category.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                <Select value={categoryId} onValueChange={setCategoryId}>
+                    <SelectTrigger
+                        id="drug-category"
+                        className="h-8 w-36 bg-background text-xs"
+                        aria-label="Kategori obat"
+                    >
+                        <SelectValue placeholder="Semua kategori" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Semua kategori</SelectItem>
+                        {categories.map((category) => (
+                            <SelectItem
+                                key={category.id}
+                                value={String(category.id)}
+                            >
+                                {category.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
 
-                    <Select value={status} onValueChange={setStatus}>
-                        <SelectTrigger className="w-[140px]">
-                            <SelectValue placeholder="Status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Semua Status</SelectItem>
-                            <SelectItem value="active">Aktif</SelectItem>
-                            <SelectItem value="inactive">Nonaktif</SelectItem>
-                        </SelectContent>
-                    </Select>
+                <Select value={status} onValueChange={setStatus}>
+                    <SelectTrigger
+                        id="drug-status"
+                        className="h-8 w-32 bg-background text-xs"
+                        aria-label="Status obat"
+                    >
+                        <SelectValue placeholder="Semua status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Semua status</SelectItem>
+                        <SelectItem value="active">Aktif</SelectItem>
+                        <SelectItem value="inactive">Nonaktif</SelectItem>
+                    </SelectContent>
+                </Select>
 
-                    <Button type="submit" variant="secondary">
-                        Filter
-                    </Button>
-
-                    {hasActiveFilters && (
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={reset}
-                            className="text-muted-foreground"
-                        >
-                            Reset
-                        </Button>
-                    )}
-                </div>
-            </div>
-
-            <TableToolbar
-                icon={Pill}
-                title="Katalog Obat"
-                current={current}
-                total={total}
-            />
-        </form>
+                <Button
+                    type="submit"
+                    size="sm"
+                    className="h-8 shrink-0 text-xs"
+                >
+                    Cari
+                </Button>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 shrink-0 text-xs"
+                    onClick={reset}
+                >
+                    Reset
+                </Button>
+            </form>
+        </TableToolbar>
     );
 }
