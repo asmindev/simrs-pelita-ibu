@@ -17,20 +17,23 @@ penjamin, dan merge menyusul).
 - [x] Migration deskripsi `units`.
 - [x] Migration `doctors`.
 - [x] Migration `doctor_schedules`.
-- [ ] Migration `drug_categories`, `drugs`, `tariffs`, `insurers`.
+- [x] Migration `guarantors` dan `tariffs`.
+- [ ] Migration `drug_categories` dan `drugs`.
 - [x] Model + factory + cast pasien.
 - [x] Model + factory unit.
 - [x] Model + factory dokter.
 - [x] Model + factory jadwal dokter.
-- [ ] Model + factory kategori/obat, tarif, penjamin.
+- [x] Model + factory penjamin dan tarif.
+- [ ] Model + factory kategori/obat.
 - [x] Controller pasien (index/create/store/edit/update/destroy).
 - [x] CRUD unit (tabel `units` sudah ada).
 - [x] CRUD dokter (profil).
 - [x] CRUD jadwal praktik dokter (validasi tumpang tindih).
+- [x] CRUD penjamin dan tarif/tindakan.
 - [ ] CRUD kategori + obat (harga, produsen, status).
-- [ ] CRUD tarif/tindakan dan penjamin.
 - [x] FormRequest validasi pasien.
-- [ ] FormRequest referensi lain.
+- [x] FormRequest penjamin dan tarif.
+- [ ] FormRequest kategori dan obat.
 - [ ] Policy scoping unit untuk data yang terikat unit.
 - [x] Deteksi duplikat pasien (NIK atau nama + tanggal lahir).
 - [ ] Endpoint merge pasien.
@@ -40,7 +43,8 @@ penjamin, dan merge menyusul).
 - [x] Test CRUD unit + permission + audit.
 - [x] Test CRUD dokter + permission + audit.
 - [x] Test CRUD jadwal dokter + permission + audit.
-- [ ] Test CRUD referensi lain.
+- [x] Test CRUD penjamin dan tarif + permission + audit.
+- [ ] Test CRUD obat.
 - [ ] Test merge pasien.
 
 ## Frontend
@@ -50,9 +54,9 @@ penjamin, dan merge menyusul).
 - [x] `pages/master-data/unit/{list,create,edit}/index.tsx`.
 - [x] `pages/master-data/doctor/{list,create,edit}/index.tsx`.
 - [x] Jadwal praktik di halaman edit dokter.
+- [x] `pages/master-data/guarantor/{list,create,edit}/index.tsx`.
+- [x] `pages/master-data/tariff/{list,create,edit}/index.tsx`.
 - [ ] `pages/master-data/drug/{list,create,edit}/index.tsx`.
-- [ ] `pages/master-data/tariff/{list,create,edit}/index.tsx`.
-- [ ] `pages/master-data/insurer/{list,create,edit}/index.tsx`.
 - [ ] `PatientPicker` di `pages/master-data/patient/components`.
 - [x] `PatientFilters`, `PatientForm` di
       `pages/master-data/patient/components`.

@@ -56,7 +56,6 @@ function getInitials(name: string): string {
 export function AppSidebar({ name, user, ...props }: Props) {
     const { can, canAny } = usePermissions();
     const current = route().current();
-
     const sections = navigationSections
         .map((section) => ({
             ...section,

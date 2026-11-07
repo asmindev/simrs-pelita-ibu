@@ -48,6 +48,32 @@ export default function MasterDataIndex() {
                         Data identitas dan nomor rekam medis.
                     </p>
                 </Link>
+
+                <Can permission="master-data.guarantor.view">
+                    <Link
+                        href={route('master-data.guarantors.index')}
+                        className="rounded-lg border p-4 hover:bg-muted/50"
+                    >
+                        <p className="font-medium">Penjamin</p>
+                        <p className="text-sm text-muted-foreground">
+                            BPJS Kesehatan, asuransi swasta, dan perusahaan
+                            penjamin.
+                        </p>
+                    </Link>
+                </Can>
+
+                <Can permission="master-data.tariff.view">
+                    <Link
+                        href={route('master-data.tariffs.index')}
+                        className="rounded-lg border p-4 hover:bg-muted/50"
+                    >
+                        <p className="font-medium">Tarif & Layanan</p>
+                        <p className="text-sm text-muted-foreground">
+                            Tarif konsultasi, tindakan, laboratorium, dan
+                            penunjang.
+                        </p>
+                    </Link>
+                </Can>
             </div>
         </>
     );

@@ -36,6 +36,7 @@
 ### Task 1: Guarantor Backend Foundation (Migration, Enum, Model, Factory, Policy)
 
 **Files:**
+
 - Create: `database/migrations/2026_11_07_000001_create_guarantors_table.php`
 - Create: `app/Enums/GuarantorType.php`
 - Create: `app/Models/Guarantor.php`
@@ -45,12 +46,14 @@
 - Test: `tests/Feature/MasterData/GuarantorTest.php`
 
 **Interfaces:**
+
 - Consumes: `MasterDataPermission::GuarantorView`, `MasterDataPermission::GuarantorManage`
 - Produces: `App\Models\Guarantor`, `App\Enums\GuarantorType`, `GuarantorPolicy`
 
 - [ ] **Step 1: Write the failing test for Guarantor model and factory**
 
 Create `tests/Feature/MasterData/GuarantorTest.php` with initial test checking factory creation, casts, activity logging, and search scope:
+
 ```php
 test('guarantor factory creates active guarantor with activity log', function () {
     $guarantor = Guarantor::factory()->create([
@@ -73,27 +76,27 @@ Expected: FAIL due to missing `Guarantor` class and `guarantors` table.
 - [ ] **Step 3: Implement `GuarantorType` Enum, Migration, Model, Factory, and Policy**
 
 1. Create `app/Enums/GuarantorType.php`:
-   - Cases: `Bpjs = 'bpjs'`, `General = 'general'`, `Insurance = 'insurance'`, `Company = 'company'`.
-   - Method: `label(): string` returning Indonesian names ('BPJS Kesehatan', 'Umum / Pribadi', 'Asuransi Swasta', 'Perusahaan').
+    - Cases: `Bpjs = 'bpjs'`, `General = 'general'`, `Insurance = 'insurance'`, `Company = 'company'`.
+    - Method: `label(): string` returning Indonesian names ('BPJS Kesehatan', 'Umum / Pribadi', 'Asuransi Swasta', 'Perusahaan').
 
 2. Create migration `database/migrations/2026_11_07_000001_create_guarantors_table.php`:
-   - Columns: `id`, `code` (string, unique), `name` (string), `type` (string), `description` (text, nullable), `is_active` (boolean, default true), `timestamps`.
-   - Index on `[type, is_active]`.
+    - Columns: `id`, `code` (string, unique), `name` (string), `type` (string), `description` (text, nullable), `is_active` (boolean, default true), `timestamps`.
+    - Index on `[type, is_active]`.
 
 3. Create model `app/Models/Guarantor.php`:
-   - Fillable: `['code', 'name', 'type', 'description', 'is_active']`.
-   - Casts: `'type' => GuarantorType::class`, `'is_active' => 'boolean'`.
-   - Traits: `HasFactory`, `LogsActivity`.
-   - Method `getActivitylogOptions()`: log name `master-data`, `logFillable()`, `logOnlyDirty()`.
-   - Scope `scopeSearch(Builder $query, string $term)`: matching code or name.
+    - Fillable: `['code', 'name', 'type', 'description', 'is_active']`.
+    - Casts: `'type' => GuarantorType::class`, `'is_active' => 'boolean'`.
+    - Traits: `HasFactory`, `LogsActivity`.
+    - Method `getActivitylogOptions()`: log name `master-data`, `logFillable()`, `logOnlyDirty()`.
+    - Scope `scopeSearch(Builder $query, string $term)`: matching code or name.
 
 4. Create factory `database/factories/GuarantorFactory.php`:
-   - Default attributes: random code, name, random `GuarantorType`, `is_active => true`.
-   - State `inactive()`.
+    - Default attributes: random code, name, random `GuarantorType`, `is_active => true`.
+    - State `inactive()`.
 
 5. Create policy `app/Policies/GuarantorPolicy.php`:
-   - `viewAny`, `view`: check `master-data.guarantor.view`.
-   - `create`, `update`, `delete`: check `master-data.guarantor.manage`.
+    - `viewAny`, `view`: check `master-data.guarantor.view`.
+    - `create`, `update`, `delete`: check `master-data.guarantor.manage`.
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -112,6 +115,7 @@ git commit -m "feat(master-data): add guarantor model, migration, policy, and fa
 ### Task 2: Guarantor Form Requests & Controller CRUD API
 
 **Files:**
+
 - Create: `app/Http/Requests/StoreGuarantorRequest.php`
 - Create: `app/Http/Requests/UpdateGuarantorRequest.php`
 - Create: `app/Http/Controllers/GuarantorController.php`
@@ -119,12 +123,14 @@ git commit -m "feat(master-data): add guarantor model, migration, policy, and fa
 - Modify: `tests/Feature/MasterData/GuarantorTest.php`
 
 **Interfaces:**
+
 - Consumes: `App\Models\Guarantor`, `GuarantorPolicy`
 - Produces: `GuarantorController` CRUD routes (`master-data.guarantors.*`)
 
 - [ ] **Step 1: Write failing feature tests for Guarantor CRUD & RBAC**
 
 Add tests to `tests/Feature/MasterData/GuarantorTest.php`:
+
 - `test('guarantor index lists and filters guarantors')`
 - `test('guarantor index requires view permission')`
 - `test('admin can store valid guarantor with activity log')`
@@ -140,18 +146,18 @@ Expected: FAIL with route not defined or 404.
 - [ ] **Step 3: Implement FormRequests, Controller, and Routes**
 
 1. Create `StoreGuarantorRequest`:
-   - Rules: `code` (required, string, max:50, unique:guarantors,code), `name` (required, string, max:255), `type` (required, Rule::enum(GuarantorType::class)), `description` (nullable, string), `is_active` (boolean).
+    - Rules: `code` (required, string, max:50, unique:guarantors,code), `name` (required, string, max:255), `type` (required, Rule::enum(GuarantorType::class)), `description` (nullable, string), `is_active` (boolean).
 
 2. Create `UpdateGuarantorRequest`:
-   - Rules: `code` (required, string, max:50, Rule::unique('guarantors', 'code')->ignore($this->route('guarantor'))), `name`, `type`, `description`, `is_active`.
+    - Rules: `code` (required, string, max:50, Rule::unique('guarantors', 'code')->ignore($this->route('guarantor'))), `name`, `type`, `description`, `is_active`.
 
 3. Create `GuarantorController`:
-   - `index`: filter by `search`, `type`, `status`. Paginate(15). Render `master-data/guarantor/list/index`.
-   - `create`: authorize `create`. Render `master-data/guarantor/create/index` with types.
-   - `store`: authorize `create`. Create record, redirect with flash success.
-   - `edit`: authorize `update`. Render `master-data/guarantor/edit/index` with guarantor & types.
-   - `update`: authorize `update`. Update record, redirect with flash success.
-   - `destroy`: authorize `delete`. Delete record, redirect with flash success.
+    - `index`: filter by `search`, `type`, `status`. Paginate(15). Render `master-data/guarantor/list/index`.
+    - `create`: authorize `create`. Render `master-data/guarantor/create/index` with types.
+    - `store`: authorize `create`. Create record, redirect with flash success.
+    - `edit`: authorize `update`. Render `master-data/guarantor/edit/index` with guarantor & types.
+    - `update`: authorize `update`. Update record, redirect with flash success.
+    - `destroy`: authorize `delete`. Delete record, redirect with flash success.
 
 4. Register routes in `routes/web.php` under `master-data.` group with `permission:master-data.guarantor.*` middleware.
 
@@ -172,6 +178,7 @@ git commit -m "feat(master-data): implement guarantor controller, requests, and 
 ### Task 3: Tariff Backend Foundation (Migration, Enum, Model, Factory, Policy)
 
 **Files:**
+
 - Create: `database/migrations/2026_11_07_000002_create_tariffs_table.php`
 - Create: `app/Enums/TariffCategory.php`
 - Create: `app/Models/Tariff.php`
@@ -180,12 +187,14 @@ git commit -m "feat(master-data): implement guarantor controller, requests, and 
 - Test: `tests/Feature/MasterData/TariffTest.php`
 
 **Interfaces:**
+
 - Consumes: `App\Models\Unit`, `MasterDataPermission::TariffView`, `MasterDataPermission::TariffManage`
 - Produces: `App\Models\Tariff`, `App\Enums\TariffCategory`, `TariffPolicy`
 
 - [ ] **Step 1: Write failing test for Tariff model and factory**
 
 Create `tests/Feature/MasterData/TariffTest.php` testing factory, category enum, unit relation, and activity log:
+
 ```php
 test('tariff factory creates valid tariff linked optionally to a unit', function () {
     $unit = Unit::factory()->create();
@@ -211,27 +220,27 @@ Expected: FAIL due to missing `Tariff` class and table.
 - [ ] **Step 3: Implement `TariffCategory` Enum, Migration, Model, Factory, Policy**
 
 1. Create `app/Enums/TariffCategory.php`:
-   - Cases: `Consultation = 'consultation'`, `Procedure = 'procedure'`, `Laboratory = 'laboratory'`, `Radiology = 'radiology'`, `Administration = 'administration'`, `Other = 'other'`.
-   - Method `label(): string` returning Indonesian text ('Konsultasi', 'Tindakan Medis', 'Laboratorium', 'Radiologi', 'Administrasi', 'Lainnya').
+    - Cases: `Consultation = 'consultation'`, `Procedure = 'procedure'`, `Laboratory = 'laboratory'`, `Radiology = 'radiology'`, `Administration = 'administration'`, `Other = 'other'`.
+    - Method `label(): string` returning Indonesian text ('Konsultasi', 'Tindakan Medis', 'Laboratorium', 'Radiologi', 'Administrasi', 'Lainnya').
 
 2. Create migration `database/migrations/2026_11_07_000002_create_tariffs_table.php`:
-   - Columns: `id`, `code` (string, unique), `name` (string), `category` (string), `price` (unsignedInteger, storing amount in IDR), `unit_id` (foreignId nullable, constrained to `units` on delete null), `description` (text, nullable), `is_active` (boolean, default true), `timestamps`.
-   - Index on `[category, is_active]` and `unit_id`.
+    - Columns: `id`, `code` (string, unique), `name` (string), `category` (string), `price` (unsignedInteger, storing amount in IDR), `unit_id` (foreignId nullable, constrained to `units` on delete null), `description` (text, nullable), `is_active` (boolean, default true), `timestamps`.
+    - Index on `[category, is_active]` and `unit_id`.
 
 3. Create model `app/Models/Tariff.php`:
-   - Fillable: `['code', 'name', 'category', 'price', 'unit_id', 'description', 'is_active']`.
-   - Casts: `'category' => TariffCategory::class`, `'price' => 'integer'`, `'is_active' => 'boolean'`.
-   - Relations: `unit(): BelongsTo`.
-   - Trait: `HasFactory`, `LogsActivity`.
-   - Method `getActivitylogOptions()`: log name `master-data`.
-   - Scope `scopeSearch(Builder $query, string $term)`: matching code or name.
+    - Fillable: `['code', 'name', 'category', 'price', 'unit_id', 'description', 'is_active']`.
+    - Casts: `'category' => TariffCategory::class`, `'price' => 'integer'`, `'is_active' => 'boolean'`.
+    - Relations: `unit(): BelongsTo`.
+    - Trait: `HasFactory`, `LogsActivity`.
+    - Method `getActivitylogOptions()`: log name `master-data`.
+    - Scope `scopeSearch(Builder $query, string $term)`: matching code or name.
 
 4. Create factory `database/factories/TariffFactory.php`:
-   - Default code, name, random category, price between 10000 and 500000, `is_active => true`.
-   - States: `inactive()`, `withUnit()`.
+    - Default code, name, random category, price between 10000 and 500000, `is_active => true`.
+    - States: `inactive()`, `withUnit()`.
 
 5. Create policy `app/Policies/TariffPolicy.php`:
-   - Check `master-data.tariff.view` for view/viewAny, `master-data.tariff.manage` for create/update/delete.
+    - Check `master-data.tariff.view` for view/viewAny, `master-data.tariff.manage` for create/update/delete.
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -250,6 +259,7 @@ git commit -m "feat(master-data): add tariff model, migration, policy, and facto
 ### Task 4: Tariff Form Requests & Controller CRUD API
 
 **Files:**
+
 - Create: `app/Http/Requests/StoreTariffRequest.php`
 - Create: `app/Http/Requests/UpdateTariffRequest.php`
 - Create: `app/Http/Controllers/TariffController.php`
@@ -257,12 +267,14 @@ git commit -m "feat(master-data): add tariff model, migration, policy, and facto
 - Modify: `tests/Feature/MasterData/TariffTest.php`
 
 **Interfaces:**
+
 - Consumes: `App\Models\Tariff`, `TariffPolicy`, `App\Models\Unit`
 - Produces: `TariffController` CRUD routes (`master-data.tariffs.*`)
 
 - [ ] **Step 1: Write failing feature tests for Tariff CRUD & RBAC**
 
 Add tests to `tests/Feature/MasterData/TariffTest.php`:
+
 - `test('tariff index lists and filters tariffs by search, category, and unit')`
 - `test('tariff index requires view permission')`
 - `test('admin can create tariff with valid unit')`
@@ -278,18 +290,18 @@ Expected: FAIL with route not found.
 - [ ] **Step 3: Implement Requests, Controller, and Routes**
 
 1. Create `StoreTariffRequest`:
-   - Rules: `code` (required, string, max:50, unique:tariffs,code), `name` (required, string, max:255), `category` (required, Rule::enum(TariffCategory::class)), `price` (required, integer, min:0), `unit_id` (nullable, exists:units,id), `description` (nullable, string), `is_active` (boolean).
+    - Rules: `code` (required, string, max:50, unique:tariffs,code), `name` (required, string, max:255), `category` (required, Rule::enum(TariffCategory::class)), `price` (required, integer, min:0), `unit_id` (nullable, exists:units,id), `description` (nullable, string), `is_active` (boolean).
 
 2. Create `UpdateTariffRequest`:
-   - Rules: `code` (required, Rule::unique('tariffs', 'code')->ignore($this->route('tariff'))), `name`, `category`, `price`, `unit_id`, `description`, `is_active`.
+    - Rules: `code` (required, Rule::unique('tariffs', 'code')->ignore($this->route('tariff'))), `name`, `category`, `price`, `unit_id`, `description`, `is_active`.
 
 3. Create `TariffController`:
-   - `index`: filter by `search`, `category`, `unit_id`, `status`. Eager-load `unit:id,name,code`. Paginate(15). Pass active units for filter dropdown. Render `master-data/tariff/list/index`.
-   - `create`: authorize `create`. Pass categories and active units. Render `master-data/tariff/create/index`.
-   - `store`: authorize `create`. Create record, redirect with flash success.
-   - `edit`: authorize `update`. Pass tariff, categories, and active units. Render `master-data/tariff/edit/index`.
-   - `update`: authorize `update`. Update record, redirect with flash success.
-   - `destroy`: authorize `delete`. Delete record, redirect with flash success.
+    - `index`: filter by `search`, `category`, `unit_id`, `status`. Eager-load `unit:id,name,code`. Paginate(15). Pass active units for filter dropdown. Render `master-data/tariff/list/index`.
+    - `create`: authorize `create`. Pass categories and active units. Render `master-data/tariff/create/index`.
+    - `store`: authorize `create`. Create record, redirect with flash success.
+    - `edit`: authorize `update`. Pass tariff, categories, and active units. Render `master-data/tariff/edit/index`.
+    - `update`: authorize `update`. Update record, redirect with flash success.
+    - `destroy`: authorize `delete`. Delete record, redirect with flash success.
 
 4. Register routes in `routes/web.php` under `master-data.` group with `permission:master-data.tariff.*` middleware.
 
@@ -310,6 +322,7 @@ git commit -m "feat(master-data): implement tariff controller, requests, and fea
 ### Task 5: Guarantor Frontend UI (Filters, Form, List, Create, Edit Pages)
 
 **Files:**
+
 - Create: `resources/js/pages/master-data/guarantor/components/guarantor-filters.tsx`
 - Create: `resources/js/pages/master-data/guarantor/components/guarantor-form.tsx`
 - Create: `resources/js/pages/master-data/guarantor/list/index.tsx`
@@ -317,6 +330,7 @@ git commit -m "feat(master-data): implement tariff controller, requests, and fea
 - Create: `resources/js/pages/master-data/guarantor/edit/index.tsx`
 
 **Interfaces:**
+
 - Consumes: `DataTable`, `TableToolbar`, `Pagination`, `Can`, `PageHeader`, `FormField`, `useForm`, Ziggy `route()`
 - Produces: Inertia pages rendered by `GuarantorController`
 
@@ -327,24 +341,24 @@ Run: `php artisan ziggy:generate resources/js/types/ziggy --types-only`
 - [ ] **Step 2: Create `guarantor-filters.tsx` & `guarantor-form.tsx`**
 
 1. `guarantor-filters.tsx`:
-   - Search input, type dropdown (`bpjs`, `general`, `insurance`, `company`), status dropdown (`active`, `inactive`).
-   - Uses `TableToolbar` and synchronizes with URL query strings via Inertia `router.get`.
+    - Search input, type dropdown (`bpjs`, `general`, `insurance`, `company`), status dropdown (`active`, `inactive`).
+    - Uses `TableToolbar` and synchronizes with URL query strings via Inertia `router.get`.
 
 2. `guarantor-form.tsx`:
-   - Uses Inertia `useForm`.
-   - Fields: `code` (uppercase text), `name` (text), `type` (select option with labels), `description` (textarea), `is_active` (checkbox).
-   - Display FormRequest validation errors cleanly.
+    - Uses Inertia `useForm`.
+    - Fields: `code` (uppercase text), `name` (text), `type` (select option with labels), `description` (textarea), `is_active` (checkbox).
+    - Display FormRequest validation errors cleanly.
 
 - [ ] **Step 3: Create `list/index.tsx`, `create/index.tsx`, and `edit/index.tsx`**
 
 1. `list/index.tsx`:
-   - `DataTable` showing Kode, Nama Penjamin, Tipe (Badge), Status (Badge Aktif/Nonaktif), dan Aksi (Edit link guarded by `Can`).
-   - Button "Tambah Penjamin" guarded by `Can permission="master-data.guarantor.manage"`.
-   - Empty state when no data matches.
+    - `DataTable` showing Kode, Nama Penjamin, Tipe (Badge), Status (Badge Aktif/Nonaktif), dan Aksi (Edit link guarded by `Can`).
+    - Button "Tambah Penjamin" guarded by `Can permission="master-data.guarantor.manage"`.
+    - Empty state when no data matches.
 
 2. `create/index.tsx` & `edit/index.tsx`:
-   - `PageHeader` with title and breadcrumb back to `master-data.guarantors.index`.
-   - Form card container using `guarantor-form.tsx`.
+    - `PageHeader` with title and breadcrumb back to `master-data.guarantors.index`.
+    - Form card container using `guarantor-form.tsx`.
 
 - [ ] **Step 4: Verify type safety and boundaries**
 
@@ -363,6 +377,7 @@ git commit -m "feat(master-data): add guarantor frontend list, create, and edit 
 ### Task 6: Tariff Frontend UI (Filters, Form, List, Create, Edit Pages)
 
 **Files:**
+
 - Create: `resources/js/pages/master-data/tariff/components/tariff-filters.tsx`
 - Create: `resources/js/pages/master-data/tariff/components/tariff-form.tsx`
 - Create: `resources/js/pages/master-data/tariff/list/index.tsx`
@@ -370,28 +385,29 @@ git commit -m "feat(master-data): add guarantor frontend list, create, and edit 
 - Create: `resources/js/pages/master-data/tariff/edit/index.tsx`
 
 **Interfaces:**
+
 - Consumes: `DataTable`, `TableToolbar`, `Pagination`, `Can`, `PageHeader`, `FormField`, `formatRupiah`, `useForm`, Ziggy `route()`
 - Produces: Inertia pages rendered by `TariffController`
 
 - [ ] **Step 1: Create `tariff-filters.tsx` & `tariff-form.tsx`**
 
 1. `tariff-filters.tsx`:
-   - Search input, category dropdown, unit dropdown, and status dropdown.
-   - Synchronizes filter state to query string on change.
+    - Search input, category dropdown, unit dropdown, and status dropdown.
+    - Synchronizes filter state to query string on change.
 
 2. `tariff-form.tsx`:
-   - Uses Inertia `useForm`.
-   - Fields: `code` (uppercase), `name`, `category` (select option), `price` (number input with currency formatting helper), `unit_id` (select unit or "Semua Unit"), `description` (textarea), `is_active` (checkbox).
-   - Display validation errors.
+    - Uses Inertia `useForm`.
+    - Fields: `code` (uppercase), `name`, `category` (select option), `price` (number input with currency formatting helper), `unit_id` (select unit or "Semua Unit"), `description` (textarea), `is_active` (checkbox).
+    - Display validation errors.
 
 - [ ] **Step 2: Create `list/index.tsx`, `create/index.tsx`, and `edit/index.tsx`**
 
 1. `list/index.tsx`:
-   - `DataTable` with columns: Kode, Nama Layanan/Tarif, Kategori (Badge), Unit (Badge or "-"), Tarif (Rupiah formatted), Status (Aktif/Nonaktif), Aksi (Edit link).
-   - Button "Tambah Tarif" guarded by `Can permission="master-data.tariff.manage"`.
+    - `DataTable` with columns: Kode, Nama Layanan/Tarif, Kategori (Badge), Unit (Badge or "-"), Tarif (Rupiah formatted), Status (Aktif/Nonaktif), Aksi (Edit link).
+    - Button "Tambah Tarif" guarded by `Can permission="master-data.tariff.manage"`.
 
 2. `create/index.tsx` & `edit/index.tsx`:
-   - Form container wrapping `tariff-form.tsx`.
+    - Form container wrapping `tariff-form.tsx`.
 
 - [ ] **Step 3: Verify type safety and boundaries**
 
@@ -410,6 +426,7 @@ git commit -m "feat(master-data): add tariff frontend list, create, and edit pag
 ### Task 7: Navigation & Master Data Landing Integration + Full Verification
 
 **Files:**
+
 - Modify: `resources/js/shared/config/navigation.ts`
 - Modify: `resources/js/pages/master-data/home/index.tsx`
 - Modify: `docs/tasks/02-master-data.md`
@@ -417,39 +434,41 @@ git commit -m "feat(master-data): add tariff frontend list, create, and edit pag
 - Test: `tests/Feature/MasterData/TariffTest.php`
 
 **Interfaces:**
+
 - Consumes: Registered routes, permissions
 - Produces: Integrated sidebar navigation and master data overview cards
 
 - [ ] **Step 1: Update navigation configuration and Master Data home**
 
 1. In `resources/js/shared/config/navigation.ts`:
-   - Add items under section `Master Data`:
-     ```ts
-     {
-         title: 'Penjamin',
-         routeName: 'master-data.guarantors.index',
-         icon: ShieldCheck, // or HandCoins / Building
-         permission: 'master-data.guarantor.view',
-     },
-     {
-         title: 'Tarif & Tindakan',
-         routeName: 'master-data.tariffs.index',
-         icon: Receipt, // or BadgePercent / Tag
-         permission: 'master-data.tariff.view',
-     },
-     ```
-   - Update `master-data.index` module item permission list to include `'master-data.guarantor.view'` and `'master-data.tariff.view'`.
+    - Add items under section `Master Data`:
+        ```ts
+        {
+            title: 'Penjamin',
+            routeName: 'master-data.guarantors.index',
+            icon: ShieldCheck, // or HandCoins / Building
+            permission: 'master-data.guarantor.view',
+        },
+        {
+            title: 'Tarif & Tindakan',
+            routeName: 'master-data.tariffs.index',
+            icon: Receipt, // or BadgePercent / Tag
+            permission: 'master-data.tariff.view',
+        },
+        ```
+    - Update `master-data.index` module item permission list to include `'master-data.guarantor.view'` and `'master-data.tariff.view'`.
 
 2. In `resources/js/pages/master-data/home/index.tsx`:
-   - Add card for Penjamin (`master-data.guarantors.index`) guarded by `Can permission="master-data.guarantor.view"`.
-   - Add card for Tarif (`master-data.tariffs.index`) guarded by `Can permission="master-data.tariff.view"`.
+    - Add card for Penjamin (`master-data.guarantors.index`) guarded by `Can permission="master-data.guarantor.view"`.
+    - Add card for Tarif (`master-data.tariffs.index`) guarded by `Can permission="master-data.tariff.view"`.
 
 3. In `docs/tasks/02-master-data.md`:
-   - Mark completed checkboxes for guarantors and tariffs.
+    - Mark completed checkboxes for guarantors and tariffs.
 
 - [ ] **Step 2: Run full verification suite**
 
 Run the mandatory project checks:
+
 ```bash
 npm run types:check
 npm run check
@@ -457,6 +476,7 @@ npm run build
 vendor/bin/pint --format agent
 php artisan test --compact
 ```
+
 Expected: All 5 commands exit with code 0.
 
 - [ ] **Step 3: Commit**

@@ -28,6 +28,8 @@ export const navigation: NavItem[] = [
             'master-data.patient.view',
             'master-data.doctor.view',
             'master-data.unit.view',
+            'master-data.guarantor.view',
+            'master-data.tariff.view',
         ] as const,
     },
     {
@@ -105,6 +107,18 @@ export const navigationSections: NavSection[] = [
                 routeName: 'master-data.units.index',
                 icon: Building2,
                 permission: 'master-data.unit.view',
+            },
+            {
+                title: 'Penjamin',
+                routeName: 'master-data.guarantors.index',
+                icon: ShieldCheck,
+                permission: 'master-data.guarantor.view',
+            },
+            {
+                title: 'Tarif & Layanan',
+                routeName: 'master-data.tariffs.index',
+                icon: Receipt,
+                permission: 'master-data.tariff.view',
             },
         ],
     },
