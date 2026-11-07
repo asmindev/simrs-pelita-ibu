@@ -121,6 +121,12 @@ export const navigationSections: NavSection[] = [
                 icon: Receipt,
                 permission: 'master-data.tariff.view',
             },
+            {
+                title: 'Obat',
+                routeName: 'master-data.drugs.index',
+                icon: Pill,
+                permission: 'master-data.drug.view',
+            },
         ],
     },
     {
