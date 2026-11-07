@@ -3,10 +3,12 @@ import { Pill, Search } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 
+import { FilterPopover } from '@/shared/components/filter-popover';
 import { TableToolbar } from '@/shared/components/table-toolbar';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
+import { Label } from '@/shared/ui/label';
 import {
     Select,
     SelectContent,
@@ -29,18 +31,46 @@ export function DrugFilters({ filters, categories, current, total }: Props) {
     const [categoryId, setCategoryId] = useState(filters.category_id || 'all');
     const [status, setStatus] = useState(filters.status || 'all');
 
-    function submit(event: FormEvent) {
-        event.preventDefault();
+    const activeFilterCount =
+        (categoryId !== 'all' ? 1 : 0) + (status !== 'all' ? 1 : 0);
+
+    function executeFilter(nextParams?: {
+        search?: string;
+        categoryId?: string;
+        status?: string;
+    }) {
+        const s = nextParams?.search !== undefined ? nextParams.search : search;
+        const c =
+            nextParams?.categoryId !== undefined
+                ? nextParams.categoryId
+                : categoryId;
+        const st =
+            nextParams?.status !== undefined ? nextParams.status : status;
 
         router.get(
             route('master-data.drugs.index'),
             {
-                search: search || undefined,
-                category_id: categoryId === 'all' ? undefined : categoryId,
-                status: status === 'all' ? undefined : status,
+                search: s || undefined,
+                category_id: c === 'all' ? undefined : c,
+                status: st === 'all' ? undefined : st,
             },
             { preserveState: true, preserveScroll: true, replace: true },
         );
+    }
+
+    function submit(event: FormEvent) {
+        event.preventDefault();
+        executeFilter();
+    }
+
+    function applyPopoverFilter() {
+        executeFilter();
+    }
+
+    function resetPopoverFilters() {
+        setCategoryId('all');
+        setStatus('all');
+        executeFilter({ categoryId: 'all', status: 'all' });
     }
 
     function reset() {
@@ -79,42 +109,6 @@ export function DrugFilters({ filters, categories, current, total }: Props) {
                     />
                 </div>
 
-                <Select value={categoryId} onValueChange={setCategoryId}>
-                    <SelectTrigger
-                        id="drug-category"
-                        className="h-8 w-36 bg-background text-xs"
-                        aria-label="Kategori obat"
-                    >
-                        <SelectValue placeholder="Semua kategori" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Semua kategori</SelectItem>
-                        {categories.map((category) => (
-                            <SelectItem
-                                key={category.id}
-                                value={String(category.id)}
-                            >
-                                {category.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-
-                <Select value={status} onValueChange={setStatus}>
-                    <SelectTrigger
-                        id="drug-status"
-                        className="h-8 w-32 bg-background text-xs"
-                        aria-label="Status obat"
-                    >
-                        <SelectValue placeholder="Semua status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Semua status</SelectItem>
-                        <SelectItem value="active">Aktif</SelectItem>
-                        <SelectItem value="inactive">Nonaktif</SelectItem>
-                    </SelectContent>
-                </Select>
-
                 <Button
                     type="submit"
                     size="sm"
@@ -122,15 +116,86 @@ export function DrugFilters({ filters, categories, current, total }: Props) {
                 >
                     Cari
                 </Button>
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-8 shrink-0 text-xs"
-                    onClick={reset}
+
+                <FilterPopover
+                    title="Filter Obat"
+                    activeCount={activeFilterCount}
+                    onApply={applyPopoverFilter}
+                    onReset={resetPopoverFilters}
                 >
-                    Reset
-                </Button>
+                    <div className="space-y-1.5">
+                        <Label
+                            htmlFor="drug-category"
+                            className="text-xs font-medium"
+                        >
+                            Kategori Obat
+                        </Label>
+                        <Select
+                            value={categoryId}
+                            onValueChange={setCategoryId}
+                        >
+                            <SelectTrigger
+                                id="drug-category"
+                                className="h-8 bg-background text-xs"
+                                aria-label="Kategori obat"
+                            >
+                                <SelectValue placeholder="Semua kategori" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">
+                                    Semua kategori
+                                </SelectItem>
+                                {categories.map((category) => (
+                                    <SelectItem
+                                        key={category.id}
+                                        value={String(category.id)}
+                                    >
+                                        {category.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <Label
+                            htmlFor="drug-status"
+                            className="text-xs font-medium"
+                        >
+                            Status Obat
+                        </Label>
+                        <Select value={status} onValueChange={setStatus}>
+                            <SelectTrigger
+                                id="drug-status"
+                                className="h-8 bg-background text-xs"
+                                aria-label="Status obat"
+                            >
+                                <SelectValue placeholder="Semua status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">
+                                    Semua status
+                                </SelectItem>
+                                <SelectItem value="active">Aktif</SelectItem>
+                                <SelectItem value="inactive">
+                                    Nonaktif
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </FilterPopover>
+
+                {(activeFilterCount > 0 || search !== '') && (
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 shrink-0 text-xs text-muted-foreground hover:text-foreground"
+                        onClick={reset}
+                    >
+                        Reset
+                    </Button>
+                )}
             </form>
         </TableToolbar>
     );

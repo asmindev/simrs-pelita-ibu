@@ -1,14 +1,13 @@
 import { router } from '@inertiajs/react';
-import { ClipboardList, Search, SlidersHorizontal } from 'lucide-react';
+import { ClipboardList, Search } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 
+import { FilterPopover } from '@/shared/components/filter-popover';
 import { TableToolbar } from '@/shared/components/table-toolbar';
 import { route } from '@/shared/lib/route';
-import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
 import {
     Select,
     SelectContent,
@@ -39,7 +38,6 @@ export function EncounterFiltersComponent({
         filters.unit_id ? String(filters.unit_id) : 'all',
     );
     const [date, setDate] = useState(filters.date || today);
-    const [open, setOpen] = useState(false);
 
     const activeFilterCount =
         (status !== 'all' ? 1 : 0) +
@@ -76,7 +74,6 @@ export function EncounterFiltersComponent({
     }
 
     function applyPopoverFilter() {
-        setOpen(false);
         executeFilter();
     }
 
@@ -84,7 +81,6 @@ export function EncounterFiltersComponent({
         setStatus('all');
         setUnitId('all');
         setDate(today);
-        setOpen(false);
         executeFilter({ status: 'all', unitId: 'all', date: today });
     }
 
@@ -133,161 +129,93 @@ export function EncounterFiltersComponent({
                     Cari
                 </Button>
 
-                <Popover open={open} onOpenChange={setOpen}>
-                    <PopoverTrigger asChild>
-                        <Button
-                            type="button"
-                            variant={
-                                activeFilterCount > 0 ? 'secondary' : 'outline'
-                            }
-                            size="sm"
-                            className="h-8 gap-1.5 text-xs"
+                <FilterPopover
+                    title="Filter Kunjungan Pasien"
+                    activeCount={activeFilterCount}
+                    onApply={applyPopoverFilter}
+                    onReset={resetPopoverFilters}
+                >
+                    <div className="space-y-1.5">
+                        <Label
+                            htmlFor="reg-filter-date"
+                            className="text-xs font-medium"
                         >
-                            <SlidersHorizontal className="size-3.5" />
-                            <span>Filter</span>
-                            {activeFilterCount > 0 && (
-                                <Badge
-                                    variant="default"
-                                    className="ml-0.5 h-4 min-w-4 rounded-full px-1 text-[10px] leading-none"
-                                >
-                                    {activeFilterCount}
-                                </Badge>
-                            )}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                        align="end"
-                        className="w-80 space-y-3.5 border-border bg-popover p-4"
-                    >
-                        <div className="flex items-center justify-between border-b border-border pb-2">
-                            <h4 className="text-sm font-semibold text-foreground">
-                                Filter Kunjungan
-                            </h4>
-                            {activeFilterCount > 0 && (
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={resetPopoverFilters}
-                                    className="h-6 px-1.5 text-xs text-muted-foreground hover:text-foreground"
-                                >
-                                    Reset
-                                </Button>
-                            )}
-                        </div>
+                            Tanggal Kunjungan
+                        </Label>
+                        <Input
+                            id="reg-filter-date"
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            className="h-8 bg-background text-xs"
+                            aria-label="Filter tanggal"
+                        />
+                    </div>
 
-                        <div className="space-y-3 text-xs">
-                            <div className="space-y-1.5">
-                                <Label
-                                    htmlFor="reg-filter-date"
-                                    className="text-xs font-medium"
-                                >
-                                    Tanggal Kunjungan
-                                </Label>
-                                <Input
-                                    id="reg-filter-date"
-                                    type="date"
-                                    value={date}
-                                    onChange={(e) => setDate(e.target.value)}
-                                    className="h-8 bg-background text-xs"
-                                    aria-label="Filter tanggal"
-                                />
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <Label
-                                    htmlFor="reg-filter-unit"
-                                    className="text-xs font-medium"
-                                >
-                                    Unit / Poliklinik
-                                </Label>
-                                <Select
-                                    value={unitId}
-                                    onValueChange={setUnitId}
-                                >
-                                    <SelectTrigger
-                                        id="reg-filter-unit"
-                                        className="h-8 bg-background text-xs"
-                                        aria-label="Filter unit"
-                                    >
-                                        <SelectValue placeholder="Semua Unit" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">
-                                            Semua Unit
-                                        </SelectItem>
-                                        {units.map((unit) => (
-                                            <SelectItem
-                                                key={unit.id}
-                                                value={String(unit.id)}
-                                            >
-                                                {unit.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <Label
-                                    htmlFor="reg-filter-status"
-                                    className="text-xs font-medium"
-                                >
-                                    Status Kunjungan
-                                </Label>
-                                <Select
-                                    value={status}
-                                    onValueChange={setStatus}
-                                >
-                                    <SelectTrigger
-                                        id="reg-filter-status"
-                                        className="h-8 bg-background text-xs"
-                                        aria-label="Filter status"
-                                    >
-                                        <SelectValue placeholder="Semua Status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">
-                                            Semua Status
-                                        </SelectItem>
-                                        <SelectItem value="arrived">
-                                            Menunggu
-                                        </SelectItem>
-                                        <SelectItem value="in_consultation">
-                                            Dilayani
-                                        </SelectItem>
-                                        <SelectItem value="finished">
-                                            Selesai
-                                        </SelectItem>
-                                        <SelectItem value="cancelled">
-                                            Dibatalkan
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-end gap-2 border-t border-border pt-2">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="h-8 text-xs"
-                                onClick={() => setOpen(false)}
+                    <div className="space-y-1.5">
+                        <Label
+                            htmlFor="reg-filter-unit"
+                            className="text-xs font-medium"
+                        >
+                            Unit / Poliklinik
+                        </Label>
+                        <Select value={unitId} onValueChange={setUnitId}>
+                            <SelectTrigger
+                                id="reg-filter-unit"
+                                className="h-8 bg-background text-xs"
+                                aria-label="Filter unit"
                             >
-                                Batal
-                            </Button>
-                            <Button
-                                type="button"
-                                size="sm"
-                                className="h-8 text-xs"
-                                onClick={applyPopoverFilter}
+                                <SelectValue placeholder="Semua Unit" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Semua Unit</SelectItem>
+                                {units.map((unit) => (
+                                    <SelectItem
+                                        key={unit.id}
+                                        value={String(unit.id)}
+                                    >
+                                        {unit.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <Label
+                            htmlFor="reg-filter-status"
+                            className="text-xs font-medium"
+                        >
+                            Status Kunjungan
+                        </Label>
+                        <Select value={status} onValueChange={setStatus}>
+                            <SelectTrigger
+                                id="reg-filter-status"
+                                className="h-8 bg-background text-xs"
+                                aria-label="Filter status"
                             >
-                                Terapkan Filter
-                            </Button>
-                        </div>
-                    </PopoverContent>
-                </Popover>
+                                <SelectValue placeholder="Semua Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">
+                                    Semua Status
+                                </SelectItem>
+                                <SelectItem value="arrived">
+                                    Menunggu
+                                </SelectItem>
+                                <SelectItem value="in_consultation">
+                                    Dilayani
+                                </SelectItem>
+                                <SelectItem value="finished">
+                                    Selesai
+                                </SelectItem>
+                                <SelectItem value="cancelled">
+                                    Dibatalkan
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </FilterPopover>
 
                 {(activeFilterCount > 0 || search !== '') && (
                     <Button
