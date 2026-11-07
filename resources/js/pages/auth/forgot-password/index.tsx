@@ -1,7 +1,18 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft, KeyRound } from 'lucide-react';
 import type { FormEvent } from 'react';
 
 import { route } from '@/shared/lib/route';
+import { Button } from '@/shared/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/shared/ui/card';
+import { Input } from '@/shared/ui/input';
+import { Label } from '@/shared/ui/label';
 
 type Props = {
     status?: string;
@@ -19,52 +30,74 @@ export default function ForgotPassword({ status }: Props) {
 
     return (
         <>
-            <Head title="Forgot password" />
-            <main className="flex min-h-screen items-center justify-center p-6">
-                <form onSubmit={submit} className="w-full max-w-sm space-y-4">
-                    <h1 className="text-xl font-semibold">Forgot password</h1>
+            <Head title="Lupa Password" />
+            <main className="flex min-h-screen items-center justify-center bg-background p-4 sm:p-6">
+                <Card className="w-full max-w-md border-border/80 shadow-xs">
+                    <CardHeader className="space-y-1 text-center">
+                        <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20">
+                            <KeyRound className="size-6" />
+                        </div>
+                        <CardTitle className="text-xl font-bold tracking-tight">
+                            Lupa Password
+                        </CardTitle>
+                        <CardDescription>
+                            Masukkan email akun Anda. Kami akan mengirimkan
+                            tautan untuk mengatur ulang password.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={submit} className="space-y-4">
+                            {status && (
+                                <div
+                                    role="status"
+                                    className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200"
+                                >
+                                    {status}
+                                </div>
+                            )}
 
-                    {status && (
-                        <p className="text-sm text-green-600">{status}</p>
-                    )}
+                            <div className="space-y-1.5">
+                                <Label htmlFor="email">Email</Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    value={data.email}
+                                    autoComplete="username"
+                                    autoFocus
+                                    placeholder="nama@rumahsakit.id"
+                                    onChange={(event) =>
+                                        setData('email', event.target.value)
+                                    }
+                                />
+                                {errors.email && (
+                                    <p className="text-xs text-destructive">
+                                        {errors.email}
+                                    </p>
+                                )}
+                            </div>
 
-                    <div className="space-y-1">
-                        <label htmlFor="email" className="text-sm">
-                            Email
-                        </label>
-                        <input
-                            id="email"
-                            type="email"
-                            value={data.email}
-                            autoComplete="username"
-                            autoFocus
-                            onChange={(event) =>
-                                setData('email', event.target.value)
-                            }
-                            className="w-full rounded-md border px-3 py-2"
-                        />
-                        {errors.email && (
-                            <p className="text-sm text-red-600">
-                                {errors.email}
-                            </p>
-                        )}
-                    </div>
+                            <Button
+                                type="submit"
+                                disabled={processing}
+                                className="w-full shadow-xs"
+                            >
+                                {processing
+                                    ? 'Mengirim...'
+                                    : 'Kirim Tautan Reset'}
+                            </Button>
 
-                    <button
-                        type="submit"
-                        disabled={processing}
-                        className="w-full rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-900"
-                    >
-                        Email password reset link
-                    </button>
-
-                    <Link
-                        href={route('login')}
-                        className="block text-center text-sm underline"
-                    >
-                        Back to log in
-                    </Link>
-                </form>
+                            <div className="text-center">
+                                <Link
+                                    href={route('login')}
+                                    className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary hover:underline"
+                                >
+                                    <ArrowLeft className="size-3.5" />
+                                    Kembali ke halaman masuk
+                                </Link>
+                            </div>
+                        </form>
+                    </CardContent>
+                </Card>
             </main>
         </>
     );

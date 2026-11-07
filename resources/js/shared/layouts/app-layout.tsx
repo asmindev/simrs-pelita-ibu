@@ -1,6 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 
+import { ThemeSwitcher } from '@/shared/components/theme-switcher';
 import {
     SidebarInset,
     SidebarProvider,
@@ -34,9 +35,12 @@ export default function AppLayout({ children }: Props) {
                         {name ?? 'SIMRS'}
                     </span>
                     <div className="flex-1" />
-                    <span className="truncate text-sm font-medium">
-                        {auth?.user?.name ?? ''}
-                    </span>
+                    <div className="flex items-center gap-2">
+                        <ThemeSwitcher />
+                        <span className="truncate text-sm font-medium">
+                            {auth?.user?.name ?? ''}
+                        </span>
+                    </div>
                 </header>
 
                 <main className="flex min-w-0 flex-1 flex-col gap-4 overflow-auto p-2 md:p-4">

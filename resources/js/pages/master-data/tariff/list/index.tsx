@@ -89,7 +89,7 @@ export default function TariffIndex({ tariffs, units, filters }: Props) {
             key: 'status',
             header: 'Status',
             render: (tariff) => (
-                <Badge variant={tariff.is_active ? 'default' : 'secondary'}>
+                <Badge variant={tariff.is_active ? 'success' : 'secondary'}>
                     {tariff.is_active ? 'Aktif' : 'Nonaktif'}
                 </Badge>
             ),

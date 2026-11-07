@@ -40,7 +40,7 @@ const NAV_ACTIVE_CLASS =
     'data-active:bg-primary! data-active:text-primary-foreground! data-active:border-primary!';
 
 const NAV_BUTTON_CLASS =
-    'h-7 text-foreground/50 group-data-[collapsible=icon]:size-6! group-data-[collapsible=icon]:w-full!';
+    'h-8 text-foreground/75 font-medium group-data-[collapsible=icon]:size-6! group-data-[collapsible=icon]:w-full! hover:bg-sidebar-accent hover:text-sidebar-accent-foreground';
 
 function getInitials(name: string): string {
     return name

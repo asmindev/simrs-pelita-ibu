@@ -67,7 +67,7 @@ export default function UnitIndex({ units, filters }: Props) {
             key: 'is_active',
             header: 'Status',
             render: (unit) => (
-                <Badge variant={unit.is_active ? 'secondary' : 'outline'}>
+                <Badge variant={unit.is_active ? 'success' : 'secondary'}>
                     {unit.is_active ? 'Aktif' : 'Nonaktif'}
                 </Badge>
             ),
