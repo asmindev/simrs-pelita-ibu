@@ -254,6 +254,120 @@ declare module 'ziggy-js' {
             "binding": "id"
         }
     ],
+    "medical-record.index": [],
+    "medical-record.patient.history": [
+        {
+            "name": "patient",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "medical-record.encounters.show": [
+        {
+            "name": "encounter",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "medical-record.encounters.assessments.store": [
+        {
+            "name": "encounter",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "medical-record.encounters.diagnoses.store": [
+        {
+            "name": "encounter",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "medical-record.encounters.procedures.store": [
+        {
+            "name": "encounter",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "medical-record.encounters.sensitive-notes.store": [
+        {
+            "name": "encounter",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "medical-record.encounters.reports.create": [
+        {
+            "name": "encounter",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "medical-record.encounters.reports.store": [
+        {
+            "name": "encounter",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "medical-record.encounters.drafts.show": [
+        {
+            "name": "encounter",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "medical-record.encounters.drafts.store": [
+        {
+            "name": "encounter",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "medical-record.assessments.update": [
+        {
+            "name": "assessment",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "medical-record.assessments.finalize": [
+        {
+            "name": "assessment",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "medical-record.assessments.addenda.store": [
+        {
+            "name": "assessment",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "medical-record.diagnoses.destroy": [
+        {
+            "name": "diagnosis",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "medical-record.procedures.destroy": [
+        {
+            "name": "procedure",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "medical-record.reports.index": [],
+    "medical-record.reports.show": [
+        {
+            "name": "clinicalReport",
+            "required": true,
+            "binding": "id"
+        }
+    ],
     "storage.local": [
         {
             "name": "path",

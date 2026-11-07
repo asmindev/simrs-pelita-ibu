@@ -13,4 +13,6 @@ enum MedicalRecordPermission: string
     case EncounterUpdate = 'medical-record.encounter.update';
     case ResumeExport = 'medical-record.resume.export';
     case ProcedureManage = 'medical-record.procedure.manage';
+    case ReportView = 'medical-record.report.view';
+    case ReportManage = 'medical-record.report.manage';
 }

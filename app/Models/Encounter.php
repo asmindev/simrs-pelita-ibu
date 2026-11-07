@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
@@ -132,6 +133,54 @@ class Encounter extends Model
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * @return HasMany<Assessment, $this>
+     */
+    public function assessments(): HasMany
+    {
+        return $this->hasMany(Assessment::class);
+    }
+
+    /**
+     * @return HasMany<Diagnosis, $this>
+     */
+    public function diagnoses(): HasMany
+    {
+        return $this->hasMany(Diagnosis::class);
+    }
+
+    /**
+     * @return HasMany<Procedure, $this>
+     */
+    public function procedures(): HasMany
+    {
+        return $this->hasMany(Procedure::class);
+    }
+
+    /**
+     * @return HasMany<SensitiveNote, $this>
+     */
+    public function sensitiveNotes(): HasMany
+    {
+        return $this->hasMany(SensitiveNote::class);
+    }
+
+    /**
+     * @return HasMany<ClinicalReport, $this>
+     */
+    public function clinicalReports(): HasMany
+    {
+        return $this->hasMany(ClinicalReport::class);
+    }
+
+    /**
+     * @return HasMany<RecordDraft, $this>
+     */
+    public function drafts(): HasMany
+    {
+        return $this->hasMany(RecordDraft::class);
     }
 
     /**

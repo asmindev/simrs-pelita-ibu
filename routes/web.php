@@ -5,6 +5,14 @@ use App\Http\Controllers\DoctorScheduleController;
 use App\Http\Controllers\DrugCategoryController;
 use App\Http\Controllers\DrugController;
 use App\Http\Controllers\GuarantorController;
+use App\Http\Controllers\MedicalRecord\AssessmentController;
+use App\Http\Controllers\MedicalRecord\ClinicalReportController;
+use App\Http\Controllers\MedicalRecord\DiagnosisController;
+use App\Http\Controllers\MedicalRecord\DraftController;
+use App\Http\Controllers\MedicalRecord\EncounterRecordController;
+use App\Http\Controllers\MedicalRecord\MedicalRecordController;
+use App\Http\Controllers\MedicalRecord\ProcedureController;
+use App\Http\Controllers\MedicalRecord\SensitiveNoteController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\Registration\EncounterController;
 use App\Http\Controllers\Registration\QueueController;
@@ -224,5 +232,88 @@ Route::middleware(['auth', 'verified'])
             Route::post('{queue}/skip', [QueueController::class, 'skip'])
                 ->middleware('permission:registration.queue.call')
                 ->name('skip');
+        });
+    });
+
+Route::middleware(['auth', 'verified'])
+    ->prefix('medical-record')
+    ->name('medical-record.')
+    ->group(function (): void {
+        Route::get('/', [MedicalRecordController::class, 'index'])
+            ->middleware('permission:medical-record.encounter.view')
+            ->name('index');
+
+        Route::get('patients/{patient}/history', [MedicalRecordController::class, 'patientHistory'])
+            ->middleware('permission:medical-record.encounter.view')
+            ->name('patient.history');
+
+        Route::prefix('encounters/{encounter}')->name('encounters.')->group(function (): void {
+            Route::get('/', [EncounterRecordController::class, 'show'])
+                ->middleware('permission:medical-record.encounter.view')
+                ->name('show');
+
+            Route::post('assessments', [AssessmentController::class, 'store'])
+                ->middleware('permission:medical-record.assessment.update')
+                ->name('assessments.store');
+
+            Route::post('diagnoses', [DiagnosisController::class, 'store'])
+                ->middleware('permission:medical-record.diagnosis.manage')
+                ->name('diagnoses.store');
+
+            Route::post('procedures', [ProcedureController::class, 'store'])
+                ->middleware('permission:medical-record.procedure.manage')
+                ->name('procedures.store');
+
+            Route::post('sensitive-notes', [SensitiveNoteController::class, 'store'])
+                ->middleware('permission:medical-record.sensitive-note.update')
+                ->name('sensitive-notes.store');
+
+            Route::get('reports/create', [ClinicalReportController::class, 'create'])
+                ->middleware('permission:medical-record.report.manage')
+                ->name('reports.create');
+
+            Route::post('reports', [ClinicalReportController::class, 'store'])
+                ->middleware('permission:medical-record.report.manage')
+                ->name('reports.store');
+
+            Route::get('drafts', [DraftController::class, 'show'])
+                ->middleware('permission:medical-record.assessment.update')
+                ->name('drafts.show');
+
+            Route::post('drafts', [DraftController::class, 'store'])
+                ->middleware('permission:medical-record.assessment.update')
+                ->name('drafts.store');
+        });
+
+        Route::prefix('assessments/{assessment}')->name('assessments.')->group(function (): void {
+            Route::put('/', [AssessmentController::class, 'update'])
+                ->middleware('permission:medical-record.assessment.update')
+                ->name('update');
+
+            Route::post('finalize', [AssessmentController::class, 'finalize'])
+                ->middleware('permission:medical-record.assessment.update')
+                ->name('finalize');
+
+            Route::post('addenda', [AssessmentController::class, 'addendum'])
+                ->middleware('permission:medical-record.assessment.update')
+                ->name('addenda.store');
+        });
+
+        Route::delete('diagnoses/{diagnosis}', [DiagnosisController::class, 'destroy'])
+            ->middleware('permission:medical-record.diagnosis.manage')
+            ->name('diagnoses.destroy');
+
+        Route::delete('procedures/{procedure}', [ProcedureController::class, 'destroy'])
+            ->middleware('permission:medical-record.procedure.manage')
+            ->name('procedures.destroy');
+
+        Route::prefix('reports')->name('reports.')->group(function (): void {
+            Route::get('/', [ClinicalReportController::class, 'index'])
+                ->middleware('permission:medical-record.report.view')
+                ->name('index');
+
+            Route::get('{clinicalReport}', [ClinicalReportController::class, 'show'])
+                ->middleware('permission:medical-record.report.view')
+                ->name('show');
         });
     });

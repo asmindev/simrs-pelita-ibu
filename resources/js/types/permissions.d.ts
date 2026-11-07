@@ -46,6 +46,8 @@ export type PermissionName =
     | 'medical-record.encounter.update'
     | 'medical-record.encounter.view'
     | 'medical-record.procedure.manage'
+    | 'medical-record.report.manage'
+    | 'medical-record.report.view'
     | 'medical-record.resume.export'
     | 'medical-record.sensitive-note.update'
     | 'medical-record.sensitive-note.view'

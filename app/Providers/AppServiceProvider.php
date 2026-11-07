@@ -3,20 +3,26 @@
 namespace App\Providers;
 
 use App\Enums\RoleName;
+use App\Models\Assessment;
 use App\Models\BreakGlassGrant;
+use App\Models\ClinicalReport;
 use App\Models\Doctor;
 use App\Models\Encounter;
 use App\Models\Patient;
 use App\Models\PatientAccessLog;
 use App\Models\Queue;
+use App\Models\SensitiveNote;
 use App\Models\Unit;
 use App\Models\User;
+use App\Policies\AssessmentPolicy;
 use App\Policies\BreakGlassGrantPolicy;
+use App\Policies\ClinicalReportPolicy;
 use App\Policies\DoctorPolicy;
 use App\Policies\EncounterPolicy;
 use App\Policies\PatientAccessLogPolicy;
 use App\Policies\PatientPolicy;
 use App\Policies\QueuePolicy;
+use App\Policies\SensitiveNotePolicy;
 use App\Policies\UnitPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
@@ -56,6 +62,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(BreakGlassGrant::class, BreakGlassGrantPolicy::class);
         Gate::policy(Encounter::class, EncounterPolicy::class);
         Gate::policy(Queue::class, QueuePolicy::class);
+        Gate::policy(Assessment::class, AssessmentPolicy::class);
+        Gate::policy(SensitiveNote::class, SensitiveNotePolicy::class);
+        Gate::policy(ClinicalReport::class, ClinicalReportPolicy::class);
 
         Gate::before(function (?User $user): ?bool {
             return $user?->hasRole(RoleName::SuperAdmin->value) ? true : null;

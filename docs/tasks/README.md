@@ -8,7 +8,7 @@ Satu fase harus selesai dan terverifikasi sebelum fase berikutnya dimulai.
 | 1    | [01-foundation.md](./01-foundation.md)                     | Fondasi RBAC, audit, FE shell     | Sebagian |
 | 2    | [02-master-data.md](./02-master-data.md)                   | Pasien, dokter, unit, obat, tarif | Selesai  |
 | 3    | [03-pendaftaran.md](./03-pendaftaran.md)                   | Kunjungan dan antrean             | Selesai  |
-| 4    | [04-rekam-medis.md](./04-rekam-medis.md)                   | EMR, draft, field sensitif        | Belum    |
+| 4    | [04-rekam-medis.md](./04-rekam-medis.md)                   | EMR, draft, field sensitif        | Selesai  |
 | 5    | [05-farmasi-kasir.md](./05-farmasi-kasir.md)               | Resep, stok, invoice, pembayaran  | Belum    |
 | 6    | [06-penunjang-rawat-inap.md](./06-penunjang-rawat-inap.md) | Lab/radiologi, admisi, bed        | Belum    |
 | 7    | [07-rbac-audit-ui.md](./07-rbac-audit-ui.md)               | UI RBAC dan audit                 | Belum    |

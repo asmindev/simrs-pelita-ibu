@@ -10,28 +10,28 @@
 
 ## Backend
 
-- [ ] Migration encounter, assessment, diagnosis, procedure, report, sensitive
+- [x] Migration encounter, assessment, diagnosis, procedure, report, sensitive
       note, draft.
-- [ ] Model + relasi.
-- [ ] Controller encounter, asesmen, dan laporan tindakan.
-- [ ] FormRequest dengan validasi klinis dasar.
-- [ ] Policy scoping poli/ruang.
-- [ ] Optimistic lock `updated_at`.
-- [ ] Omisi field sensitif di Resource/Controller.
-- [ ] Addendum untuk catatan final.
-- [ ] Audit akses pasien.
-- [ ] Permission enum Medical Record (termasuk `report.view/manage`).
-- [ ] Test field sensitif, laporan, dan konkurensi.
+- [x] Model + relasi.
+- [x] Controller encounter, asesmen, dan laporan tindakan.
+- [x] FormRequest dengan validasi klinis dasar.
+- [x] Policy scoping poli/ruang.
+- [x] Optimistic lock `updated_at`.
+- [x] Omisi field sensitif di Resource/Controller.
+- [x] Addendum untuk catatan final.
+- [x] Audit akses pasien.
+- [x] Permission enum Medical Record (termasuk `report.view/manage`).
+- [x] Test field sensitif, laporan, dan konkurensi.
 
 ## Frontend
 
-- [ ] `pages/medical-record/encounter/{list,show,edit}/index.tsx`.
-- [ ] `pages/medical-record/report/{list,create,edit}/index.tsx`.
-- [ ] Sub-layout clinical dengan patient context bar.
-- [ ] `AssessmentForm`, `DiagnosisEditor`, `SensitiveNote` di components.
-- [ ] Draft autosave dan guard perubahan.
-- [ ] `Can` untuk field dan aksi sensitif.
-- [ ] Tampilan konflik edit.
+- [x] `pages/medical-record/encounter/{list,show,edit}/index.tsx`.
+- [x] `pages/medical-record/report/{list,create,edit}/index.tsx`.
+- [x] Sub-layout clinical dengan patient context bar.
+- [x] `AssessmentForm`, `DiagnosisEditor`, `SensitiveNote` di components.
+- [x] Draft autosave dan guard perubahan.
+- [x] `Can` untuk field dan aksi sensitif.
+- [x] Tampilan konflik edit.
 
 ## Kriteria
 

@@ -82,6 +82,46 @@ class Patient extends Model
     }
 
     /**
+     * @return HasMany<Assessment, $this>
+     */
+    public function assessments(): HasMany
+    {
+        return $this->hasMany(Assessment::class);
+    }
+
+    /**
+     * @return HasMany<Diagnosis, $this>
+     */
+    public function diagnoses(): HasMany
+    {
+        return $this->hasMany(Diagnosis::class);
+    }
+
+    /**
+     * @return HasMany<Procedure, $this>
+     */
+    public function procedures(): HasMany
+    {
+        return $this->hasMany(Procedure::class);
+    }
+
+    /**
+     * @return HasMany<SensitiveNote, $this>
+     */
+    public function sensitiveNotes(): HasMany
+    {
+        return $this->hasMany(SensitiveNote::class);
+    }
+
+    /**
+     * @return HasMany<ClinicalReport, $this>
+     */
+    public function clinicalReports(): HasMany
+    {
+        return $this->hasMany(ClinicalReport::class);
+    }
+
+    /**
      * @param  Builder<Patient>  $query
      * @return Builder<Patient>
      */
