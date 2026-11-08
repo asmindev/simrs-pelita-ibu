@@ -1,9 +1,15 @@
-import { Eye } from 'lucide-react';
+import { Eye, MoreHorizontal } from 'lucide-react';
 
 import type { DataTableColumn } from '@/shared/components/data-table';
 import { formatDateTime } from '@/shared/lib/format';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu';
 
 import type { ActivityLog } from '../../../types/audit';
 
@@ -59,17 +65,28 @@ export function getLogColumns({
         {
             key: 'actions',
             header: '',
-            className: 'w-20 text-right',
+            className: 'w-12 text-right',
             render: (log) => (
-                <Button
-                    size="sm"
-                    variant="ghost"
-                    className="size-7 p-0"
-                    onClick={() => onViewDetail(log)}
-                    title="Lihat Detail Snapshot"
-                >
-                    <Eye className="size-3.5" />
-                </Button>
+                <div className="flex justify-end">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                className="size-8 p-0"
+                            >
+                                <MoreHorizontal className="size-4" />
+                                <span className="sr-only">Buka menu aksi</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-36">
+                            <DropdownMenuItem onClick={() => onViewDetail(log)}>
+                                <Eye className="mr-2 size-3.5" />
+                                Detail Snapshot
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             ),
         },
     ];

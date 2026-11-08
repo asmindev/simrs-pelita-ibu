@@ -1,5 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { Edit2, MoreHorizontal, PowerOff } from 'lucide-react';
 
+import { usePermissions } from '@/shared/hooks/use-permissions';
 import { Can } from '@/shared/components/can';
 import {
     DataTable,
@@ -10,6 +12,12 @@ import { Pagination } from '@/shared/components/pagination';
 import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu';
 
 import { UnitFilters } from '../components/unit-filters';
 import {
@@ -25,6 +33,8 @@ type Props = {
 };
 
 export default function UnitIndex({ units, filters }: Props) {
+    const { can } = usePermissions();
+
     function deactivate(unit: Unit) {
         if (!window.confirm(`Nonaktifkan unit ${unit.name}?`)) {
             return;
@@ -75,32 +85,55 @@ export default function UnitIndex({ units, filters }: Props) {
         {
             key: 'actions',
             header: '',
-            className: 'text-right',
-            render: (unit) => (
-                <div className="flex justify-end gap-2">
-                    <Can permission="master-data.unit.manage">
-                        <Button asChild variant="outline" size="sm">
-                            <Link
-                                href={route('master-data.units.edit', unit.id)}
-                            >
-                                Ubah
-                            </Link>
-                        </Button>
-                    </Can>
-                    <Can permission="master-data.unit.manage">
-                        {unit.is_active && (
-                            <Button
-                                type="button"
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => deactivate(unit)}
-                            >
-                                Nonaktifkan
-                            </Button>
-                        )}
-                    </Can>
-                </div>
-            ),
+            className: 'w-12 text-right',
+            render: (unit) => {
+                const canManage = can('master-data.unit.manage');
+
+                if (!canManage) {
+                    return null;
+                }
+
+                return (
+                    <div className="flex justify-end">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="size-8 p-0"
+                                >
+                                    <MoreHorizontal className="size-4" />
+                                    <span className="sr-only">
+                                        Buka menu aksi
+                                    </span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-36">
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        href={route(
+                                            'master-data.units.edit',
+                                            unit.id,
+                                        )}
+                                    >
+                                        <Edit2 className="mr-2 size-3.5" />
+                                        Ubah
+                                    </Link>
+                                </DropdownMenuItem>
+                                {unit.is_active && (
+                                    <DropdownMenuItem
+                                        variant="destructive"
+                                        onClick={() => deactivate(unit)}
+                                    >
+                                        <PowerOff className="mr-2 size-3.5" />
+                                        Nonaktifkan
+                                    </DropdownMenuItem>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                );
+            },
         },
     ];
 

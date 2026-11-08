@@ -11,6 +11,7 @@ export type Unit = {
     id: number;
     name: string;
     code: string;
+    type?: string;
 };
 
 export type User = {

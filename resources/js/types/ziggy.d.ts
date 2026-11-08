@@ -529,6 +529,13 @@ declare module 'ziggy-js' {
     ],
     "rbac.roles.index": [],
     "rbac.roles.store": [],
+    "rbac.roles.update": [
+        {
+            "name": "role",
+            "required": true,
+            "binding": "id"
+        }
+    ],
     "rbac.roles.permissions.update": [
         {
             "name": "role",

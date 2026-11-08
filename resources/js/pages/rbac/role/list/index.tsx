@@ -8,8 +8,8 @@ import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
 
 import type { GroupedPermission, Role } from '../../types/rbac';
-import { NewRoleDialog } from './components/new-role-dialog';
 import { getRoleColumns } from './components/role-columns';
+import { RoleFormDialog } from './components/role-form-dialog';
 import { RoleMatrixDialog } from './components/role-matrix-dialog';
 
 type Props = {
@@ -19,8 +19,18 @@ type Props = {
 
 export default function RoleListIndex({ roles, groupedPermissions }: Props) {
     const [matrixOpen, setMatrixOpen] = useState(false);
-    const [newRoleOpen, setNewRoleOpen] = useState(false);
+    const [formOpen, setFormOpen] = useState(false);
     const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+
+    function handleCreateRole() {
+        setSelectedRole(null);
+        setFormOpen(true);
+    }
+
+    function handleEditRole(role: Role) {
+        setSelectedRole(role);
+        setFormOpen(true);
+    }
 
     function handleConfigurePermissions(role: Role) {
         setSelectedRole(role);
@@ -30,6 +40,7 @@ export default function RoleListIndex({ roles, groupedPermissions }: Props) {
     const columns = useMemo(
         () =>
             getRoleColumns({
+                onEdit: handleEditRole,
                 onConfigurePermissions: handleConfigurePermissions,
             }),
         [],
@@ -56,7 +67,7 @@ export default function RoleListIndex({ roles, groupedPermissions }: Props) {
                                 Break-Glass
                             </Link>
                         </Button>
-                        <Button size="sm" onClick={() => setNewRoleOpen(true)}>
+                        <Button size="sm" onClick={handleCreateRole}>
                             <Plus className="mr-1.5 size-4" />
                             Tambah Role
                         </Button>
@@ -78,7 +89,11 @@ export default function RoleListIndex({ roles, groupedPermissions }: Props) {
                 groupedPermissions={groupedPermissions}
             />
 
-            <NewRoleDialog open={newRoleOpen} onOpenChange={setNewRoleOpen} />
+            <RoleFormDialog
+                role={selectedRole}
+                open={formOpen}
+                onOpenChange={setFormOpen}
+            />
         </div>
     );
 }

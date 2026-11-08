@@ -5,6 +5,7 @@ import {
     ArrowUpRight,
     Boxes,
     Clock,
+    MoreHorizontal,
     PackageCheck,
     RotateCcw,
     SlidersHorizontal,
@@ -25,6 +26,12 @@ import {
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu';
 import {
     Table,
     TableBody,
@@ -220,18 +227,31 @@ export default function PharmacyStockIndex({
         },
         {
             key: 'actions',
-            header: 'Aksi',
-            className: 'text-right',
+            header: '',
+            className: 'w-12 text-right',
             render: (batch) => (
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-xs"
-                    onClick={() => setAdjustingBatch(batch)}
-                >
-                    <SlidersHorizontal className="mr-1 size-3" />
-                    Penyesuaian
-                </Button>
+                <div className="flex justify-end">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                className="size-8 p-0"
+                            >
+                                <MoreHorizontal className="size-4" />
+                                <span className="sr-only">Buka menu aksi</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44">
+                            <DropdownMenuItem
+                                onClick={() => setAdjustingBatch(batch)}
+                            >
+                                <SlidersHorizontal className="mr-2 size-3.5" />
+                                Penyesuaian Stok
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             ),
         },
     ];

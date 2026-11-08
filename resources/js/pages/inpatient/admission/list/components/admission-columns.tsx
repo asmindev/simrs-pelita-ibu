@@ -1,10 +1,16 @@
 import { Link } from '@inertiajs/react';
-import { BedDouble, Eye } from 'lucide-react';
+import { BedDouble, Eye, MoreHorizontal } from 'lucide-react';
 
 import type { DataTableColumn } from '@/shared/components/data-table';
 import { formatDateTime } from '@/shared/lib/format';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu';
 
 import type { Admission } from '../../../types/inpatient';
 import { AdmissionStatusBadge } from './admission-status-badge';
@@ -93,19 +99,36 @@ export function getAdmissionColumns(): DataTableColumn<Admission>[] {
         },
         {
             key: 'actions',
-            header: 'Aksi',
+            header: '',
+            className: 'w-12 text-right',
             render: (adm: Admission) => (
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 text-xs"
-                    asChild
-                >
-                    <Link href={route('inpatient.admissions.show', adm.id)}>
-                        <Eye className="mr-1 size-3.5" />
-                        Detail
-                    </Link>
-                </Button>
+                <div className="flex justify-end">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                className="size-8 p-0"
+                            >
+                                <MoreHorizontal className="size-4" />
+                                <span className="sr-only">Buka menu aksi</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40">
+                            <DropdownMenuItem asChild>
+                                <Link
+                                    href={route(
+                                        'inpatient.admissions.show',
+                                        adm.id,
+                                    )}
+                                >
+                                    <Eye className="mr-2 size-3.5" />
+                                    Detail Rawat Inap
+                                </Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             ),
         },
     ];

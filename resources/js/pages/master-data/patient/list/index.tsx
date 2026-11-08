@@ -1,5 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { Edit2, MoreHorizontal, UserX } from 'lucide-react';
 
+import { usePermissions } from '@/shared/hooks/use-permissions';
 import { Can } from '@/shared/components/can';
 import {
     DataTable,
@@ -11,6 +13,12 @@ import { formatDate } from '@/shared/lib/format';
 import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu';
 
 import { PatientFilters } from '../components/patient-filters';
 import type {
@@ -25,6 +33,8 @@ type Props = {
 };
 
 export default function PatientIndex({ patients, filters }: Props) {
+    const { can } = usePermissions();
+
     function deactivate(patient: Patient) {
         if (!window.confirm(`Nonaktifkan pasien ${patient.name}?`)) {
             return;
@@ -85,35 +95,58 @@ export default function PatientIndex({ patients, filters }: Props) {
         {
             key: 'actions',
             header: '',
-            className: 'text-right',
-            render: (patient) => (
-                <div className="flex justify-end gap-2">
-                    <Can permission="master-data.patient.update">
-                        <Button asChild variant="outline" size="sm">
-                            <Link
-                                href={route(
-                                    'master-data.patients.edit',
-                                    patient.id,
+            className: 'w-12 text-right',
+            render: (patient) => {
+                const canUpdate = can('master-data.patient.update');
+                const canDelete = can('master-data.patient.delete');
+
+                if (!canUpdate && (!canDelete || !patient.is_active)) {
+                    return null;
+                }
+
+                return (
+                    <div className="flex justify-end">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="size-8 p-0"
+                                >
+                                    <MoreHorizontal className="size-4" />
+                                    <span className="sr-only">
+                                        Buka menu aksi
+                                    </span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-36">
+                                {canUpdate && (
+                                    <DropdownMenuItem asChild>
+                                        <Link
+                                            href={route(
+                                                'master-data.patients.edit',
+                                                patient.id,
+                                            )}
+                                        >
+                                            <Edit2 className="mr-2 size-3.5" />
+                                            Ubah
+                                        </Link>
+                                    </DropdownMenuItem>
                                 )}
-                            >
-                                Ubah
-                            </Link>
-                        </Button>
-                    </Can>
-                    <Can permission="master-data.patient.delete">
-                        {patient.is_active && (
-                            <Button
-                                type="button"
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => deactivate(patient)}
-                            >
-                                Nonaktifkan
-                            </Button>
-                        )}
-                    </Can>
-                </div>
-            ),
+                                {canDelete && patient.is_active && (
+                                    <DropdownMenuItem
+                                        variant="destructive"
+                                        onClick={() => deactivate(patient)}
+                                    >
+                                        <UserX className="mr-2 size-3.5" />
+                                        Nonaktifkan
+                                    </DropdownMenuItem>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                );
+            },
         },
     ];
 

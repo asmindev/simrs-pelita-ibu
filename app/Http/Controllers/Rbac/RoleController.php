@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Rbac;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Rbac\StoreRoleRequest;
 use App\Http\Requests\Rbac\UpdateRolePermissionsRequest;
+use App\Http\Requests\Rbac\UpdateRoleRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -87,6 +88,28 @@ class RoleController extends Controller
             ->log("Membuat role baru: {$role->name}");
 
         return redirect()->route('rbac.roles.index')->with('success', "Role {$role->name} berhasil dibuat.");
+    }
+
+    public function update(UpdateRoleRequest $request, Role $role): RedirectResponse
+    {
+        if ($role->name === 'super-admin') {
+            return back()->with('error', 'Nama role super-admin tidak dapat diubah.');
+        }
+
+        $validated = $request->validated();
+        $oldName = $role->name;
+
+        $role->update([
+            'name' => $validated['name'],
+        ]);
+
+        activity()
+            ->causedBy($request->user())
+            ->performedOn($role)
+            ->withProperties(['old_name' => $oldName, 'new_name' => $role->name])
+            ->log("Mengubah nama role dari {$oldName} menjadi {$role->name}");
+
+        return redirect()->route('rbac.roles.index')->with('success', "Role {$role->name} berhasil diperbarui.");
     }
 
     public function updatePermissions(UpdateRolePermissionsRequest $request, Role $role): RedirectResponse

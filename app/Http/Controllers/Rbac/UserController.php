@@ -47,7 +47,7 @@ class UserController extends Controller
         ];
 
         $availableRoles = Role::orderBy('name')->get(['id', 'name']);
-        $availableUnits = Unit::orderBy('name')->get(['id', 'name', 'code']);
+        $availableUnits = Unit::orderBy('name')->get(['id', 'name', 'code', 'type']);
 
         return Inertia::render('rbac/user/list/index', [
             'users' => $users,

@@ -94,7 +94,7 @@ export function RoleMatrixDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
+            <DialogContent className="max-h-[90vh] min-w-4xl overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Key className="size-5 text-primary" />
@@ -106,6 +106,20 @@ export function RoleMatrixDialog({
                             : `Atur izin spesifik untuk peran "${role?.name}".`}
                     </DialogDescription>
                 </DialogHeader>
+
+                {isSuperAdmin && (
+                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs text-foreground">
+                        <div className="font-semibold text-primary">
+                            Hak Akses Super Admin Tidak Terbatas
+                        </div>
+                        <p className="mt-0.5 text-[11px] text-muted-foreground">
+                            Role ini secara otomatis mem-bypass semua
+                            pemeriksaan otorisasi di seluruh modul backend dan
+                            frontend. Seluruh izin di bawah otomatis aktif tanpa
+                            perlu disimpan manual.
+                        </p>
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-4">

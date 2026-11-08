@@ -1,9 +1,15 @@
 import { Link } from '@inertiajs/react';
-import { Eye } from 'lucide-react';
+import { Eye, MoreHorizontal } from 'lucide-react';
 
 import type { DataTableColumn } from '@/shared/components/data-table';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu';
 
 import type { Encounter } from '../../../types/registration';
 import { EncounterStatusBadge } from './encounter-status-badge';
@@ -78,16 +84,35 @@ export function getEncounterColumns(): DataTableColumn<Encounter>[] {
         {
             key: 'actions',
             header: '',
-            className: 'w-20 text-right',
+            className: 'w-12 text-right',
             render: (encounter) => (
-                <Button asChild size="icon" variant="ghost">
-                    <Link
-                        href={route('registration.visits.show', encounter.id)}
-                        aria-label="Detail Kunjungan"
-                    >
-                        <Eye className="size-4" />
-                    </Link>
-                </Button>
+                <div className="flex justify-end">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                className="size-8 p-0"
+                            >
+                                <MoreHorizontal className="size-4" />
+                                <span className="sr-only">Buka menu aksi</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40">
+                            <DropdownMenuItem asChild>
+                                <Link
+                                    href={route(
+                                        'registration.visits.show',
+                                        encounter.id,
+                                    )}
+                                >
+                                    <Eye className="mr-2 size-3.5" />
+                                    Detail Kunjungan
+                                </Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             ),
         },
     ];

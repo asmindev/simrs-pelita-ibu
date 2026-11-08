@@ -1,10 +1,16 @@
 import { Link } from '@inertiajs/react';
-import { Eye } from 'lucide-react';
+import { Eye, MoreHorizontal } from 'lucide-react';
 
 import type { DataTableColumn } from '@/shared/components/data-table';
 import { formatDate } from '@/shared/lib/format';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu';
 
 import type { DiagnosticOrder } from '../../../types/diagnostics';
 import {
@@ -75,20 +81,36 @@ export function getDiagnosticOrderColumns(): DataTableColumn<DiagnosticOrder>[] 
         },
         {
             key: 'actions',
-            header: 'Aksi',
-            className: 'text-right',
+            header: '',
+            className: 'w-12 text-right',
             render: (order) => (
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-xs"
-                    asChild
-                >
-                    <Link href={route('diagnostics.orders.show', order.id)}>
-                        <Eye className="mr-1 size-3" />
-                        Detail & Hasil
-                    </Link>
-                </Button>
+                <div className="flex justify-end">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                className="size-8 p-0"
+                            >
+                                <MoreHorizontal className="size-4" />
+                                <span className="sr-only">Buka menu aksi</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40">
+                            <DropdownMenuItem asChild>
+                                <Link
+                                    href={route(
+                                        'diagnostics.orders.show',
+                                        order.id,
+                                    )}
+                                >
+                                    <Eye className="mr-2 size-3.5" />
+                                    Detail & Input Hasil
+                                </Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             ),
         },
     ];

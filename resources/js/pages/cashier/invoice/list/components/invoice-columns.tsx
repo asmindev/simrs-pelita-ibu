@@ -1,10 +1,16 @@
 import { Link } from '@inertiajs/react';
-import { Eye, Wallet } from 'lucide-react';
+import { Eye, MoreHorizontal, Wallet } from 'lucide-react';
 
 import type { DataTableColumn } from '@/shared/components/data-table';
 import { formatCurrency, formatDate } from '@/shared/lib/format';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu';
 
 import type { Invoice } from '../../../types/cashier';
 import { InvoiceStatusBadge } from '../../components/invoice-status-badge';
@@ -87,32 +93,43 @@ export function getInvoiceColumns({
         {
             key: 'actions',
             header: '',
-            className: 'w-[140px] text-right',
+            className: 'w-12 text-right',
             render: (invoice) => (
-                <div className="flex items-center justify-end gap-1">
-                    {invoice.status !== 'paid' &&
-                        invoice.status !== 'voided' && (
+                <div className="flex justify-end">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
                             <Button
                                 size="sm"
-                                variant="default"
-                                className="h-7 text-xs"
-                                onClick={() => onPay(invoice)}
+                                variant="ghost"
+                                className="size-8 p-0"
                             >
-                                <Wallet className="mr-1 size-3.5" />
-                                Bayar
+                                <MoreHorizontal className="size-4" />
+                                <span className="sr-only">Buka menu aksi</span>
                             </Button>
-                        )}
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-xs"
-                        asChild
-                    >
-                        <Link href={route('cashier.invoices.show', invoice.id)}>
-                            <Eye className="mr-1 size-3.5" />
-                            Detail
-                        </Link>
-                    </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40">
+                            {invoice.status !== 'paid' &&
+                                invoice.status !== 'voided' && (
+                                    <DropdownMenuItem
+                                        onClick={() => onPay(invoice)}
+                                    >
+                                        <Wallet className="mr-2 size-3.5" />
+                                        Bayar Tagihan
+                                    </DropdownMenuItem>
+                                )}
+                            <DropdownMenuItem asChild>
+                                <Link
+                                    href={route(
+                                        'cashier.invoices.show',
+                                        invoice.id,
+                                    )}
+                                >
+                                    <Eye className="mr-2 size-3.5" />
+                                    Lihat Detail
+                                </Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             ),
         },

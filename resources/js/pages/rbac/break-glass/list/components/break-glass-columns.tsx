@@ -1,10 +1,16 @@
 import { router } from '@inertiajs/react';
-import { Eye, XCircle } from 'lucide-react';
+import { Eye, MoreHorizontal, XCircle } from 'lucide-react';
 
 import type { DataTableColumn } from '@/shared/components/data-table';
 import { formatDateTime } from '@/shared/lib/format';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu';
 
 import type { BreakGlassGrant } from '../../../types/rbac';
 import { BreakGlassStatusBadge } from './break-glass-status-badge';
@@ -70,46 +76,55 @@ export function getBreakGlassColumns({
         {
             key: 'actions',
             header: '',
-            className: 'w-32 text-right',
+            className: 'w-12 text-right',
             render: (grant) => {
                 const isRevoked = Boolean(grant.revoked_at);
                 const isExpired = new Date(grant.expires_at) < new Date();
 
                 return (
-                    <div className="flex items-center justify-end gap-1">
-                        {!isRevoked && !isExpired && (
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-7 text-xs text-destructive hover:bg-destructive/10"
-                                onClick={() => {
-                                    if (
-                                        confirm(
-                                            'Cabut akses break-glass darurat ini sekarang?',
-                                        )
-                                    ) {
-                                        router.post(
-                                            route(
-                                                'rbac.break-glass.revoke',
-                                                grant.id,
-                                            ),
-                                        );
-                                    }
-                                }}
-                                title="Cabut Akses"
-                            >
-                                <XCircle className="size-3.5" />
-                            </Button>
-                        )}
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 text-xs"
-                            onClick={() => onReview(grant)}
-                        >
-                            <Eye className="mr-1 size-3.5" />
-                            Tinjau
-                        </Button>
+                    <div className="flex justify-end">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="size-8 p-0"
+                                >
+                                    <MoreHorizontal className="size-4" />
+                                    <span className="sr-only">Buka menu</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-36">
+                                <DropdownMenuItem
+                                    onClick={() => onReview(grant)}
+                                >
+                                    <Eye className="mr-2 size-3.5" />
+                                    Tinjau Akses
+                                </DropdownMenuItem>
+                                {!isRevoked && !isExpired && (
+                                    <DropdownMenuItem
+                                        variant="destructive"
+                                        onClick={() => {
+                                            if (
+                                                confirm(
+                                                    'Cabut akses break-glass darurat ini sekarang?',
+                                                )
+                                            ) {
+                                                router.post(
+                                                    route(
+                                                        'rbac.break-glass.revoke',
+                                                        grant.id,
+                                                    ),
+                                                );
+                                            }
+                                        }}
+                                    >
+                                        <XCircle className="mr-2 size-3.5" />
+                                        Cabut Akses
+                                    </DropdownMenuItem>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 );
             },

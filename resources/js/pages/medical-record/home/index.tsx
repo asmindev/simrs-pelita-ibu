@@ -4,6 +4,7 @@ import {
     Clock,
     FileText,
     History,
+    MoreHorizontal,
     Stethoscope,
     Users,
 } from 'lucide-react';
@@ -18,6 +19,12 @@ import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu';
 
 import type {
     EncounterWithEmr,
@@ -177,37 +184,47 @@ export default function MedicalRecordIndex({
         {
             key: 'actions',
             header: '',
-            className: 'text-right',
+            className: 'w-12 text-right',
             render: (item) => (
-                <div className="flex items-center justify-end gap-1.5">
-                    {item.patient_id && (
-                        <Button
-                            asChild
-                            size="sm"
-                            variant="ghost"
-                            title="Lihat Riwayat Rekam Medis Pasien"
-                        >
-                            <Link
-                                href={route(
-                                    'medical-record.patient.history',
-                                    item.patient_id,
-                                )}
+                <div className="flex justify-end">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                className="size-8 p-0"
                             >
-                                <History className="size-4" />
-                            </Link>
-                        </Button>
-                    )}
-                    <Button asChild size="sm">
-                        <Link
-                            href={route(
-                                'medical-record.encounters.show',
-                                item.id,
+                                <MoreHorizontal className="size-4" />
+                                <span className="sr-only">Buka menu aksi</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44">
+                            <DropdownMenuItem asChild>
+                                <Link
+                                    href={route(
+                                        'medical-record.encounters.show',
+                                        item.id,
+                                    )}
+                                >
+                                    <Stethoscope className="mr-2 size-3.5" />
+                                    Buka EMR
+                                </Link>
+                            </DropdownMenuItem>
+                            {item.patient_id && (
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        href={route(
+                                            'medical-record.patient.history',
+                                            item.patient_id,
+                                        )}
+                                    >
+                                        <History className="mr-2 size-3.5" />
+                                        Riwayat Rekam Medis
+                                    </Link>
+                                </DropdownMenuItem>
                             )}
-                        >
-                            <Stethoscope className="mr-1.5 size-4" />
-                            Buka EMR
-                        </Link>
-                    </Button>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             ),
         },

@@ -4,6 +4,7 @@ use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\Audit\ActivityLogController;
 use App\Http\Controllers\Audit\PatientAccessLogController;
 use App\Http\Controllers\BedController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DiagnosticOrderController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\DoctorScheduleController;
@@ -35,7 +36,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome/home/index')->name('home');
 
-Route::inertia('/dashboard', 'dashboard/index')
+Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
@@ -522,6 +523,10 @@ Route::middleware(['auth', 'verified'])
             Route::post('/', [RoleController::class, 'store'])
                 ->middleware('permission:rbac.role.assign')
                 ->name('store');
+
+            Route::put('{role}', [RoleController::class, 'update'])
+                ->middleware('permission:rbac.role.assign')
+                ->name('update');
 
             Route::put('{role}/permissions', [RoleController::class, 'updatePermissions'])
                 ->middleware('permission:rbac.role.assign')

@@ -1,16 +1,24 @@
-import { ShieldCheck, Users } from 'lucide-react';
+import { Edit2, MoreHorizontal, ShieldCheck, Users } from 'lucide-react';
 
 import type { DataTableColumn } from '@/shared/components/data-table';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu';
 
 import type { Role } from '../../../types/rbac';
 
 type ColumnOptions = {
+    onEdit: (role: Role) => void;
     onConfigurePermissions: (role: Role) => void;
 };
 
 export function getRoleColumns({
+    onEdit,
     onConfigurePermissions,
 }: ColumnOptions): DataTableColumn<Role>[] {
     return [
@@ -65,17 +73,36 @@ export function getRoleColumns({
         {
             key: 'actions',
             header: '',
-            className: 'w-36 text-right',
+            className: 'w-12 text-right',
             render: (role) => (
-                <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-7 text-xs"
-                    onClick={() => onConfigurePermissions(role)}
-                >
-                    <ShieldCheck className="mr-1.5 size-3.5 text-primary" />
-                    Atur Izin
-                </Button>
+                <div className="flex justify-end">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                className="size-8 p-0"
+                            >
+                                <MoreHorizontal className="size-4" />
+                                <span className="sr-only">Buka menu aksi</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40">
+                            {role.name !== 'super-admin' && (
+                                <DropdownMenuItem onClick={() => onEdit(role)}>
+                                    <Edit2 className="mr-2 size-3.5" />
+                                    Edit Nama
+                                </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem
+                                onClick={() => onConfigurePermissions(role)}
+                            >
+                                <ShieldCheck className="mr-2 size-3.5" />
+                                Atur Izin Akses
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             ),
         },
     ];

@@ -1,11 +1,17 @@
 import { router } from '@inertiajs/react';
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit2, MoreHorizontal, Trash2 } from 'lucide-react';
 
 import type { DataTableColumn } from '@/shared/components/data-table';
 import { formatDate } from '@/shared/lib/format';
 import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu';
 
 import type { User } from '../../../types/rbac';
 import { UserRoleBadge } from './user-status-badge';
@@ -92,37 +98,47 @@ export function getUserColumns({
         {
             key: 'actions',
             header: '',
-            className: 'w-24 text-right',
+            className: 'w-12 text-right',
             render: (user) => (
-                <div className="flex items-center justify-end gap-1">
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        className="size-7 p-0"
-                        onClick={() => onEdit(user)}
-                        title="Edit User"
-                    >
-                        <Edit2 className="size-3.5" />
-                    </Button>
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        className="size-7 p-0 text-destructive hover:bg-destructive/10"
-                        onClick={() => {
-                            if (
-                                confirm(
-                                    `Hapus user ${user.name}? Tindakan ini tidak dapat dibatalkan.`,
-                                )
-                            ) {
-                                router.delete(
-                                    route('rbac.users.destroy', user.id),
-                                );
-                            }
-                        }}
-                        title="Hapus User"
-                    >
-                        <Trash2 className="size-3.5" />
-                    </Button>
+                <div className="flex justify-end">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                className="size-8 p-0"
+                            >
+                                <MoreHorizontal className="size-4" />
+                                <span className="sr-only">Buka menu aksi</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-36">
+                            <DropdownMenuItem onClick={() => onEdit(user)}>
+                                <Edit2 className="mr-2 size-3.5" />
+                                Edit User
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                variant="destructive"
+                                onClick={() => {
+                                    if (
+                                        confirm(
+                                            `Hapus user ${user.name}? Tindakan ini tidak dapat dibatalkan.`,
+                                        )
+                                    ) {
+                                        router.delete(
+                                            route(
+                                                'rbac.users.destroy',
+                                                user.id,
+                                            ),
+                                        );
+                                    }
+                                }}
+                            >
+                                <Trash2 className="mr-2 size-3.5" />
+                                Hapus User
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             ),
         },

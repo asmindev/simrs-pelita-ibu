@@ -1,6 +1,7 @@
 import { useForm } from '@inertiajs/react';
-import { Key, Loader2 } from 'lucide-react';
+import { Edit2, Key, Loader2 } from 'lucide-react';
 import type { FormEvent } from 'react';
+import { useEffect } from 'react';
 
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
@@ -15,24 +16,47 @@ import {
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
 
+import type { Role } from '../../../types/rbac';
+
 type Props = {
+    role?: Role | null;
     open: boolean;
     onOpenChange: (open: boolean) => void;
 };
 
-export function NewRoleDialog({ open, onOpenChange }: Props) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
+export function RoleFormDialog({ role, open, onOpenChange }: Props) {
+    const isEdit = Boolean(role);
+
+    const { data, setData, post, put, processing, errors, reset } = useForm({
+        name: role?.name || '',
     });
+
+    useEffect(() => {
+        if (open) {
+            setData({
+                name: role?.name || '',
+            });
+        }
+    }, [role, open]);
 
     function handleSubmit(e: FormEvent) {
         e.preventDefault();
-        post(route('rbac.roles.store'), {
-            onSuccess: () => {
-                onOpenChange(false);
-                reset();
-            },
-        });
+
+        if (isEdit && role) {
+            put(route('rbac.roles.update', role.id), {
+                onSuccess: () => {
+                    onOpenChange(false);
+                    reset();
+                },
+            });
+        } else {
+            post(route('rbac.roles.store'), {
+                onSuccess: () => {
+                    onOpenChange(false);
+                    reset();
+                },
+            });
+        }
     }
 
     return (
@@ -40,12 +64,22 @@ export function NewRoleDialog({ open, onOpenChange }: Props) {
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <Key className="size-5 text-primary" />
-                        Tambah Peran (Role) Baru
+                        {isEdit ? (
+                            <>
+                                <Edit2 className="size-5 text-primary" />
+                                Edit Nama Peran (Role)
+                            </>
+                        ) : (
+                            <>
+                                <Key className="size-5 text-primary" />
+                                Tambah Peran (Role) Baru
+                            </>
+                        )}
                     </DialogTitle>
                     <DialogDescription>
-                        Buat kategori hak akses baru (gunakan huruf kecil dan
-                        tanda hubung, contoh: billing-admin).
+                        {isEdit
+                            ? `Ubah nama pengenal peran "${role?.name}".`
+                            : 'Buat kategori hak akses baru (gunakan huruf kecil dan tanda hubung, contoh: billing-admin).'}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -63,6 +97,7 @@ export function NewRoleDialog({ open, onOpenChange }: Props) {
                             }
                             placeholder="contoh: radiologist-assistant"
                             className="bg-background text-xs"
+                            disabled={role?.name === 'super-admin'}
                             required
                         />
                         {errors.name && (
@@ -80,12 +115,19 @@ export function NewRoleDialog({ open, onOpenChange }: Props) {
                         >
                             Batal
                         </Button>
-                        <Button type="submit" disabled={processing}>
+                        <Button
+                            type="submit"
+                            disabled={
+                                processing || role?.name === 'super-admin'
+                            }
+                        >
                             {processing ? (
                                 <>
                                     <Loader2 className="mr-1.5 size-4 animate-spin" />
                                     Menyimpan...
                                 </>
+                            ) : isEdit ? (
+                                'Simpan Perubahan'
                             ) : (
                                 'Buat Role'
                             )}

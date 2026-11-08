@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Plus } from 'lucide-react';
+import { Edit2, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 
+import { usePermissions } from '@/shared/hooks/use-permissions';
 import { Can } from '@/shared/components/can';
 import {
     DataTable,
@@ -12,6 +13,12 @@ import { formatCurrency } from '@/shared/lib/format';
 import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu';
 
 import { DrugFilters } from '../components/drug-filters';
 import type {
@@ -28,6 +35,8 @@ type Props = {
 };
 
 export default function DrugIndex({ drugs, categories, filters }: Props) {
+    const { can } = usePermissions();
+
     function handleDelete(drug: Drug) {
         if (!window.confirm(`Hapus obat ${drug.name}?`)) {
             return;
@@ -112,27 +121,53 @@ export default function DrugIndex({ drugs, categories, filters }: Props) {
         {
             key: 'actions',
             header: '',
-            className: 'text-right',
-            render: (drug) => (
-                <Can permission="master-data.drug.manage">
-                    <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm" asChild>
-                            <Link
-                                href={route('master-data.drugs.edit', drug.id)}
-                            >
-                                Edit
-                            </Link>
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleDelete(drug)}
-                        >
-                            Hapus
-                        </Button>
+            className: 'w-12 text-right',
+            render: (drug) => {
+                const canManage = can('master-data.drug.manage');
+
+                if (!canManage) {
+                    return null;
+                }
+
+                return (
+                    <div className="flex justify-end">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="size-8 p-0"
+                                >
+                                    <MoreHorizontal className="size-4" />
+                                    <span className="sr-only">
+                                        Buka menu aksi
+                                    </span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-36">
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        href={route(
+                                            'master-data.drugs.edit',
+                                            drug.id,
+                                        )}
+                                    >
+                                        <Edit2 className="mr-2 size-3.5" />
+                                        Ubah
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    variant="destructive"
+                                    onClick={() => handleDelete(drug)}
+                                >
+                                    <Trash2 className="mr-2 size-3.5" />
+                                    Hapus
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
-                </Can>
-            ),
+                );
+            },
         },
     ];
 
