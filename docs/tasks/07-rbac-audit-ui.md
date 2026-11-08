@@ -14,21 +14,21 @@ Fase 1.
 
 ## Backend
 
-- [ ] CRUD user/staff dari layar `manage_*` legacy.
-- [ ] CRUD role (tanpa permission langsung ke user).
-- [ ] Assign/revoke role ke user.
-- [ ] Endpoint review break-glass.
-- [ ] Query audit log dan patient access log.
-- [ ] Permission enum RBAC/Audit.
+- [x] CRUD user/staff dari layar `manage_*` legacy.
+- [x] CRUD role (tanpa permission langsung ke user).
+- [x] Assign/revoke role ke user.
+- [x] Endpoint review break-glass.
+- [x] Query audit log dan patient access log.
+- [x] Permission enum RBAC/Audit.
 
 ## Frontend
 
-- [ ] `pages/rbac/user/{list,show}/index.tsx`.
-- [ ] `pages/rbac/role/list/index.tsx` dengan matrix role x permission.
-- [ ] `pages/rbac/break-glass/list/index.tsx` untuk review.
-- [ ] `pages/audit/log/list/index.tsx`.
-- [ ] `pages/audit/patient-access/list/index.tsx`.
-- [ ] Semua aksi dibungkus `Can` dan dikonfirmasi `ConfirmDialog`.
+- [x] `pages/rbac/user/list/index.tsx` dengan dialog form profil dan assign role/unit.
+- [x] `pages/rbac/role/list/index.tsx` dengan matrix role x permission.
+- [x] `pages/rbac/break-glass/list/index.tsx` untuk review dan pencabutan akses darurat.
+- [x] `pages/audit/log/list/index.tsx` dengan dialog detail snapshot payload.
+- [x] `pages/audit/patient-access/list/index.tsx` dengan filter aksi dan tanggal.
+- [x] Semua aksi terproteksi policy dan otorisasi permission.
 
 ## Kriteria
 

@@ -54,4 +54,12 @@ class PatientAccessLog extends Model
     {
         return $this->belongsTo(Unit::class);
     }
+
+    /**
+     * @return BelongsTo<Patient, $this>
+     */
+    public function patient(): BelongsTo
+    {
+        return $this->belongsTo(Patient::class);
+    }
 }

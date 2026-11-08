@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Policies;
+
+use App\Enums\Permissions\AuditPermission;
+use App\Models\User;
+use Spatie\Activitylog\Models\Activity;
+
+class ActivityLogPolicy
+{
+    public function viewAny(User $user): bool
+    {
+        return $user->can(AuditPermission::LogView->value);
+    }
+
+    public function view(User $user, Activity $activity): bool
+    {
+        return $user->can(AuditPermission::LogView->value);
+    }
+}

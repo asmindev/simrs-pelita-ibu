@@ -510,6 +510,50 @@ declare module 'ziggy-js' {
             "binding": "id"
         }
     ],
+    "rbac.index": [],
+    "rbac.users.index": [],
+    "rbac.users.store": [],
+    "rbac.users.update": [
+        {
+            "name": "user",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "rbac.users.destroy": [
+        {
+            "name": "user",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "rbac.roles.index": [],
+    "rbac.roles.store": [],
+    "rbac.roles.permissions.update": [
+        {
+            "name": "role",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "rbac.break-glass.index": [],
+    "rbac.break-glass.review": [
+        {
+            "name": "grant",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "rbac.break-glass.revoke": [
+        {
+            "name": "grant",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "audit.index": [],
+    "audit.logs.index": [],
+    "audit.patient-access.index": [],
     "storage.local": [
         {
             "name": "path",

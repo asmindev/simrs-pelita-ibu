@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AdmissionController;
+use App\Http\Controllers\Audit\ActivityLogController;
+use App\Http\Controllers\Audit\PatientAccessLogController;
 use App\Http\Controllers\BedController;
 use App\Http\Controllers\DiagnosticOrderController;
 use App\Http\Controllers\DoctorController;
@@ -21,6 +23,9 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PharmacyStockController;
 use App\Http\Controllers\PrescriptionController;
+use App\Http\Controllers\Rbac\BreakGlassController;
+use App\Http\Controllers\Rbac\RoleController;
+use App\Http\Controllers\Rbac\UserController;
 use App\Http\Controllers\Registration\EncounterController;
 use App\Http\Controllers\Registration\QueueController;
 use App\Http\Controllers\Registration\RegistrationController;
@@ -482,5 +487,77 @@ Route::middleware(['auth', 'verified'])
             Route::post('{admission}/daily-notes', [AdmissionController::class, 'addDailyNote'])
                 ->middleware('permission:inpatient.daily-note.update')
                 ->name('daily-notes.store');
+        });
+    });
+
+Route::middleware(['auth', 'verified'])
+    ->prefix('rbac')
+    ->name('rbac.')
+    ->group(function (): void {
+        Route::redirect('/', '/rbac/users')->name('index');
+
+        Route::prefix('users')->name('users.')->group(function (): void {
+            Route::get('/', [UserController::class, 'index'])
+                ->middleware('permission:rbac.user.view')
+                ->name('index');
+
+            Route::post('/', [UserController::class, 'store'])
+                ->middleware('permission:rbac.user.manage')
+                ->name('store');
+
+            Route::put('{user}', [UserController::class, 'update'])
+                ->middleware('permission:rbac.user.manage')
+                ->name('update');
+
+            Route::delete('{user}', [UserController::class, 'destroy'])
+                ->middleware('permission:rbac.user.manage')
+                ->name('destroy');
+        });
+
+        Route::prefix('roles')->name('roles.')->group(function (): void {
+            Route::get('/', [RoleController::class, 'index'])
+                ->middleware('permission:rbac.role.view')
+                ->name('index');
+
+            Route::post('/', [RoleController::class, 'store'])
+                ->middleware('permission:rbac.role.assign')
+                ->name('store');
+
+            Route::put('{role}/permissions', [RoleController::class, 'updatePermissions'])
+                ->middleware('permission:rbac.role.assign')
+                ->name('permissions.update');
+        });
+
+        Route::prefix('break-glass')->name('break-glass.')->group(function (): void {
+            Route::get('/', [BreakGlassController::class, 'index'])
+                ->middleware('permission:rbac.break-glass.review')
+                ->name('index');
+
+            Route::post('{grant}/review', [BreakGlassController::class, 'review'])
+                ->middleware('permission:rbac.break-glass.review')
+                ->name('review');
+
+            Route::post('{grant}/revoke', [BreakGlassController::class, 'revoke'])
+                ->middleware('permission:rbac.break-glass.review')
+                ->name('revoke');
+        });
+    });
+
+Route::middleware(['auth', 'verified'])
+    ->prefix('audit')
+    ->name('audit.')
+    ->group(function (): void {
+        Route::redirect('/', '/audit/logs')->name('index');
+
+        Route::prefix('logs')->name('logs.')->group(function (): void {
+            Route::get('/', [ActivityLogController::class, 'index'])
+                ->middleware('permission:audit.log.view')
+                ->name('index');
+        });
+
+        Route::prefix('patient-access')->name('patient-access.')->group(function (): void {
+            Route::get('/', [PatientAccessLogController::class, 'index'])
+                ->middleware('permission:audit.patient-access.view')
+                ->name('index');
         });
     });

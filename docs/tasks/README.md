@@ -11,7 +11,7 @@ Satu fase harus selesai dan terverifikasi sebelum fase berikutnya dimulai.
 | 4    | [04-rekam-medis.md](./04-rekam-medis.md)                   | EMR, draft, field sensitif        | Selesai  |
 | 5    | [05-farmasi-kasir.md](./05-farmasi-kasir.md)               | Resep, stok, invoice, pembayaran  | Selesai  |
 | 6    | [06-penunjang-rawat-inap.md](./06-penunjang-rawat-inap.md) | Lab/radiologi, admisi, bed        | Selesai  |
-| 7    | [07-rbac-audit-ui.md](./07-rbac-audit-ui.md)               | UI RBAC dan audit                 | Belum    |
+| 7    | [07-rbac-audit-ui.md](./07-rbac-audit-ui.md)               | UI RBAC dan audit                 | Selesai  |
 
 ## Legacy parity
 

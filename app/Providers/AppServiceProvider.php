@@ -20,6 +20,7 @@ use App\Models\Queue;
 use App\Models\SensitiveNote;
 use App\Models\Unit;
 use App\Models\User;
+use App\Policies\ActivityLogPolicy;
 use App\Policies\AdmissionPolicy;
 use App\Policies\AssessmentPolicy;
 use App\Policies\BedPolicy;
@@ -34,14 +35,18 @@ use App\Policies\PatientAccessLogPolicy;
 use App\Policies\PatientPolicy;
 use App\Policies\PrescriptionPolicy;
 use App\Policies\QueuePolicy;
+use App\Policies\RolePolicy;
 use App\Policies\SensitiveNotePolicy;
 use App\Policies\UnitPolicy;
+use App\Policies\UserPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Spatie\Activitylog\Models\Activity;
+use Spatie\Permission\Models\Role;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -83,6 +88,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(DiagnosticOrder::class, DiagnosticOrderPolicy::class);
         Gate::policy(Bed::class, BedPolicy::class);
         Gate::policy(Admission::class, AdmissionPolicy::class);
+        Gate::policy(User::class, UserPolicy::class);
+        Gate::policy(Role::class, RolePolicy::class);
+        Gate::policy(Activity::class, ActivityLogPolicy::class);
 
         Gate::before(function (?User $user): ?bool {
             return $user?->hasRole(RoleName::SuperAdmin->value) ? true : null;
