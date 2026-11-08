@@ -368,6 +368,91 @@ declare module 'ziggy-js' {
             "binding": "id"
         }
     ],
+    "pharmacy.index": [],
+    "pharmacy.prescriptions.index": [],
+    "pharmacy.prescriptions.store": [],
+    "pharmacy.prescriptions.show": [
+        {
+            "name": "prescription",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "pharmacy.prescriptions.verify": [
+        {
+            "name": "prescription",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "pharmacy.prescriptions.dispense": [
+        {
+            "name": "prescription",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "pharmacy.prescriptions.cancel": [
+        {
+            "name": "prescription",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "pharmacy.prescriptions.return": [
+        {
+            "name": "prescription",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "pharmacy.stock.index": [],
+    "pharmacy.stock.batches.store": [],
+    "pharmacy.stock.batches.adjust": [
+        {
+            "name": "batch",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "cashier.index": [],
+    "cashier.invoices.index": [],
+    "cashier.invoices.store": [],
+    "cashier.invoices.show": [
+        {
+            "name": "invoice",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "cashier.invoices.finalize": [
+        {
+            "name": "invoice",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "cashier.invoices.void": [
+        {
+            "name": "invoice",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "cashier.invoices.payments.store": [
+        {
+            "name": "invoice",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "cashier.invoices.refunds.store": [
+        {
+            "name": "invoice",
+            "required": true,
+            "binding": "id"
+        }
+    ],
     "storage.local": [
         {
             "name": "path",

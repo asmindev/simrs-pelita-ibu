@@ -7,9 +7,12 @@ use App\Models\Assessment;
 use App\Models\BreakGlassGrant;
 use App\Models\ClinicalReport;
 use App\Models\Doctor;
+use App\Models\DrugBatch;
 use App\Models\Encounter;
+use App\Models\Invoice;
 use App\Models\Patient;
 use App\Models\PatientAccessLog;
+use App\Models\Prescription;
 use App\Models\Queue;
 use App\Models\SensitiveNote;
 use App\Models\Unit;
@@ -18,9 +21,12 @@ use App\Policies\AssessmentPolicy;
 use App\Policies\BreakGlassGrantPolicy;
 use App\Policies\ClinicalReportPolicy;
 use App\Policies\DoctorPolicy;
+use App\Policies\DrugBatchPolicy;
 use App\Policies\EncounterPolicy;
+use App\Policies\InvoicePolicy;
 use App\Policies\PatientAccessLogPolicy;
 use App\Policies\PatientPolicy;
+use App\Policies\PrescriptionPolicy;
 use App\Policies\QueuePolicy;
 use App\Policies\SensitiveNotePolicy;
 use App\Policies\UnitPolicy;
@@ -65,6 +71,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Assessment::class, AssessmentPolicy::class);
         Gate::policy(SensitiveNote::class, SensitiveNotePolicy::class);
         Gate::policy(ClinicalReport::class, ClinicalReportPolicy::class);
+        Gate::policy(Prescription::class, PrescriptionPolicy::class);
+        Gate::policy(DrugBatch::class, DrugBatchPolicy::class);
+        Gate::policy(Invoice::class, InvoicePolicy::class);
 
         Gate::before(function (?User $user): ?bool {
             return $user?->hasRole(RoleName::SuperAdmin->value) ? true : null;

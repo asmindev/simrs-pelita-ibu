@@ -1,0 +1,438 @@
+import { Head } from '@inertiajs/react';
+import {
+    AlertTriangle,
+    ArrowDownRight,
+    ArrowUpRight,
+    Boxes,
+    Clock,
+    PackageCheck,
+    RotateCcw,
+    SlidersHorizontal,
+} from 'lucide-react';
+import { useState } from 'react';
+
+import {
+    DataTable,
+    type DataTableColumn,
+} from '@/shared/components/data-table';
+import { PageHeader } from '@/shared/components/page-header';
+import { Pagination } from '@/shared/components/pagination';
+import {
+    formatCurrency,
+    formatDate,
+    formatDateTime,
+} from '@/shared/lib/format';
+import { Badge } from '@/shared/ui/badge';
+import { Button } from '@/shared/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/shared/ui/table';
+
+import type {
+    DrugBatch,
+    DrugInfo,
+    PaginatedData,
+    StockMovement,
+} from '../types/pharmacy';
+import { NewBatchDialog } from './components/new-batch-dialog';
+import { StockAdjustDialog } from './components/stock-adjust-dialog';
+import { StockFilters } from './components/stock-filters';
+
+type Props = {
+    batches: PaginatedData<DrugBatch>;
+    drugs: DrugInfo[];
+    recentMovements: StockMovement[];
+    filters: {
+        search: string;
+        status: string;
+    };
+    statistics: {
+        total_batches: number;
+        active_stock: number;
+        expiring_soon: number;
+        expired: number;
+    };
+};
+
+function getExpiryBadge(expiryDate: string) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const exp = new Date(expiryDate);
+    exp.setHours(0, 0, 0, 0);
+
+    const diffDays = Math.ceil(
+        (exp.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    if (diffDays < 0) {
+        return (
+            <Badge variant="destructive" className="text-xs">
+                Kadaluwarsa ({formatDate(expiryDate)})
+            </Badge>
+        );
+    }
+
+    if (diffDays <= 30) {
+        return (
+            <Badge
+                variant="outline"
+                className="border-destructive/50 text-xs text-destructive"
+            >
+                Mendekati ED: {diffDays} hr ({formatDate(expiryDate)})
+            </Badge>
+        );
+    }
+
+    return (
+        <span className="font-mono text-xs text-muted-foreground">
+            {formatDate(expiryDate)}
+        </span>
+    );
+}
+
+function getMovementTypeBadge(type: StockMovement['type']) {
+    switch (type) {
+        case 'in':
+            return (
+                <Badge variant="outline" className="text-xs">
+                    <ArrowDownRight className="mr-1 size-3 text-primary" />
+                    Masuk
+                </Badge>
+            );
+        case 'out':
+        case 'dispensing':
+            return (
+                <Badge variant="secondary" className="text-xs">
+                    <ArrowUpRight className="mr-1 size-3 text-muted-foreground" />
+                    Keluar / Resep
+                </Badge>
+            );
+        case 'adjustment':
+        case 'opname':
+            return (
+                <Badge variant="outline" className="text-xs">
+                    <SlidersHorizontal className="mr-1 size-3 text-muted-foreground" />
+                    Opname
+                </Badge>
+            );
+        case 'return':
+            return (
+                <Badge variant="default" className="text-xs">
+                    <RotateCcw className="mr-1 size-3" />
+                    Retur
+                </Badge>
+            );
+    }
+}
+
+export default function PharmacyStockIndex({
+    batches,
+    drugs,
+    recentMovements,
+    filters,
+    statistics,
+}: Props) {
+    const [isAddBatchOpen, setIsAddBatchOpen] = useState(false);
+    const [adjustingBatch, setAdjustingBatch] = useState<DrugBatch | null>(
+        null,
+    );
+
+    const columns: DataTableColumn<DrugBatch>[] = [
+        {
+            key: 'batch_drug',
+            header: 'No. Batch & Obat',
+            render: (batch) => (
+                <div className="space-y-0.5">
+                    <span className="font-mono text-xs font-semibold text-foreground">
+                        {batch.batch_number}
+                    </span>
+                    <div className="text-xs font-medium text-foreground">
+                        {batch.drug?.name}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">
+                        {batch.drug?.code} &bull; {batch.drug?.form}
+                    </div>
+                </div>
+            ),
+        },
+        {
+            key: 'expiry_date',
+            header: 'Kedaluwarsa (FEFO)',
+            render: (batch) => getExpiryBadge(batch.expiry_date),
+        },
+        {
+            key: 'current_quantity',
+            header: 'Sisa Stok',
+            render: (batch) => (
+                <div className="space-y-0.5">
+                    <div className="text-xs font-bold text-foreground">
+                        {batch.current_quantity}{' '}
+                        <span className="font-normal text-muted-foreground">
+                            {batch.drug?.unit_of_measure}
+                        </span>
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">
+                        Awal: {batch.initial_quantity}
+                    </div>
+                </div>
+            ),
+        },
+        {
+            key: 'buy_price',
+            header: 'Harga Beli',
+            render: (batch) => (
+                <span className="text-xs text-muted-foreground">
+                    {formatCurrency(batch.buy_price)}
+                </span>
+            ),
+        },
+        {
+            key: 'status',
+            header: 'Status',
+            render: (batch) => {
+                const isExpired = new Date(batch.expiry_date) < new Date();
+                if (isExpired) {
+                    return (
+                        <Badge variant="destructive" className="text-xs">
+                            Expired
+                        </Badge>
+                    );
+                }
+                if (batch.current_quantity <= 0) {
+                    return (
+                        <Badge variant="secondary" className="text-xs">
+                            Habis
+                        </Badge>
+                    );
+                }
+                return (
+                    <Badge variant="default" className="text-xs">
+                        Aktif / FEFO
+                    </Badge>
+                );
+            },
+        },
+        {
+            key: 'actions',
+            header: 'Aksi',
+            className: 'text-right',
+            render: (batch) => (
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setAdjustingBatch(batch)}
+                >
+                    <SlidersHorizontal className="mr-1 size-3" />
+                    Penyesuaian
+                </Button>
+            ),
+        },
+    ];
+
+    return (
+        <div className="space-y-6 p-6">
+            <Head title="Inventaris Stok & Batch Obat — SIMRS" />
+
+            <PageHeader
+                title="Inventaris & Batch Farmasi"
+                description="Pelacakan batch obat berbasis FEFO (First Expired, First Out) dan penyesuaian stok opname."
+            />
+
+            {/* Statistik Banner */}
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-xs font-medium text-muted-foreground">
+                            Total Batch Aktif
+                        </CardTitle>
+                        <Boxes className="size-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">
+                            {statistics.total_batches}
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">
+                            Batch obat terdaftar
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-xs font-medium text-muted-foreground">
+                            Total Stok Fisik
+                        </CardTitle>
+                        <PackageCheck className="size-4 text-primary" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-primary">
+                            {statistics.active_stock}
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">
+                            Akumulasi seluruh batch
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-xs font-medium text-muted-foreground">
+                            Mendekati ED (&le;30 Hari)
+                        </CardTitle>
+                        <Clock className="size-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">
+                            {statistics.expiring_soon}
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">
+                            Prioritas pengeluaran FEFO
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-xs font-medium text-muted-foreground">
+                            Batch Kadaluwarsa
+                        </CardTitle>
+                        <AlertTriangle className="size-4 text-destructive" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-destructive">
+                            {statistics.expired}
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">
+                            Harus dikarantina / dihapus
+                        </p>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Tabel Batch Obat */}
+            <DataTable<DrugBatch>
+                columns={columns}
+                rows={batches.data}
+                rowKey={(batch) => batch.id}
+                empty="Tidak ada batch obat yang sesuai dengan pencarian."
+                toolbar={
+                    <StockFilters
+                        filters={filters}
+                        current={batches.data.length}
+                        total={batches.total}
+                        onAddBatchClick={() => setIsAddBatchOpen(true)}
+                    />
+                }
+                footer={
+                    <Pagination
+                        links={batches.links}
+                        from={batches.from}
+                        to={batches.to}
+                        total={batches.total}
+                    />
+                }
+            />
+
+            {/* Riwayat Mutasi Stok Terbaru */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-sm font-semibold">
+                        Riwayat Mutasi Stok Terbaru (10 Terakhir)
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="text-xs">Waktu</TableHead>
+                                <TableHead className="text-xs">
+                                    Obat & Batch
+                                </TableHead>
+                                <TableHead className="text-xs">Tipe</TableHead>
+                                <TableHead className="text-right text-xs">
+                                    Kuantitas
+                                </TableHead>
+                                <TableHead className="text-right text-xs">
+                                    Saldo Sesudah
+                                </TableHead>
+                                <TableHead className="text-xs">
+                                    Petugas / Keterangan
+                                </TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {recentMovements.length === 0 ? (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={6}
+                                        className="h-24 text-center text-xs text-muted-foreground"
+                                    >
+                                        Belum ada riwayat mutasi stok.
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                recentMovements.map((m) => (
+                                    <TableRow key={m.id}>
+                                        <TableCell className="text-xs text-muted-foreground">
+                                            {formatDateTime(m.created_at)}
+                                        </TableCell>
+                                        <TableCell className="text-xs">
+                                            <span className="font-medium text-foreground">
+                                                {m.drug?.name}
+                                            </span>
+                                            {m.drug_batch?.batch_number && (
+                                                <span className="ml-1.5 font-mono text-muted-foreground">
+                                                    ({m.drug_batch.batch_number}
+                                                    )
+                                                </span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell>
+                                            {getMovementTypeBadge(m.type)}
+                                        </TableCell>
+                                        <TableCell className="text-right font-mono text-xs font-medium">
+                                            {m.quantity}
+                                        </TableCell>
+                                        <TableCell className="text-right font-mono text-xs font-bold">
+                                            {m.balance_after}
+                                        </TableCell>
+                                        <TableCell className="text-xs">
+                                            <div className="font-medium text-foreground">
+                                                {m.user?.name ?? 'Sistem'}
+                                            </div>
+                                            {m.reason && (
+                                                <div className="text-[11px] text-muted-foreground">
+                                                    {m.reason}
+                                                </div>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+
+            {/* Dialogs */}
+            <NewBatchDialog
+                open={isAddBatchOpen}
+                onOpenChange={setIsAddBatchOpen}
+                drugs={drugs}
+            />
+
+            <StockAdjustDialog
+                batch={adjustingBatch}
+                open={adjustingBatch !== null}
+                onOpenChange={(open) => !open && setAdjustingBatch(null)}
+            />
+        </div>
+    );
+}

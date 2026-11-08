@@ -5,6 +5,7 @@ use App\Http\Controllers\DoctorScheduleController;
 use App\Http\Controllers\DrugCategoryController;
 use App\Http\Controllers\DrugController;
 use App\Http\Controllers\GuarantorController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MedicalRecord\AssessmentController;
 use App\Http\Controllers\MedicalRecord\ClinicalReportController;
 use App\Http\Controllers\MedicalRecord\DiagnosisController;
@@ -14,6 +15,9 @@ use App\Http\Controllers\MedicalRecord\MedicalRecordController;
 use App\Http\Controllers\MedicalRecord\ProcedureController;
 use App\Http\Controllers\MedicalRecord\SensitiveNoteController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PharmacyStockController;
+use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\Registration\EncounterController;
 use App\Http\Controllers\Registration\QueueController;
 use App\Http\Controllers\Registration\RegistrationController;
@@ -315,5 +319,93 @@ Route::middleware(['auth', 'verified'])
             Route::get('{clinicalReport}', [ClinicalReportController::class, 'show'])
                 ->middleware('permission:medical-record.report.view')
                 ->name('show');
+        });
+    });
+
+Route::middleware(['auth', 'verified'])
+    ->prefix('pharmacy')
+    ->name('pharmacy.')
+    ->group(function (): void {
+        Route::redirect('/', '/pharmacy/prescriptions')->name('index');
+
+        Route::prefix('prescriptions')->name('prescriptions.')->group(function (): void {
+            Route::get('/', [PrescriptionController::class, 'index'])
+                ->middleware('permission:pharmacy.prescription.view')
+                ->name('index');
+
+            Route::post('/', [PrescriptionController::class, 'store'])
+                ->middleware('permission:pharmacy.prescription.create')
+                ->name('store');
+
+            Route::get('{prescription}', [PrescriptionController::class, 'show'])
+                ->middleware('permission:pharmacy.prescription.view')
+                ->name('show');
+
+            Route::post('{prescription}/verify', [PrescriptionController::class, 'verify'])
+                ->middleware('permission:pharmacy.prescription.verify')
+                ->name('verify');
+
+            Route::post('{prescription}/dispense', [PrescriptionController::class, 'dispense'])
+                ->middleware('permission:pharmacy.dispensing.create')
+                ->name('dispense');
+
+            Route::post('{prescription}/cancel', [PrescriptionController::class, 'cancel'])
+                ->middleware('permission:pharmacy.prescription.verify')
+                ->name('cancel');
+
+            Route::post('{prescription}/return', [PrescriptionController::class, 'returnItem'])
+                ->middleware('permission:pharmacy.return.create')
+                ->name('return');
+        });
+
+        Route::prefix('stock')->name('stock.')->group(function (): void {
+            Route::get('/', [PharmacyStockController::class, 'index'])
+                ->middleware('permission:pharmacy.stock.view')
+                ->name('index');
+
+            Route::post('batches', [PharmacyStockController::class, 'storeBatch'])
+                ->middleware('permission:pharmacy.stock.adjust')
+                ->name('batches.store');
+
+            Route::post('batches/{batch}/adjust', [PharmacyStockController::class, 'adjust'])
+                ->middleware('permission:pharmacy.stock.adjust')
+                ->name('batches.adjust');
+        });
+    });
+
+Route::middleware(['auth', 'verified'])
+    ->prefix('cashier')
+    ->name('cashier.')
+    ->group(function (): void {
+        Route::redirect('/', '/cashier/invoices')->name('index');
+
+        Route::prefix('invoices')->name('invoices.')->group(function (): void {
+            Route::get('/', [InvoiceController::class, 'index'])
+                ->middleware('permission:cashier.invoice.view')
+                ->name('index');
+
+            Route::post('/', [InvoiceController::class, 'store'])
+                ->middleware('permission:cashier.invoice.create')
+                ->name('store');
+
+            Route::get('{invoice}', [InvoiceController::class, 'show'])
+                ->middleware('permission:cashier.invoice.view')
+                ->name('show');
+
+            Route::post('{invoice}/finalize', [InvoiceController::class, 'finalize'])
+                ->middleware('permission:cashier.invoice.finalize')
+                ->name('finalize');
+
+            Route::post('{invoice}/void', [InvoiceController::class, 'void'])
+                ->middleware('permission:cashier.invoice.void')
+                ->name('void');
+
+            Route::post('{invoice}/payments', [PaymentController::class, 'store'])
+                ->middleware('permission:cashier.payment.create')
+                ->name('payments.store');
+
+            Route::post('{invoice}/refunds', [PaymentController::class, 'refund'])
+                ->middleware('permission:cashier.refund.create')
+                ->name('refunds.store');
         });
     });
