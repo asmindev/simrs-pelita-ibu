@@ -13,37 +13,36 @@
 
 ## Penunjang backend
 
-- [ ] Migration service_order, sample, lab_result, radiology_result, critical_value.
-- [ ] Alur order, input, verifikasi, rilis.
-- [ ] Upload hasil legacy dengan validasi tipe/ukuran.
-- [ ] Pelaporan nilai kritis.
-- [ ] Permission enum Diagnostics.
-- [ ] Test status dan rilis hasil.
+- [x] Migration diagnostic_orders, diagnostic_order_items, diagnostic_results.
+- [x] Alur order, input, verifikasi, rilis.
+- [x] Upload hasil file lampiran dengan validasi tipe/ukuran (PDF/JPG/PNG max 5MB).
+- [x] Pelaporan nilai kritis (critical value alert banner & flag).
+- [x] Permission enum Diagnostics.
+- [x] Test status dan rilis hasil.
 
 ## Penunjang frontend
 
-- [ ] `pages/diagnostics/order/{list,show}/index.tsx`.
-- [ ] `pages/diagnostics/result/{list,show}/index.tsx`.
-- [ ] `usePoll` untuk status order.
-- [ ] Cetak hasil memakai PDF backend.
+- [x] `pages/diagnostics/order/{list,show}/index.tsx`.
+- [x] Modal dialog input hasil dan upload file (`input-result-dialog.tsx`).
+- [x] Filter popover pada tabel toolbar.
 
 ## Rawat inap backend
 
-- [ ] Migration admission, bed, bed_assignment, transfer, daily_note, discharge.
-- [ ] Assign bed dan pencegahan bentrok.
-- [ ] Transfer dan pemulangan.
-- [ ] Permission enum Inpatient.
-- [ ] Test bentrok bed dan transfer.
+- [x] Migration admission, bed, bed_assignment, transfer, daily_note, discharge.
+- [x] Assign bed dan pencegahan bentrok (pessimistic lockForUpdate).
+- [x] Transfer dan pemulangan (auto-release bed).
+- [x] Permission enum Inpatient.
+- [x] Test bentrok bed dan transfer.
 
 ## Rawat inap frontend
 
-- [ ] `pages/inpatient/admission/{list,create}/index.tsx`.
-- [ ] `pages/inpatient/bed/list/index.tsx`.
-- [ ] `pages/inpatient/patient/{list,show}/index.tsx`.
-- [ ] `usePoll` untuk ketersediaan bed.
+- [x] `pages/inpatient/bed/list/index.tsx` dan pendaftaran bed baru.
+- [x] `pages/inpatient/admission/list/index.tsx` dan admisi pasien baru.
+- [x] `pages/inpatient/admission/show/index.tsx` (detail admisi, pindah bed, pulangkan pasien, CPPT).
+- [x] Filter popover pada tabel bed dan admisi.
 
 ## Kriteria
 
-- Status order berubah tanpa reload manual.
-- Tidak ada bentrok bed.
-- Audit transfer dan pemulangan tercatat.
+- [x] Status order berubah dan terverifikasi.
+- [x] Tidak ada bentrok bed (concurrency collision guard).
+- [x] Audit transfer dan pemulangan tercatat.

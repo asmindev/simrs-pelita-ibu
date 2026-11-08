@@ -453,6 +453,63 @@ declare module 'ziggy-js' {
             "binding": "id"
         }
     ],
+    "diagnostics.index": [],
+    "diagnostics.orders.index": [],
+    "diagnostics.orders.store": [],
+    "diagnostics.orders.show": [
+        {
+            "name": "order",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "diagnostics.orders.results.store": [
+        {
+            "name": "order",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "diagnostics.orders.complete": [
+        {
+            "name": "order",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "inpatient.index": [],
+    "inpatient.beds.index": [],
+    "inpatient.beds.store": [],
+    "inpatient.admissions.index": [],
+    "inpatient.admissions.store": [],
+    "inpatient.admissions.show": [
+        {
+            "name": "admission",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "inpatient.admissions.transfer": [
+        {
+            "name": "admission",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "inpatient.admissions.discharge": [
+        {
+            "name": "admission",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "inpatient.admissions.daily-notes.store": [
+        {
+            "name": "admission",
+            "required": true,
+            "binding": "id"
+        }
+    ],
     "storage.local": [
         {
             "name": "path",

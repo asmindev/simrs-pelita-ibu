@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\AdmissionController;
+use App\Http\Controllers\BedController;
+use App\Http\Controllers\DiagnosticOrderController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\DoctorScheduleController;
 use App\Http\Controllers\DrugCategoryController;
@@ -407,5 +410,77 @@ Route::middleware(['auth', 'verified'])
             Route::post('{invoice}/refunds', [PaymentController::class, 'refund'])
                 ->middleware('permission:cashier.refund.create')
                 ->name('refunds.store');
+        });
+    });
+
+Route::middleware(['auth', 'verified'])
+    ->prefix('diagnostics')
+    ->name('diagnostics.')
+    ->group(function (): void {
+        Route::redirect('/', '/diagnostics/orders')->name('index');
+
+        Route::prefix('orders')->name('orders.')->group(function (): void {
+            Route::get('/', [DiagnosticOrderController::class, 'index'])
+                ->middleware('permission:diagnostics.order.view')
+                ->name('index');
+
+            Route::post('/', [DiagnosticOrderController::class, 'store'])
+                ->middleware('permission:diagnostics.order.create')
+                ->name('store');
+
+            Route::get('{order}', [DiagnosticOrderController::class, 'show'])
+                ->middleware('permission:diagnostics.order.view')
+                ->name('show');
+
+            Route::post('{order}/results', [DiagnosticOrderController::class, 'inputResult'])
+                ->middleware('permission:diagnostics.result.input')
+                ->name('results.store');
+
+            Route::post('{order}/complete', [DiagnosticOrderController::class, 'complete'])
+                ->middleware('permission:diagnostics.result.verify')
+                ->name('complete');
+        });
+    });
+
+Route::middleware(['auth', 'verified'])
+    ->prefix('inpatient')
+    ->name('inpatient.')
+    ->group(function (): void {
+        Route::redirect('/', '/inpatient/admissions')->name('index');
+
+        Route::prefix('beds')->name('beds.')->group(function (): void {
+            Route::get('/', [BedController::class, 'index'])
+                ->middleware('permission:inpatient.bed.view')
+                ->name('index');
+
+            Route::post('/', [BedController::class, 'store'])
+                ->middleware('permission:inpatient.bed.view')
+                ->name('store');
+        });
+
+        Route::prefix('admissions')->name('admissions.')->group(function (): void {
+            Route::get('/', [AdmissionController::class, 'index'])
+                ->middleware('permission:inpatient.admission.view')
+                ->name('index');
+
+            Route::post('/', [AdmissionController::class, 'store'])
+                ->middleware('permission:inpatient.admission.create')
+                ->name('store');
+
+            Route::get('{admission}', [AdmissionController::class, 'show'])
+                ->middleware('permission:inpatient.admission.view')
+                ->name('show');
+
+            Route::post('{admission}/transfer', [AdmissionController::class, 'transferBed'])
+                ->middleware('permission:inpatient.transfer.create')
+                ->name('transfer');
+
+            Route::post('{admission}/discharge', [AdmissionController::class, 'discharge'])
+                ->middleware('permission:inpatient.discharge.create')
+                ->name('discharge');
+
+            Route::post('{admission}/daily-notes', [AdmissionController::class, 'addDailyNote'])
+                ->middleware('permission:inpatient.daily-note.update')
+                ->name('daily-notes.store');
         });
     });

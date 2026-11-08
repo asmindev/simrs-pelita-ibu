@@ -54,6 +54,7 @@ export type PermissionName =
     | 'pharmacy.dispensing.create'
     | 'pharmacy.dispensing.verify'
     | 'pharmacy.label.print'
+    | 'pharmacy.prescription.create'
     | 'pharmacy.prescription.verify'
     | 'pharmacy.prescription.view'
     | 'pharmacy.return.create'

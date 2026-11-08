@@ -237,7 +237,7 @@ export default function PharmacyStockIndex({
     ];
 
     return (
-        <div className="space-y-6 p-6">
+        <div className="space-y-6">
             <Head title="Inventaris Stok & Batch Obat — SIMRS" />
 
             <PageHeader

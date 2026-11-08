@@ -164,7 +164,7 @@ export default function InvoiceShowIndex({ invoice }: Props) {
     }
 
     return (
-        <div className="space-y-6 p-6">
+        <div className="space-y-6">
             <Head title={`Invoice #${invoice.invoice_number} — SIMRS`} />
 
             {/* Back Button & Header */}

@@ -3,9 +3,12 @@
 namespace App\Providers;
 
 use App\Enums\RoleName;
+use App\Models\Admission;
 use App\Models\Assessment;
+use App\Models\Bed;
 use App\Models\BreakGlassGrant;
 use App\Models\ClinicalReport;
+use App\Models\DiagnosticOrder;
 use App\Models\Doctor;
 use App\Models\DrugBatch;
 use App\Models\Encounter;
@@ -17,9 +20,12 @@ use App\Models\Queue;
 use App\Models\SensitiveNote;
 use App\Models\Unit;
 use App\Models\User;
+use App\Policies\AdmissionPolicy;
 use App\Policies\AssessmentPolicy;
+use App\Policies\BedPolicy;
 use App\Policies\BreakGlassGrantPolicy;
 use App\Policies\ClinicalReportPolicy;
+use App\Policies\DiagnosticOrderPolicy;
 use App\Policies\DoctorPolicy;
 use App\Policies\DrugBatchPolicy;
 use App\Policies\EncounterPolicy;
@@ -74,6 +80,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Prescription::class, PrescriptionPolicy::class);
         Gate::policy(DrugBatch::class, DrugBatchPolicy::class);
         Gate::policy(Invoice::class, InvoicePolicy::class);
+        Gate::policy(DiagnosticOrder::class, DiagnosticOrderPolicy::class);
+        Gate::policy(Bed::class, BedPolicy::class);
+        Gate::policy(Admission::class, AdmissionPolicy::class);
 
         Gate::before(function (?User $user): ?bool {
             return $user?->hasRole(RoleName::SuperAdmin->value) ? true : null;

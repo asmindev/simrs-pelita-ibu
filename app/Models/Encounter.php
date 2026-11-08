@@ -200,6 +200,22 @@ class Encounter extends Model
     }
 
     /**
+     * @return HasMany<Admission, $this>
+     */
+    public function admissions(): HasMany
+    {
+        return $this->hasMany(Admission::class);
+    }
+
+    /**
+     * @return HasMany<DiagnosticOrder, $this>
+     */
+    public function diagnosticOrders(): HasMany
+    {
+        return $this->hasMany(DiagnosticOrder::class);
+    }
+
+    /**
      * @param  Builder<Encounter>  $query
      * @return Builder<Encounter>
      */
