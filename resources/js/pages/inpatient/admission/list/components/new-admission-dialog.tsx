@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { ArrowRightLeft, Loader2 } from 'lucide-react';
+import { Hospital, Loader2 } from 'lucide-react';
 import type { FormEvent } from 'react';
 
 import { route } from '@/shared/lib/route';
@@ -22,29 +22,30 @@ import {
 } from '@/shared/ui/select';
 import { Textarea } from '@/shared/ui/textarea';
 
-import type { Admission, Bed } from '../../types/inpatient';
+import type { AdmissionEncounter, Bed } from '../../../types/inpatient';
 
 type Props = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    admission: Admission;
     availableBeds: Bed[];
+    activeEncounters: AdmissionEncounter[];
 };
 
-export function TransferBedDialog({
+export function NewAdmissionDialog({
     open,
     onOpenChange,
-    admission,
     availableBeds,
+    activeEncounters,
 }: Props) {
     const { data, setData, post, processing, errors, reset } = useForm({
-        target_bed_id: '',
-        reason: '',
+        encounter_id: '',
+        bed_id: '',
+        initial_diagnosis: '',
     });
 
     function handleSubmit(e: FormEvent) {
         e.preventDefault();
-        post(route('inpatient.admissions.transfer', admission.id), {
+        post(route('inpatient.admissions.store'), {
             onSuccess: () => {
                 reset();
                 onOpenChange(false);
@@ -52,53 +53,78 @@ export function TransferBedDialog({
         });
     }
 
-    const currentBed = admission.current_assignment?.bed;
-
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <ArrowRightLeft className="size-5 text-primary" />
-                        Pindah Tempat Tidur (Transfer Bed)
+                        <Hospital className="size-5 text-primary" />
+                        Admisi Pasien ke Rawat Inap
                     </DialogTitle>
                     <DialogDescription>
-                        Pindahkan pasien ke bed atau kelas ruangan lain yang
-                        masih tersedia.
+                        Pilih kunjungan aktif pasien dan tentukan tempat tidur
+                        (bed) yang tersedia.
                     </DialogDescription>
                 </DialogHeader>
-
-                <div className="space-y-1 rounded-md bg-muted/50 p-3 text-xs">
-                    <div className="text-muted-foreground">
-                        Tempat Tidur Saat Ini:
-                    </div>
-                    <div className="font-semibold text-foreground">
-                        {currentBed
-                            ? `${currentBed.room_name} — Bed ${currentBed.bed_number} (${currentBed.class.toUpperCase()})`
-                            : 'Belum dialokasikan'}
-                    </div>
-                </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4 pt-2">
                     <div className="space-y-1.5">
                         <Label
-                            htmlFor="target_bed_id"
+                            htmlFor="encounter_id"
                             className="text-xs font-medium"
                         >
-                            Pilih Bed Tujuan (Tersedia){' '}
+                            Pilih Kunjungan / Pasien{' '}
                             <span className="text-destructive">*</span>
                         </Label>
                         <Select
-                            value={data.target_bed_id}
+                            value={data.encounter_id}
                             onValueChange={(val) =>
-                                setData('target_bed_id', val)
+                                setData('encounter_id', val)
                             }
                         >
                             <SelectTrigger
-                                id="target_bed_id"
+                                id="encounter_id"
                                 className="h-8 text-xs"
                             >
-                                <SelectValue placeholder="Pilih bed tujuan yang kosong..." />
+                                <SelectValue placeholder="Pilih pasien yang akan dirawat inap..." />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-60">
+                                {activeEncounters.length === 0 ? (
+                                    <div className="p-2 text-center text-xs text-muted-foreground">
+                                        Tidak ada kunjungan aktif yang tersedia.
+                                    </div>
+                                ) : (
+                                    activeEncounters.map((enc) => (
+                                        <SelectItem
+                                            key={enc.id}
+                                            value={String(enc.id)}
+                                        >
+                                            {enc.patient?.name} (RM:{' '}
+                                            {enc.patient?.medical_record_number}
+                                            ) — {enc.encounter_number}
+                                        </SelectItem>
+                                    ))
+                                )}
+                            </SelectContent>
+                        </Select>
+                        {errors.encounter_id && (
+                            <p className="text-xs text-destructive">
+                                {errors.encounter_id}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <Label htmlFor="bed_id" className="text-xs font-medium">
+                            Pilih Tempat Tidur (Bed Tersedia){' '}
+                            <span className="text-destructive">*</span>
+                        </Label>
+                        <Select
+                            value={data.bed_id}
+                            onValueChange={(val) => setData('bed_id', val)}
+                        >
+                            <SelectTrigger id="bed_id" className="h-8 text-xs">
+                                <SelectValue placeholder="Pilih bed ruangan yang masih kosong..." />
                             </SelectTrigger>
                             <SelectContent className="max-h-60">
                                 {availableBeds.length === 0 ? (
@@ -119,29 +145,32 @@ export function TransferBedDialog({
                                 )}
                             </SelectContent>
                         </Select>
-                        {errors.target_bed_id && (
+                        {errors.bed_id && (
                             <p className="text-xs text-destructive">
-                                {errors.target_bed_id}
+                                {errors.bed_id}
                             </p>
                         )}
                     </div>
 
                     <div className="space-y-1.5">
-                        <Label htmlFor="reason" className="text-xs font-medium">
-                            Alasan Pemindahan{' '}
-                            <span className="text-destructive">*</span>
+                        <Label
+                            htmlFor="initial_diagnosis"
+                            className="text-xs font-medium"
+                        >
+                            Diagnosa Masuk Awal (Initial Diagnosis)
                         </Label>
                         <Textarea
-                            id="reason"
-                            value={data.reason}
-                            onChange={(e) => setData('reason', e.target.value)}
-                            placeholder="Contoh: Permintaan keluarga pasien, indikasi perburukan klinis ke ICU, renovasi ruangan..."
+                            id="initial_diagnosis"
+                            value={data.initial_diagnosis}
+                            onChange={(e) =>
+                                setData('initial_diagnosis', e.target.value)
+                            }
+                            placeholder="Tuliskan diagnosa kerja atau keluhan utama saat admisi..."
                             className="min-h-20 text-xs"
-                            required
                         />
-                        {errors.reason && (
+                        {errors.initial_diagnosis && (
                             <p className="text-xs text-destructive">
-                                {errors.reason}
+                                {errors.initial_diagnosis}
                             </p>
                         )}
                     </div>
@@ -159,12 +188,16 @@ export function TransferBedDialog({
                         <Button
                             type="submit"
                             size="sm"
-                            disabled={processing || availableBeds.length === 0}
+                            disabled={
+                                processing ||
+                                availableBeds.length === 0 ||
+                                activeEncounters.length === 0
+                            }
                         >
                             {processing && (
                                 <Loader2 className="mr-1.5 size-3.5 animate-spin" />
                             )}
-                            Simpan Pemindahan Bed
+                            Proses Admisi Pasien
                         </Button>
                     </DialogFooter>
                 </form>

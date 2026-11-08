@@ -9,10 +9,10 @@ import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
 
 import type { Bed, PaginatedData } from '../../types/inpatient';
-import { getBedColumns } from '../components/bed-columns';
-import { BedFilters } from '../components/bed-filters';
-import { BedStatistics } from '../components/bed-statistics';
-import { NewBedDialog } from '../components/new-bed-dialog';
+import { getBedColumns } from './components/bed-columns';
+import { BedFilters } from './components/bed-filters';
+import { BedStatistics } from './components/bed-statistics';
+import { NewBedDialog } from './components/new-bed-dialog';
 
 type Props = {
     beds: PaginatedData<Bed>;

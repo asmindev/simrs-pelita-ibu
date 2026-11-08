@@ -1,13 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import {
-    ArrowLeft,
-    CheckCircle2,
-    Clock,
-    Pill,
-    RotateCcw,
-    ShieldCheck,
-    XCircle,
-} from 'lucide-react';
+import { ArrowLeft, Pill, RotateCcw, ShieldCheck, XCircle } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 
@@ -37,53 +29,12 @@ import {
 } from '@/shared/ui/table';
 import { Textarea } from '@/shared/ui/textarea';
 
-import type {
-    DispensingRecord,
-    Prescription,
-    PrescriptionStatus,
-} from '../../types/pharmacy';
+import type { DispensingRecord, Prescription } from '../../types/pharmacy';
+import { PrescriptionStatusBadge } from '../components/prescription-status-badge';
 
 type Props = {
     prescription: Prescription;
 };
-
-function getStatusBadge(status: PrescriptionStatus) {
-    switch (status) {
-        case 'submitted':
-            return (
-                <Badge variant="secondary" className="text-xs">
-                    <Clock className="mr-1 size-3" />
-                    Menunggu Verifikasi
-                </Badge>
-            );
-        case 'verified':
-            return (
-                <Badge variant="default" className="text-xs">
-                    <ShieldCheck className="mr-1 size-3" />
-                    Sudah Diverifikasi (Siap Dispensing)
-                </Badge>
-            );
-        case 'dispensed':
-            return (
-                <Badge variant="outline" className="border-border text-xs">
-                    <CheckCircle2 className="mr-1 size-3" />
-                    Selesai Dispensing
-                </Badge>
-            );
-        case 'cancelled':
-            return (
-                <Badge
-                    variant="outline"
-                    className="border-destructive text-xs text-destructive"
-                >
-                    <XCircle className="mr-1 size-3" />
-                    Dibatalkan
-                </Badge>
-            );
-        default:
-            return <Badge variant="outline">{status}</Badge>;
-    }
-}
 
 export default function PrescriptionShow({ prescription }: Props) {
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
@@ -191,7 +142,9 @@ export default function PrescriptionShow({ prescription }: Props) {
                             <CardTitle className="text-base font-semibold text-foreground">
                                 Informasi Pasien & Kunjungan
                             </CardTitle>
-                            {getStatusBadge(prescription.status)}
+                            <PrescriptionStatusBadge
+                                status={prescription.status}
+                            />
                         </div>
                     </CardHeader>
                     <CardContent className="pt-4">

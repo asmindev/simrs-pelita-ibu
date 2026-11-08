@@ -14,10 +14,10 @@ import type {
     Bed,
     PaginatedData,
 } from '../../types/inpatient';
-import { getAdmissionColumns } from '../components/admission-columns';
-import { AdmissionFilters } from '../components/admission-filters';
-import { AdmissionStatistics } from '../components/admission-statistics';
-import { NewAdmissionDialog } from '../components/new-admission-dialog';
+import { getAdmissionColumns } from './components/admission-columns';
+import { AdmissionFilters } from './components/admission-filters';
+import { AdmissionStatistics } from './components/admission-statistics';
+import { NewAdmissionDialog } from './components/new-admission-dialog';
 
 type Props = {
     admissions: PaginatedData<Admission>;

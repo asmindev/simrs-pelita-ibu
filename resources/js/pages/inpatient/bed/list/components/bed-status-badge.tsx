@@ -2,7 +2,7 @@ import { CheckCircle2, Users, Wrench } from 'lucide-react';
 
 import { Badge } from '@/shared/ui/badge';
 
-import type { BedClass, BedStatus } from '../../types/inpatient';
+import type { BedClass, BedStatus } from '../../../types/inpatient';
 
 export function BedClassBadge({ bedClass }: { bedClass: BedClass }) {
     switch (bedClass) {

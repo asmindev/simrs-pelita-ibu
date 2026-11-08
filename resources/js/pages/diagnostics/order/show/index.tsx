@@ -1,16 +1,12 @@
 import { Head, Link, router } from '@inertiajs/react';
 import {
-    Activity,
     AlertTriangle,
     ArrowLeft,
     CheckCircle2,
-    Clock,
     Download,
     FileText,
-    Microscope,
     Plus,
     Printer,
-    Radiation,
     ShieldCheck,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -32,68 +28,16 @@ import {
 import type {
     DiagnosticOrder,
     DiagnosticOrderItem,
-    DiagnosticOrderStatus,
-    DiagnosticOrderType,
 } from '../../types/diagnostics';
-import { InputResultDialog } from '../components/input-result-dialog';
+import {
+    DiagnosticStatusBadge,
+    DiagnosticTypeBadge,
+} from '../components/order-status-badge';
+import { InputResultDialog } from './components/input-result-dialog';
 
 type Props = {
     order: DiagnosticOrder;
 };
-
-function getTypeBadge(type: DiagnosticOrderType) {
-    switch (type) {
-        case 'laboratory':
-            return (
-                <Badge variant="outline" className="text-xs">
-                    <Microscope className="mr-1 size-3 text-primary" />
-                    Laboratorium
-                </Badge>
-            );
-        case 'radiology':
-            return (
-                <Badge variant="secondary" className="text-xs">
-                    <Radiation className="mr-1 size-3" />
-                    Radiologi
-                </Badge>
-            );
-    }
-}
-
-function getStatusBadge(status: DiagnosticOrderStatus) {
-    switch (status) {
-        case 'ordered':
-            return (
-                <Badge variant="secondary" className="text-xs">
-                    <Clock className="mr-1 size-3 text-muted-foreground" />
-                    Menunggu Diproses
-                </Badge>
-            );
-        case 'in_progress':
-            return (
-                <Badge
-                    variant="outline"
-                    className="border-primary/50 text-xs text-primary"
-                >
-                    <Activity className="mr-1 size-3" />
-                    Sedang Diperiksa
-                </Badge>
-            );
-        case 'completed':
-            return (
-                <Badge variant="default" className="text-xs">
-                    <CheckCircle2 className="mr-1 size-3" />
-                    Hasil Rilis
-                </Badge>
-            );
-        case 'cancelled':
-            return (
-                <Badge variant="destructive" className="text-xs">
-                    Dibatalkan
-                </Badge>
-            );
-    }
-}
 
 export default function DiagnosticOrderShowIndex({ order }: Props) {
     const [isInputOpen, setIsInputOpen] = useState(false);
@@ -197,8 +141,8 @@ export default function DiagnosticOrderShowIndex({ order }: Props) {
                             <CardTitle className="font-mono text-lg font-bold">
                                 {order.order_number}
                             </CardTitle>
-                            {getTypeBadge(order.type)}
-                            {getStatusBadge(order.status)}
+                            <DiagnosticTypeBadge type={order.type} />
+                            <DiagnosticStatusBadge status={order.status} />
                         </div>
                         <p className="text-xs text-muted-foreground">
                             Kunjungan:{' '}

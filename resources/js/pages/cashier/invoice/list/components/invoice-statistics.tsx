@@ -42,7 +42,7 @@ export function InvoiceStatistics({ statistics }: Props) {
                 <CardContent>
                     <div className="text-2xl font-bold">{statistics.draft}</div>
                     <p className="text-[11px] text-muted-foreground">
-                        Belum diselesaikan kasir
+                        Belum lunas / draft
                     </p>
                 </CardContent>
             </Card>
@@ -50,16 +50,14 @@ export function InvoiceStatistics({ statistics }: Props) {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-xs font-medium text-muted-foreground">
-                        Tagihan Lunas
+                        Lunas Hari Ini
                     </CardTitle>
-                    <CheckCircle2 className="size-4 text-primary" />
+                    <CheckCircle2 className="size-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold text-primary">
-                        {statistics.paid}
-                    </div>
+                    <div className="text-2xl font-bold">{statistics.paid}</div>
                     <p className="text-[11px] text-muted-foreground">
-                        Pembayaran telah diterima
+                        Invoice berhasil dibayar
                     </p>
                 </CardContent>
             </Card>
@@ -67,16 +65,16 @@ export function InvoiceStatistics({ statistics }: Props) {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-xs font-medium text-muted-foreground">
-                        Pendapatan Hari Ini
+                        Penerimaan Kasir
                     </CardTitle>
-                    <DollarSign className="size-4 text-primary" />
+                    <DollarSign className="size-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold text-primary">
+                    <div className="font-mono text-xl font-bold">
                         {formatCurrency(statistics.revenue_today)}
                     </div>
                     <p className="text-[11px] text-muted-foreground">
-                        Total penerimaan kasir
+                        Total kas masuk hari ini
                     </p>
                 </CardContent>
             </Card>

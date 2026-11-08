@@ -27,7 +27,7 @@ import { Textarea } from '@/shared/ui/textarea';
 import type {
     DiagnosticOrder,
     DiagnosticOrderItem,
-} from '../../types/diagnostics';
+} from '../../../types/diagnostics';
 
 type Props = {
     order: DiagnosticOrder;

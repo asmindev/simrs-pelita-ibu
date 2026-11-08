@@ -15,7 +15,7 @@ import {
 import { Label } from '@/shared/ui/label';
 import { Textarea } from '@/shared/ui/textarea';
 
-import type { Admission } from '../../types/inpatient';
+import type { Admission } from '../../../types/inpatient';
 
 type Props = {
     open: boolean;

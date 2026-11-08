@@ -6,11 +6,11 @@ import { formatDate } from '@/shared/lib/format';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
 
-import type { DiagnosticOrder } from '../../types/diagnostics';
+import type { DiagnosticOrder } from '../../../types/diagnostics';
 import {
     DiagnosticStatusBadge,
     DiagnosticTypeBadge,
-} from './order-status-badge';
+} from '../../components/order-status-badge';
 
 export function getDiagnosticOrderColumns(): DataTableColumn<DiagnosticOrder>[] {
     return [

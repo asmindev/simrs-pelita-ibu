@@ -2,7 +2,7 @@ import { LogOut, UserCheck } from 'lucide-react';
 
 import { Badge } from '@/shared/ui/badge';
 
-import type { AdmissionStatus } from '../../types/inpatient';
+import type { AdmissionStatus } from '../../../types/inpatient';
 
 export function AdmissionStatusBadge({ status }: { status: AdmissionStatus }) {
     switch (status) {

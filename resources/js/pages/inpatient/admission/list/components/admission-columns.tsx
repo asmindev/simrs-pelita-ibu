@@ -6,7 +6,7 @@ import { formatDateTime } from '@/shared/lib/format';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
 
-import type { Admission } from '../../types/inpatient';
+import type { Admission } from '../../../types/inpatient';
 import { AdmissionStatusBadge } from './admission-status-badge';
 
 export function getAdmissionColumns(): DataTableColumn<Admission>[] {

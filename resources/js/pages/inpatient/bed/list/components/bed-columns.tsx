@@ -5,7 +5,7 @@ import type { DataTableColumn } from '@/shared/components/data-table';
 import { formatCurrency } from '@/shared/lib/format';
 import { route } from '@/shared/lib/route';
 
-import type { Bed } from '../../types/inpatient';
+import type { Bed } from '../../../types/inpatient';
 import { BedClassBadge, BedStatusBadge } from './bed-status-badge';
 
 export function getBedColumns(): DataTableColumn<Bed>[] {

@@ -23,7 +23,7 @@ import {
 } from '@/shared/ui/select';
 import { Textarea } from '@/shared/ui/textarea';
 
-import type { Admission, DailyNoteType } from '../../types/inpatient';
+import type { Admission, DailyNoteType } from '../../../types/inpatient';
 
 type Props = {
     open: boolean;

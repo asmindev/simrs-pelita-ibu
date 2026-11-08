@@ -3,7 +3,7 @@ import { Head } from '@inertiajs/react';
 import { PageHeader } from '@/shared/components/page-header';
 import type { PatientSearchResult } from '@/shared/types/patient';
 
-import { EncounterForm } from '../components/encounter-form';
+import { EncounterForm } from './components/encounter-form';
 
 type UnitOption = {
     id: number;

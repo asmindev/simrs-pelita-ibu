@@ -26,9 +26,9 @@ import {
 } from '@/shared/ui/card';
 
 import type { Admission, Bed } from '../../types/inpatient';
-import { DailyNoteDialog } from '../components/daily-note-dialog';
-import { DischargeDialog } from '../components/discharge-dialog';
-import { TransferBedDialog } from '../components/transfer-bed-dialog';
+import { DailyNoteDialog } from './components/daily-note-dialog';
+import { DischargeDialog } from './components/discharge-dialog';
+import { TransferBedDialog } from './components/transfer-bed-dialog';
 
 type Props = {
     admission: Admission;

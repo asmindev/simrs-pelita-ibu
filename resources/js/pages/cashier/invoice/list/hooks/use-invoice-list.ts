@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import type { Invoice } from '../../types/cashier';
+import type { Invoice } from '../../../types/cashier';
 
 export function useInvoiceList() {
     const [payingInvoice, setPayingInvoice] = useState<Invoice | null>(null);

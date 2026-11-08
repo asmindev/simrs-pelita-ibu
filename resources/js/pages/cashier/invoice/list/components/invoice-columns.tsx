@@ -6,8 +6,8 @@ import { formatCurrency, formatDate } from '@/shared/lib/format';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
 
-import type { Invoice } from '../../types/cashier';
-import { InvoiceStatusBadge } from './invoice-status-badge';
+import type { Invoice } from '../../../types/cashier';
+import { InvoiceStatusBadge } from '../../components/invoice-status-badge';
 
 type ColumnOptions = {
     onPay: (invoice: Invoice) => void;
@@ -53,8 +53,8 @@ export function getInvoiceColumns({
             ),
         },
         {
-            key: 'amounts',
-            header: 'Total & Terbayar',
+            key: 'amount_info',
+            header: 'Total Tagihan',
             render: (invoice) => {
                 const remaining = Math.max(
                     0,
@@ -62,16 +62,16 @@ export function getInvoiceColumns({
                 );
                 return (
                     <div className="space-y-0.5">
-                        <div className="text-xs font-bold text-foreground">
+                        <div className="font-mono text-xs font-semibold text-foreground">
                             {formatCurrency(invoice.total_amount)}
                         </div>
                         {invoice.paid_amount > 0 && (
-                            <div className="text-[11px] text-muted-foreground">
-                                Terbayar: {formatCurrency(invoice.paid_amount)}
+                            <div className="font-mono text-[11px] text-muted-foreground">
+                                Dibayar: {formatCurrency(invoice.paid_amount)}
                             </div>
                         )}
                         {remaining > 0 && invoice.status !== 'voided' && (
-                            <div className="text-[11px] font-semibold text-primary">
+                            <div className="font-mono text-[11px] font-semibold text-destructive">
                                 Sisa: {formatCurrency(remaining)}
                             </div>
                         )}
@@ -86,31 +86,31 @@ export function getInvoiceColumns({
         },
         {
             key: 'actions',
-            header: 'Aksi',
-            className: 'text-right',
+            header: '',
+            className: 'w-[140px] text-right',
             render: (invoice) => (
-                <div className="flex items-center justify-end gap-1.5">
+                <div className="flex items-center justify-end gap-1">
                     {invoice.status !== 'paid' &&
                         invoice.status !== 'voided' && (
                             <Button
                                 size="sm"
-                                className="h-7 text-xs font-medium"
+                                variant="default"
+                                className="h-7 text-xs"
                                 onClick={() => onPay(invoice)}
                             >
-                                <Wallet className="mr-1 size-3" />
+                                <Wallet className="mr-1 size-3.5" />
                                 Bayar
                             </Button>
                         )}
-
                     <Button
-                        variant="outline"
                         size="sm"
+                        variant="outline"
                         className="h-7 text-xs"
                         asChild
                     >
                         <Link href={route('cashier.invoices.show', invoice.id)}>
-                            <Eye className="mr-1 size-3" />
-                            Rincian
+                            <Eye className="mr-1 size-3.5" />
+                            Detail
                         </Link>
                     </Button>
                 </div>

@@ -32,12 +32,11 @@
   `Inertia::render('master-data/patient/list/index')`.
 - **Halaman `index.tsx` wajib tipis (thin view composer / orchestrator)**:
     - Tidak boleh ada logic bisnis, kalkulasi data, format kompleks, atau inline badge helper di `index.tsx`.
-    - Definisi kolom `DataTable` (`columns`) dipisah ke `components/<resource>-columns.tsx` atau hook.
-    - Kartu statistik dipisah ke `components/<resource>-statistics.tsx`.
-    - Badge status dipisah ke `components/<resource>-status-badge.tsx`.
-    - Filter dipisah ke `components/<resource>-filters.tsx`.
-    - Modal dialog aksi dipisah ke `components/<action>-dialog.tsx`.
-    - State interaksi/aksi dipisah ke custom hook di `hooks/`.
+    - **Cakupan folder (scope) wajib tepat**:
+        - Jika komponen/hook/filter/kolom **hanya dipakai di 1 route** (misalnya halaman `list`), **wajib disimpan di dalam folder route tersebut**: `<action>/components/` (contoh: `list/components/<resource>-columns.tsx`, `list/components/<resource>-statistics.tsx`, `list/components/<resource>-filters.tsx`) dan `<action>/hooks/`. Dilarang menumpuk komponen route-specific di level resource!
+        - Komponen yang **dipakai bersama oleh 2+ route** dalam satu resource (misal dipakai di `list` DAN `show`) disimpan di `<resource>/components/`.
+        - Modal dialog aksi disimpan di `<action>/components/` jika spesifik route, atau `<resource>/components/` jika dipakai lintas route.
+    - State interaksi/aksi dipisah ke custom hook di `hooks/` sesuai tingkat pemakaiannya.
 - Halaman daftar memakai folder `list`; landing domain memakai `home`;
   create/edit memakai `create`/`edit`.
 - Folder pendukung dibuat saat dibutuhkan, bukan folder kosong:

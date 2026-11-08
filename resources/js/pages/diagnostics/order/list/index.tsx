@@ -5,9 +5,9 @@ import { DataTable } from '@/shared/components/data-table';
 import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 
-import { getDiagnosticOrderColumns } from '../components/order-columns';
-import { OrderFilters } from '../components/order-filters';
-import { DiagnosticOrderStatistics } from '../components/order-statistics';
+import { getDiagnosticOrderColumns } from './components/order-columns';
+import { OrderFilters } from './components/order-filters';
+import { DiagnosticOrderStatistics } from './components/order-statistics';
 import type { DiagnosticOrder, PaginatedData } from '../../types/diagnostics';
 
 type Props = {

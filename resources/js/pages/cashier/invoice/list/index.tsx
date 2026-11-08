@@ -5,12 +5,12 @@ import { DataTable } from '@/shared/components/data-table';
 import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 
-import { getInvoiceColumns } from '../components/invoice-columns';
-import { InvoiceFilters } from '../components/invoice-filters';
-import { InvoiceStatistics } from '../components/invoice-statistics';
 import { PaymentDialog } from '../components/payment-dialog';
-import { useInvoiceList } from '../hooks/use-invoice-list';
 import type { Invoice, PaginatedData } from '../../types/cashier';
+import { getInvoiceColumns } from './components/invoice-columns';
+import { InvoiceFilters } from './components/invoice-filters';
+import { InvoiceStatistics } from './components/invoice-statistics';
+import { useInvoiceList } from './hooks/use-invoice-list';
 
 type Props = {
     invoices: PaginatedData<Invoice>;

@@ -1,7 +1,6 @@
 import { router } from '@inertiajs/react';
-import { Receipt, Search } from 'lucide-react';
-import type { FormEvent } from 'react';
-import { useState } from 'react';
+import { ClipboardList, Search } from 'lucide-react';
+import { type FormEvent, useState } from 'react';
 
 import { FilterPopover } from '@/shared/components/filter-popover';
 import { TableToolbar } from '@/shared/components/table-toolbar';
@@ -17,39 +16,52 @@ import {
     SelectValue,
 } from '@/shared/ui/select';
 
+import type { EncounterFilters as Filters } from '../../../types/registration';
+
 type Props = {
-    filters: {
-        search: string;
-        status: string;
-        date: string;
-    };
+    filters: Filters;
+    units: Array<{ id: number; name: string; code: string }>;
     current: number;
     total: number;
 };
 
-export function InvoiceFilters({ filters, current, total }: Props) {
+export function EncounterFiltersComponent({
+    filters,
+    units,
+    current,
+    total,
+}: Props) {
+    const today = new Date().toISOString().slice(0, 10);
     const [search, setSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || 'all');
-    const [date, setDate] = useState(filters.date || '');
+    const [unitId, setUnitId] = useState<string>(
+        filters.unit_id ? String(filters.unit_id) : 'all',
+    );
+    const [date, setDate] = useState(filters.date || today);
 
     const activeFilterCount =
-        (status !== 'all' ? 1 : 0) + (date !== '' ? 1 : 0);
+        (status !== 'all' ? 1 : 0) +
+        (unitId !== 'all' ? 1 : 0) +
+        (date !== today ? 1 : 0);
 
     function executeFilter(nextParams?: {
         search?: string;
         status?: string;
+        unitId?: string;
         date?: string;
     }) {
         const s = nextParams?.search !== undefined ? nextParams.search : search;
         const st =
             nextParams?.status !== undefined ? nextParams.status : status;
+        const u = nextParams?.unitId !== undefined ? nextParams.unitId : unitId;
         const d = nextParams?.date !== undefined ? nextParams.date : date;
 
         router.get(
-            route('cashier.invoices.index'),
+            route('registration.visits.index'),
             {
                 search: s || undefined,
                 status: st === 'all' ? undefined : st,
+                unit_id: u === 'all' ? undefined : u,
                 date: d || undefined,
             },
             { preserveState: true, preserveScroll: true, replace: true },
@@ -67,27 +79,29 @@ export function InvoiceFilters({ filters, current, total }: Props) {
 
     function resetPopoverFilters() {
         setStatus('all');
-        setDate('');
-        executeFilter({ status: 'all', date: '' });
+        setUnitId('all');
+        setDate(today);
+        executeFilter({ status: 'all', unitId: 'all', date: today });
     }
 
     function resetAll() {
         setSearch('');
         setStatus('all');
-        setDate('');
+        setUnitId('all');
+        setDate(today);
 
         router.get(
-            route('cashier.invoices.index'),
-            {},
+            route('registration.visits.index'),
+            { date: today },
             { preserveState: true, preserveScroll: true, replace: true },
         );
     }
 
     return (
         <TableToolbar
-            title="Daftar Tagihan Kasir"
-            description="Pengelolaan tagihan kunjungan pasien, penerimaan pembayaran langsung, dan kuitansi."
-            icon={Receipt}
+            title="Daftar Kunjungan"
+            description="Kunjungan pasien rawat jalan dan gawat darurat."
+            icon={ClipboardList}
             current={current}
             total={total}
         >
@@ -96,14 +110,14 @@ export function InvoiceFilters({ filters, current, total }: Props) {
                 className="flex w-full flex-wrap items-center gap-2 sm:w-auto"
             >
                 <div className="relative min-w-48 flex-1 sm:w-64 sm:flex-none">
-                    <Search className="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                        id="invoice-search"
+                        type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="No. Invoice, Pasien, No. RM..."
+                        placeholder="Cari pasien / No. RM..."
                         className="h-8 bg-background pl-8 text-xs"
-                        aria-label="Cari tagihan"
+                        aria-label="Cari kunjungan"
                     />
                 </div>
 
@@ -116,20 +130,20 @@ export function InvoiceFilters({ filters, current, total }: Props) {
                 </Button>
 
                 <FilterPopover
-                    title="Filter Tagihan"
+                    title="Filter Kunjungan Pasien"
                     activeCount={activeFilterCount}
                     onApply={applyPopoverFilter}
                     onReset={resetPopoverFilters}
                 >
                     <div className="space-y-1.5">
                         <Label
-                            htmlFor="inv-filter-date"
+                            htmlFor="reg-filter-date"
                             className="text-xs font-medium"
                         >
-                            Tanggal Tagihan
+                            Tanggal Kunjungan
                         </Label>
                         <Input
-                            id="inv-filter-date"
+                            id="reg-filter-date"
                             type="date"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
@@ -140,16 +154,45 @@ export function InvoiceFilters({ filters, current, total }: Props) {
 
                     <div className="space-y-1.5">
                         <Label
-                            htmlFor="inv-filter-status"
+                            htmlFor="reg-filter-unit"
                             className="text-xs font-medium"
                         >
-                            Status Tagihan
+                            Unit / Poliklinik
+                        </Label>
+                        <Select value={unitId} onValueChange={setUnitId}>
+                            <SelectTrigger
+                                id="reg-filter-unit"
+                                className="h-8 bg-background text-xs"
+                                aria-label="Filter unit"
+                            >
+                                <SelectValue placeholder="Semua Unit" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Semua Unit</SelectItem>
+                                {units.map((unit) => (
+                                    <SelectItem
+                                        key={unit.id}
+                                        value={String(unit.id)}
+                                    >
+                                        {unit.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <Label
+                            htmlFor="reg-filter-status"
+                            className="text-xs font-medium"
+                        >
+                            Status Kunjungan
                         </Label>
                         <Select value={status} onValueChange={setStatus}>
                             <SelectTrigger
-                                id="inv-filter-status"
+                                id="reg-filter-status"
                                 className="h-8 bg-background text-xs"
-                                aria-label="Filter status tagihan"
+                                aria-label="Filter status"
                             >
                                 <SelectValue placeholder="Semua Status" />
                             </SelectTrigger>
@@ -157,20 +200,17 @@ export function InvoiceFilters({ filters, current, total }: Props) {
                                 <SelectItem value="all">
                                     Semua Status
                                 </SelectItem>
-                                <SelectItem value="draft">
-                                    Menunggu Pembayaran (Draft)
+                                <SelectItem value="arrived">
+                                    Menunggu
                                 </SelectItem>
-                                <SelectItem value="finalized">
-                                    Siap Bayar
+                                <SelectItem value="in_consultation">
+                                    Dilayani
                                 </SelectItem>
-                                <SelectItem value="partially_paid">
-                                    Sebagian Terbayar
+                                <SelectItem value="finished">
+                                    Selesai
                                 </SelectItem>
-                                <SelectItem value="paid">
-                                    Lunas (Paid)
-                                </SelectItem>
-                                <SelectItem value="voided">
-                                    Dibatalkan (Void)
+                                <SelectItem value="cancelled">
+                                    Dibatalkan
                                 </SelectItem>
                             </SelectContent>
                         </Select>

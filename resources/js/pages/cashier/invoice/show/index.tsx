@@ -1,16 +1,12 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import {
     ArrowLeft,
-    CheckCircle2,
-    Clock,
-    CreditCard,
     FileText,
     Printer,
     Receipt,
     Wallet,
     XCircle,
 } from 'lucide-react';
-import type { FormEvent } from 'react';
 import { useState } from 'react';
 
 import { formatCurrency, formatDateTime } from '@/shared/lib/format';
@@ -19,15 +15,6 @@ import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/shared/ui/dialog';
-import { Label } from '@/shared/ui/label';
-import {
     Table,
     TableBody,
     TableCell,
@@ -35,51 +22,15 @@ import {
     TableHeader,
     TableRow,
 } from '@/shared/ui/table';
-import { Textarea } from '@/shared/ui/textarea';
 
-import type { Invoice, InvoiceItem, InvoiceStatus } from '../../types/cashier';
+import type { Invoice, InvoiceItem } from '../../types/cashier';
+import { InvoiceStatusBadge } from '../components/invoice-status-badge';
 import { PaymentDialog } from '../components/payment-dialog';
+import { VoidInvoiceDialog } from './components/void-invoice-dialog';
 
 type Props = {
     invoice: Invoice;
 };
-
-function getStatusBadge(status: InvoiceStatus) {
-    switch (status) {
-        case 'draft':
-        case 'finalized':
-            return (
-                <Badge variant="secondary" className="text-xs">
-                    <Clock className="mr-1 size-3 text-muted-foreground" />
-                    Menunggu Pembayaran
-                </Badge>
-            );
-        case 'partially_paid':
-            return (
-                <Badge
-                    variant="outline"
-                    className="border-primary/50 text-xs text-primary"
-                >
-                    <CreditCard className="mr-1 size-3" />
-                    Sebagian Terbayar
-                </Badge>
-            );
-        case 'paid':
-            return (
-                <Badge variant="default" className="text-xs">
-                    <CheckCircle2 className="mr-1 size-3" />
-                    Lunas
-                </Badge>
-            );
-        case 'voided':
-            return (
-                <Badge variant="destructive" className="text-xs">
-                    <XCircle className="mr-1 size-3" />
-                    Dibatalkan (Void)
-                </Badge>
-            );
-    }
-}
 
 function getItemTypeBadge(type: InvoiceItem['item_type']) {
     switch (type) {
@@ -137,27 +88,10 @@ export default function InvoiceShowIndex({ invoice }: Props) {
     const [isPaymentOpen, setIsPaymentOpen] = useState(false);
     const [isVoidOpen, setIsVoidOpen] = useState(false);
 
-    const {
-        data: voidData,
-        setData: setVoidData,
-        post: postVoid,
-        processing: voidProcessing,
-        errors: voidErrors,
-    } = useForm({
-        void_reason: '',
-    });
-
     const remainingBalance = Math.max(
         0,
         invoice.total_amount - invoice.paid_amount,
     );
-
-    function handleVoidSubmit(event: FormEvent) {
-        event.preventDefault();
-        postVoid(route('cashier.invoices.void', invoice.id), {
-            onSuccess: () => setIsVoidOpen(false),
-        });
-    }
 
     function handlePrint() {
         window.print();
@@ -227,7 +161,7 @@ export default function InvoiceShowIndex({ invoice }: Props) {
                             <CardTitle className="font-mono text-lg font-bold">
                                 {invoice.invoice_number}
                             </CardTitle>
-                            {getStatusBadge(invoice.status)}
+                            <InvoiceStatusBadge status={invoice.status} />
                         </div>
                         <p className="text-xs text-muted-foreground">
                             Kunjungan:{' '}
@@ -485,61 +419,11 @@ export default function InvoiceShowIndex({ invoice }: Props) {
             />
 
             {/* Dialog Batalkan (Void) Invoice */}
-            <Dialog open={isVoidOpen} onOpenChange={setIsVoidOpen}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Batalkan Tagihan (Void)</DialogTitle>
-                        <DialogDescription>
-                            Pembatalan tagihan akan mengunci invoice ini dan
-                            tidak dapat digunakan lagi.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <form onSubmit={handleVoidSubmit} className="space-y-4">
-                        <div className="space-y-1.5">
-                            <Label htmlFor="void-reason">
-                                Alasan Pembatalan{' '}
-                                <span className="text-destructive">*</span>
-                            </Label>
-                            <Textarea
-                                id="void-reason"
-                                value={voidData.void_reason}
-                                onChange={(e) =>
-                                    setVoidData('void_reason', e.target.value)
-                                }
-                                placeholder="Jelaskan alasan pembatalan invoice..."
-                                className="resize-none bg-background text-xs"
-                                rows={3}
-                                required
-                            />
-                            {voidErrors.void_reason && (
-                                <p className="text-xs text-destructive">
-                                    {voidErrors.void_reason}
-                                </p>
-                            )}
-                        </div>
-
-                        <DialogFooter className="gap-2 sm:gap-0">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => setIsVoidOpen(false)}
-                            >
-                                Kembali
-                            </Button>
-                            <Button
-                                type="submit"
-                                variant="destructive"
-                                disabled={voidProcessing}
-                            >
-                                {voidProcessing
-                                    ? 'Membatalkan...'
-                                    : 'Konfirmasi Batal'}
-                            </Button>
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog>
+            <VoidInvoiceDialog
+                invoice={invoice}
+                open={isVoidOpen}
+                onOpenChange={setIsVoidOpen}
+            />
         </div>
     );
 }
