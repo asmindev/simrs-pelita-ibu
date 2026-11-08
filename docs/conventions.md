@@ -30,6 +30,14 @@
 - Setiap halaman Inertia adalah folder dengan `index.tsx`. Nama komponen di
   `Inertia::render` adalah path folder ditambah `/index`, misalnya
   `Inertia::render('master-data/patient/list/index')`.
+- **Halaman `index.tsx` wajib tipis (thin view composer / orchestrator)**:
+    - Tidak boleh ada logic bisnis, kalkulasi data, format kompleks, atau inline badge helper di `index.tsx`.
+    - Definisi kolom `DataTable` (`columns`) dipisah ke `components/<resource>-columns.tsx` atau hook.
+    - Kartu statistik dipisah ke `components/<resource>-statistics.tsx`.
+    - Badge status dipisah ke `components/<resource>-status-badge.tsx`.
+    - Filter dipisah ke `components/<resource>-filters.tsx`.
+    - Modal dialog aksi dipisah ke `components/<action>-dialog.tsx`.
+    - State interaksi/aksi dipisah ke custom hook di `hooks/`.
 - Halaman daftar memakai folder `list`; landing domain memakai `home`;
   create/edit memakai `create`/`edit`.
 - Folder pendukung dibuat saat dibutuhkan, bukan folder kosong:
