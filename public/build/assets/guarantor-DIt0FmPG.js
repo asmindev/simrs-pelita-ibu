@@ -1,0 +1,1 @@
+var e=[{value:`bpjs`,label:`BPJS Kesehatan`},{value:`general`,label:`Umum / Pribadi`},{value:`insurance`,label:`Asuransi Swasta`},{value:`company`,label:`Perusahaan`}],t=Object.fromEntries(e.map(e=>[e.value,e.label]));export{e as n,t};

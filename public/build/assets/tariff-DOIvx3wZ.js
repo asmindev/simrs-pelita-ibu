@@ -1,0 +1,1 @@
+var e=[{value:`consultation`,label:`Konsultasi`},{value:`procedure`,label:`Tindakan Medis`},{value:`laboratory`,label:`Laboratorium`},{value:`radiology`,label:`Radiologi`},{value:`administration`,label:`Administrasi`},{value:`other`,label:`Lainnya`}],t=Object.fromEntries(e.map(e=>[e.value,e.label]));export{e as n,t};

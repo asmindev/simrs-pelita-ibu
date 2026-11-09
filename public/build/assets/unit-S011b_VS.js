@@ -1,0 +1,1 @@
+var e=[{value:`outpatient`,label:`Rawat Jalan`},{value:`inpatient`,label:`Rawat Inap`},{value:`emergency`,label:`Gawat Darurat`},{value:`laboratory`,label:`Laboratorium`},{value:`radiology`,label:`Radiologi`},{value:`pharmacy`,label:`Farmasi`},{value:`other`,label:`Lainnya`}],t=Object.fromEntries(e.map(e=>[e.value,e.label]));export{e as n,t};
