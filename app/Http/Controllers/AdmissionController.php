@@ -43,7 +43,7 @@ class AdmissionController extends Controller
         $availableBeds = Bed::where('status', 'available')->orderBy('room_name')->orderBy('bed_number')->get();
 
         $activeEncounters = Encounter::query()
-            ->with(['patient', 'doctor.user'])
+            ->with(['patient', 'doctor'])
             ->whereDoesntHave('admissions', fn (Builder $q) => $q->where('status', 'active'))
             ->whereNotIn('status', ['cancelled'])
             ->latest('id')
