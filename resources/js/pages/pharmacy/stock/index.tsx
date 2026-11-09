@@ -40,6 +40,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/shared/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 
 import type {
     DrugBatch,
@@ -336,110 +337,162 @@ export default function PharmacyStockIndex({
                 </Card>
             </div>
 
-            {/* Tabel Batch Obat */}
-            <DataTable<DrugBatch>
-                columns={columns}
-                rows={batches.data}
-                rowKey={(batch) => batch.id}
-                empty="Tidak ada batch obat yang sesuai dengan pencarian."
-                toolbar={
-                    <StockFilters
-                        filters={filters}
-                        current={batches.data.length}
-                        total={batches.total}
-                        onAddBatchClick={() => setIsAddBatchOpen(true)}
-                    />
-                }
-                footer={
-                    <Pagination
-                        links={batches.links}
-                        from={batches.from}
-                        to={batches.to}
-                        total={batches.total}
-                    />
-                }
-            />
+            {/* Tabs: Inventaris Batch Obat & Riwayat Mutasi */}
+            <Tabs defaultValue="batches" className="space-y-4">
+                <TabsList className="h-9">
+                    <TabsTrigger value="batches" className="gap-2">
+                        <Boxes className="size-4" />
+                        <span>Inventaris & Batch Obat</span>
+                        <Badge
+                            variant="secondary"
+                            className="ml-1 px-1.5 py-0 font-mono text-[10px]"
+                        >
+                            {batches.total}
+                        </Badge>
+                    </TabsTrigger>
+                    <TabsTrigger value="movements" className="gap-2">
+                        <RotateCcw className="size-4" />
+                        <span>Riwayat Mutasi Stok</span>
+                        {recentMovements.length > 0 && (
+                            <Badge
+                                variant="secondary"
+                                className="ml-1 px-1.5 py-0 font-mono text-[10px]"
+                            >
+                                {recentMovements.length}
+                            </Badge>
+                        )}
+                    </TabsTrigger>
+                </TabsList>
 
-            {/* Riwayat Mutasi Stok Terbaru */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-sm font-semibold">
-                        Riwayat Mutasi Stok Terbaru (10 Terakhir)
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="text-xs">Waktu</TableHead>
-                                <TableHead className="text-xs">
-                                    Obat & Batch
-                                </TableHead>
-                                <TableHead className="text-xs">Tipe</TableHead>
-                                <TableHead className="text-right text-xs">
-                                    Kuantitas
-                                </TableHead>
-                                <TableHead className="text-right text-xs">
-                                    Saldo Sesudah
-                                </TableHead>
-                                <TableHead className="text-xs">
-                                    Petugas / Keterangan
-                                </TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {recentMovements.length === 0 ? (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={6}
-                                        className="h-24 text-center text-xs text-muted-foreground"
-                                    >
-                                        Belum ada riwayat mutasi stok.
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                recentMovements.map((m) => (
-                                    <TableRow key={m.id}>
-                                        <TableCell className="text-xs text-muted-foreground">
-                                            {formatDateTime(m.created_at)}
-                                        </TableCell>
-                                        <TableCell className="text-xs">
-                                            <span className="font-medium text-foreground">
-                                                {m.drug?.name}
-                                            </span>
-                                            {m.drug_batch?.batch_number && (
-                                                <span className="ml-1.5 font-mono text-muted-foreground">
-                                                    ({m.drug_batch.batch_number}
-                                                    )
-                                                </span>
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            {getMovementTypeBadge(m.type)}
-                                        </TableCell>
-                                        <TableCell className="text-right font-mono text-xs font-medium">
-                                            {m.quantity}
-                                        </TableCell>
-                                        <TableCell className="text-right font-mono text-xs font-bold">
-                                            {m.balance_after}
-                                        </TableCell>
-                                        <TableCell className="text-xs">
-                                            <div className="font-medium text-foreground">
-                                                {m.user?.name ?? 'Sistem'}
-                                            </div>
-                                            {m.reason && (
-                                                <div className="text-[11px] text-muted-foreground">
-                                                    {m.reason}
-                                                </div>
-                                            )}
-                                        </TableCell>
+                {/* Tab 1: Tabel Batch Obat */}
+                <TabsContent value="batches" className="space-y-4 outline-none">
+                    <DataTable<DrugBatch>
+                        columns={columns}
+                        rows={batches.data}
+                        rowKey={(batch) => batch.id}
+                        empty="Tidak ada batch obat yang sesuai dengan pencarian."
+                        toolbar={
+                            <StockFilters
+                                filters={filters}
+                                current={batches.data.length}
+                                total={batches.total}
+                                onAddBatchClick={() => setIsAddBatchOpen(true)}
+                            />
+                        }
+                        footer={
+                            <Pagination
+                                links={batches.links}
+                                from={batches.from}
+                                to={batches.to}
+                                total={batches.total}
+                            />
+                        }
+                    />
+                </TabsContent>
+
+                {/* Tab 2: Riwayat Mutasi Stok Terbaru */}
+                <TabsContent
+                    value="movements"
+                    className="space-y-4 outline-none"
+                >
+                    <Card className="border-border/80 shadow-xs">
+                        <CardHeader className="border-b border-border/60 pb-3">
+                            <CardTitle className="flex items-center justify-between text-sm font-semibold">
+                                <span>Mutasi Transaksi Stok Obat</span>
+                                <Badge variant="outline" className="text-xs">
+                                    10 Mutasi Terakhir
+                                </Badge>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="hover:bg-transparent">
+                                        <TableHead className="text-xs">
+                                            Waktu
+                                        </TableHead>
+                                        <TableHead className="text-xs">
+                                            Obat & Batch
+                                        </TableHead>
+                                        <TableHead className="text-xs">
+                                            Tipe
+                                        </TableHead>
+                                        <TableHead className="text-right text-xs">
+                                            Kuantitas
+                                        </TableHead>
+                                        <TableHead className="text-right text-xs">
+                                            Saldo Sesudah
+                                        </TableHead>
+                                        <TableHead className="text-xs">
+                                            Petugas / Keterangan
+                                        </TableHead>
                                     </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+                                </TableHeader>
+                                <TableBody>
+                                    {recentMovements.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell
+                                                colSpan={6}
+                                                className="h-24 text-center text-xs text-muted-foreground"
+                                            >
+                                                Belum ada riwayat mutasi stok.
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        recentMovements.map((m) => (
+                                            <TableRow key={m.id}>
+                                                <TableCell className="text-xs text-muted-foreground">
+                                                    {formatDateTime(
+                                                        m.created_at,
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="text-xs">
+                                                    <span className="font-medium text-foreground">
+                                                        {m.drug?.name}
+                                                    </span>
+                                                    {m.drug_batch
+                                                        ?.batch_number && (
+                                                        <span className="ml-1.5 font-mono text-muted-foreground">
+                                                            (
+                                                            {
+                                                                m.drug_batch
+                                                                    .batch_number
+                                                            }
+                                                            )
+                                                        </span>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {getMovementTypeBadge(
+                                                        m.type,
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="text-right font-mono text-xs font-medium">
+                                                    {m.quantity}
+                                                </TableCell>
+                                                <TableCell className="text-right font-mono text-xs font-bold">
+                                                    {m.balance_after}
+                                                </TableCell>
+                                                <TableCell className="text-xs">
+                                                    <div className="font-medium text-foreground">
+                                                        {m.user?.name ??
+                                                            'Sistem'}
+                                                    </div>
+                                                    {m.reason && (
+                                                        <div className="text-[11px] text-muted-foreground">
+                                                            {m.reason}
+                                                        </div>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
 
             {/* Dialogs */}
             <NewBatchDialog
