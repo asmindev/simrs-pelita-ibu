@@ -6,6 +6,7 @@ type NavigationRoute = Pick<NavItem, 'routeName'>;
 export function isNavigationItemActive(
     item: NavigationRoute,
     current: string | undefined,
+    exact: boolean = false,
 ): boolean {
     if (!current) {
         return false;
@@ -13,6 +14,10 @@ export function isNavigationItemActive(
 
     if (current === item.routeName) {
         return true;
+    }
+
+    if (exact) {
+        return false;
     }
 
     const prefix = item.routeName.endsWith('.index')

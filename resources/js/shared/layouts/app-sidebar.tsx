@@ -187,6 +187,7 @@ export function AppSidebar({ name, user, ...props }: Props) {
                                                                         isNavigationItemActive(
                                                                             sub,
                                                                             current,
+                                                                            true,
                                                                         );
                                                                     return (
                                                                         <SidebarMenuSubItem
@@ -262,6 +263,7 @@ export function AppSidebar({ name, user, ...props }: Props) {
                                                                         isNavigationItemActive(
                                                                             sub,
                                                                             current,
+                                                                            true,
                                                                         );
                                                                     return (
                                                                         <Link
