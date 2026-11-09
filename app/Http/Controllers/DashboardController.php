@@ -199,7 +199,7 @@ class DashboardController extends Controller
         // F. Nurse / Inpatient Items (Active admitted patients)
         if ($isNurse) {
             $admissions = Admission::where('status', 'admitted')
-                ->with(['patient:id,name,medical_record_number', 'doctor:id,name', 'current_assignment.bed'])
+                ->with(['patient:id,name,medical_record_number', 'doctor:id,name', 'currentAssignment.bed'])
                 ->latest('admitted_at')
                 ->limit(6)
                 ->get()
@@ -208,7 +208,7 @@ class DashboardController extends Controller
                     'category' => 'nurse',
                     'badge' => 'Rawat Inap',
                     'title' => $adm->patient->name.' ('.$adm->admission_number.')',
-                    'subtitle' => ($adm->current_assignment?->bed ? $adm->current_assignment->bed->room_name.' - '.$adm->current_assignment->bed->bed_number : 'Bed belum dialokasikan').' • DPJP: '.$adm->doctor->name,
+                    'subtitle' => ($adm->currentAssignment?->bed ? $adm->currentAssignment->bed->room_name.' - '.$adm->currentAssignment->bed->bed_number : 'Bed belum dialokasikan').' • DPJP: '.$adm->doctor->name,
                     'status' => $adm->status,
                     'status_label' => 'Dirawat',
                     'time' => $adm->admitted_at->format('d/m H:i'),
