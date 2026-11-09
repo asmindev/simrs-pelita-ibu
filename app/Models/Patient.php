@@ -45,6 +45,14 @@ class Patient extends Model
     use HasFactory;
 
     /**
+     * Accessor for mrn alias to medical_record_number.
+     */
+    public function getMrnAttribute(): string
+    {
+        return $this->medical_record_number;
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array

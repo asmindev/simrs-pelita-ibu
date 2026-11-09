@@ -137,7 +137,7 @@ class DashboardController extends Controller
         $finishedCount = (clone $encountersQuery)->where('status', EncounterStatus::Finished)->count();
 
         $patientQueue = (clone $encountersQuery)
-            ->with(['patient:id,mrn,name,birth_date,gender', 'unit:id,name', 'queue'])
+            ->with(['patient:id,medical_record_number,name,birth_date,gender', 'unit:id,name', 'queue'])
             ->whereIn('status', [EncounterStatus::Arrived, EncounterStatus::InConsultation])
             ->orderBy('arrived_at', 'asc')
             ->limit(10)
@@ -146,7 +146,7 @@ class DashboardController extends Controller
                 'id' => $enc->id,
                 'encounter_number' => $enc->encounter_number,
                 'patient_name' => $enc->patient->name,
-                'patient_mrn' => $enc->patient->mrn,
+                'patient_mrn' => $enc->patient->medical_record_number,
                 'unit_name' => $enc->unit->name,
                 'queue_code' => $enc->queue?->queue_code ?? '-',
                 'status' => $enc->status->value,
@@ -157,7 +157,7 @@ class DashboardController extends Controller
         $recentDiagnostics = DiagnosticOrder::whereDate('created_at', '>=', $today->copy()->subDays(3))
             ->when($doctorId, fn ($q) => $q->where('doctor_id', $doctorId))
             ->where('status', 'completed')
-            ->with(['patient:id,name,mrn'])
+            ->with(['patient:id,name,medical_record_number'])
             ->latest('completed_at')
             ->limit(5)
             ->get()
@@ -165,7 +165,7 @@ class DashboardController extends Controller
                 'id' => $order->id,
                 'order_number' => $order->order_number,
                 'patient_name' => $order->patient->name,
-                'patient_mrn' => $order->patient->mrn,
+                'patient_mrn' => $order->patient->medical_record_number,
                 'type' => $order->type,
                 'completed_at' => $order->completed_at?->diffForHumans() ?? '-',
             ]);
@@ -214,7 +214,7 @@ class DashboardController extends Controller
             ->values();
 
         $recentEncounters = Encounter::whereDate('arrived_at', $today)
-            ->with(['patient:id,mrn,name,gender', 'unit:id,name', 'doctor:id,name'])
+            ->with(['patient:id,medical_record_number,name,gender', 'unit:id,name', 'doctor:id,name'])
             ->latest('arrived_at')
             ->limit(8)
             ->get()
@@ -222,7 +222,7 @@ class DashboardController extends Controller
                 'id' => $enc->id,
                 'encounter_number' => $enc->encounter_number,
                 'patient_name' => $enc->patient->name,
-                'patient_mrn' => $enc->patient->mrn,
+                'patient_mrn' => $enc->patient->medical_record_number,
                 'unit_name' => $enc->unit->name,
                 'doctor_name' => $enc->doctor?->name ?? 'Belum Ditentukan',
                 'type' => $enc->type->value,
@@ -276,7 +276,7 @@ class DashboardController extends Controller
             ->count();
 
         $pendingPrescriptions = Prescription::whereIn('status', ['submitted', 'verified'])
-            ->with(['patient:id,name,mrn', 'doctor:id,name', 'unit:id,name', 'items'])
+            ->with(['patient:id,name,medical_record_number', 'doctor:id,name', 'unit:id,name', 'items'])
             ->orderBy('created_at', 'asc')
             ->limit(8)
             ->get()
@@ -284,7 +284,7 @@ class DashboardController extends Controller
                 'id' => $p->id,
                 'prescription_number' => $p->prescription_number,
                 'patient_name' => $p->patient->name,
-                'patient_mrn' => $p->patient->mrn,
+                'patient_mrn' => $p->patient->medical_record_number,
                 'doctor_name' => $p->doctor->name,
                 'unit_name' => $p->unit->name,
                 'items_count' => $p->items->count(),
@@ -339,7 +339,7 @@ class DashboardController extends Controller
         $totalPendingAmount = (float) Invoice::whereIn('status', ['draft', 'finalized'])->sum('total_amount');
 
         $pendingInvoices = Invoice::whereIn('status', ['draft', 'finalized'])
-            ->with(['patient:id,name,mrn', 'guarantor:id,name'])
+            ->with(['patient:id,name,medical_record_number', 'guarantor:id,name'])
             ->latest('created_at')
             ->limit(8)
             ->get()
@@ -347,7 +347,7 @@ class DashboardController extends Controller
                 'id' => $inv->id,
                 'invoice_number' => $inv->invoice_number,
                 'patient_name' => $inv->patient->name,
-                'patient_mrn' => $inv->patient->mrn,
+                'patient_mrn' => $inv->patient->medical_record_number,
                 'guarantor_name' => $inv->guarantor?->name ?? 'Pribadi / Umum',
                 'total_amount' => (float) $inv->total_amount,
                 'paid_amount' => (float) $inv->paid_amount,
@@ -446,7 +446,7 @@ class DashboardController extends Controller
         $completedToday = DiagnosticOrder::where('status', 'completed')->whereDate('completed_at', $today)->count();
 
         $pendingOrders = DiagnosticOrder::whereIn('status', ['ordered', 'in_progress'])
-            ->with(['patient:id,name,mrn', 'doctor:id,name'])
+            ->with(['patient:id,name,medical_record_number', 'doctor:id,name'])
             ->orderBy('created_at', 'asc')
             ->limit(8)
             ->get()
@@ -455,7 +455,7 @@ class DashboardController extends Controller
                 'order_number' => $o->order_number,
                 'type' => $o->type,
                 'patient_name' => $o->patient->name,
-                'patient_mrn' => $o->patient->mrn,
+                'patient_mrn' => $o->patient->medical_record_number,
                 'doctor_name' => $o->doctor->name,
                 'status' => $o->status,
                 'created_at' => $o->created_at?->format('H:i') ?? '-',
@@ -491,7 +491,7 @@ class DashboardController extends Controller
         $pendingDiagnosticsCount = DiagnosticOrder::whereIn('status', ['ordered', 'in_progress'])->count();
 
         $recentEncounters = Encounter::whereDate('arrived_at', $today)
-            ->with(['patient:id,name,mrn', 'unit:id,name', 'doctor:id,name'])
+            ->with(['patient:id,name,medical_record_number', 'unit:id,name', 'doctor:id,name'])
             ->latest('arrived_at')
             ->limit(6)
             ->get()
@@ -499,7 +499,7 @@ class DashboardController extends Controller
                 'id' => $e->id,
                 'encounter_number' => $e->encounter_number,
                 'patient_name' => $e->patient->name,
-                'patient_mrn' => $e->patient->mrn,
+                'patient_mrn' => $e->patient->medical_record_number,
                 'unit_name' => $e->unit->name,
                 'doctor_name' => $e->doctor?->name ?? '-',
                 'type' => $e->type->value,
