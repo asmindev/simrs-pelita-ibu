@@ -11,16 +11,15 @@ export function getZiggyConfig() {
     if (typeof window !== 'undefined') {
         const liveZiggy = (window as any).Ziggy;
         if (liveZiggy) {
-            return liveZiggy;
-        }
-        // In browser, dynamically use current origin if Ziggy.url points to localhost
-        if (Ziggy.url && Ziggy.url.includes('localhost') && !window.location.host.includes('localhost')) {
             return {
-                ...Ziggy,
+                ...liveZiggy,
                 url: window.location.origin,
-                port: window.location.port ? parseInt(window.location.port, 10) : null,
             };
         }
+        return {
+            ...Ziggy,
+            url: window.location.origin,
+        };
     }
     return Ziggy;
 }
@@ -32,7 +31,7 @@ if (typeof globalThis.Ziggy === 'undefined') {
 export const route: typeof ziggyRoute = ((
     name?: any,
     params?: any,
-    absolute?: any,
+    absolute: boolean = false,
     config?: any,
 ) => {
     return ziggyRoute(name, params, absolute, config ?? getZiggyConfig());
