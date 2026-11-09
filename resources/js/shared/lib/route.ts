@@ -8,8 +8,19 @@ declare global {
 }
 
 export function getZiggyConfig() {
-    if (typeof window !== 'undefined' && (window as any).Ziggy) {
-        return (window as any).Ziggy;
+    if (typeof window !== 'undefined') {
+        const liveZiggy = (window as any).Ziggy;
+        if (liveZiggy) {
+            return liveZiggy;
+        }
+        // In browser, dynamically use current origin if Ziggy.url points to localhost
+        if (Ziggy.url && Ziggy.url.includes('localhost') && !window.location.host.includes('localhost')) {
+            return {
+                ...Ziggy,
+                url: window.location.origin,
+                port: window.location.port ? parseInt(window.location.port, 10) : null,
+            };
+        }
     }
     return Ziggy;
 }
