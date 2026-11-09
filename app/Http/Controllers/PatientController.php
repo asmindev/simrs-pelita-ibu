@@ -138,15 +138,16 @@ class PatientController extends Controller
         $term = $request->string('q')->trim()->toString();
         $excludeId = $request->integer('exclude');
 
-        if ($term === '') {
-            return response()->json(['data' => []]);
+        $query = Patient::query()
+            ->when($excludeId > 0, fn (Builder $q) => $q->whereKeyNot($excludeId));
+
+        if ($term !== '') {
+            $query->search($term);
         }
 
-        $patients = Patient::query()
-            ->when($excludeId > 0, fn (Builder $query) => $query->whereKeyNot($excludeId))
-            ->search($term)
+        $patients = $query
             ->orderBy('name')
-            ->limit(10)
+            ->limit(15)
             ->get()
             ->map(fn (Patient $patient): array => [
                 'id' => $patient->id,
