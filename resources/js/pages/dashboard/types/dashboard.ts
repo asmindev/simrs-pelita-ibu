@@ -76,10 +76,32 @@ export interface FacilitySnapshot {
     alerts: DashboardAlertItem[];
 }
 
+export interface UnitQueueSummary {
+    id: number;
+    unit_name: string;
+    unit_code: string;
+    doctor_name: string;
+    waiting: number;
+    serving: number;
+    completed: number;
+    total: number;
+}
+
+export interface FinancialSummaryItem {
+    guarantor_id: number | null;
+    guarantor_name: string;
+    invoice_count: number;
+    total_billed: number;
+    total_paid: number;
+    status_label: string;
+}
+
 export interface DashboardPageProps {
     assignedRoles: string[];
     isSuperAdmin: boolean;
     pipeline: DashboardPipeline;
     actionFeed: ActionFeedItem[];
     facilitySnapshot: FacilitySnapshot;
+    unitQueueSummaries: UnitQueueSummary[];
+    financialSummaries: FinancialSummaryItem[];
 }

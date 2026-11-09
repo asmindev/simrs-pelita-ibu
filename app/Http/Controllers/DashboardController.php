@@ -17,6 +17,7 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Prescription;
 use App\Models\Queue;
+use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -312,6 +313,54 @@ class DashboardController extends Controller
             $criticalAlerts = $criticalAlerts->concat($expiringBatches)->concat($lowStock);
         }
 
+        // 4. Monitoring Antrean & Beban Kerja per Poli / Unit
+        $unitQueueSummaries = Unit::where('is_active', true)
+            ->whereIn('type', ['outpatient', 'emergency'])
+            ->withCount([
+                'queues as waiting_count' => fn ($q) => $q->whereDate('queue_date', $today)->where('status', QueueStatus::Waiting),
+                'queues as serving_count' => fn ($q) => $q->whereDate('queue_date', $today)->where('status', QueueStatus::Serving),
+                'queues as completed_count' => fn ($q) => $q->whereDate('queue_date', $today)->where('status', QueueStatus::Completed),
+                'queues as total_count' => fn ($q) => $q->whereDate('queue_date', $today),
+            ])
+            ->get()
+            ->map(function ($u) use ($today) {
+                $activeSchedule = DoctorSchedule::where('unit_id', $u->id)
+                    ->where('day_of_week', $today->dayOfWeek)
+                    ->where('is_active', true)
+                    ->with('doctor:id,name')
+                    ->first();
+
+                return [
+                    'id' => $u->id,
+                    'unit_name' => $u->name,
+                    'unit_code' => $u->code,
+                    'doctor_name' => $activeSchedule?->doctor?->name ?? 'Dokter Jaga',
+                    'waiting' => (int) $u->waiting_count,
+                    'serving' => (int) $u->serving_count,
+                    'completed' => (int) $u->completed_count,
+                    'total' => (int) $u->total_count,
+                ];
+            })
+            ->values()
+            ->all();
+
+        // 5. Ringkasan Finansial Kasir & Penjamin Hari Ini
+        $financialSummaries = Invoice::whereDate('created_at', $today)
+            ->with('guarantor:id,name')
+            ->selectRaw('guarantor_id, count(*) as invoice_count, sum(total_amount) as total_billed, sum(paid_amount) as total_paid')
+            ->groupBy('guarantor_id')
+            ->get()
+            ->map(fn ($inv) => [
+                'guarantor_id' => $inv->guarantor_id,
+                'guarantor_name' => $inv->guarantor?->name ?? 'Umum / Pribadi',
+                'invoice_count' => (int) $inv->invoice_count,
+                'total_billed' => (float) $inv->total_billed,
+                'total_paid' => (float) $inv->total_paid,
+                'status_label' => (float) $inv->total_paid >= (float) $inv->total_billed ? 'Lunas' : 'Tertunda / Siap Klaim',
+            ])
+            ->values()
+            ->all();
+
         return Inertia::render('dashboard/index', [
             'assignedRoles' => $userRoles,
             'isSuperAdmin' => $isSuperAdmin,
@@ -328,6 +377,8 @@ class DashboardController extends Controller
                 'active_doctors' => $activeDoctors,
                 'alerts' => $criticalAlerts->values()->all(),
             ],
+            'unitQueueSummaries' => $unitQueueSummaries,
+            'financialSummaries' => $financialSummaries,
         ]);
     }
 }

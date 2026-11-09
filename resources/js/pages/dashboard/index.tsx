@@ -6,7 +6,9 @@ import { Badge } from '@/shared/ui/badge';
 
 import { DashboardActionFeed } from './components/dashboard-action-feed';
 import { DashboardFacilitySnapshot } from './components/dashboard-facility-snapshot';
+import { DashboardFinancialSummaryTable } from './components/dashboard-financial-summary-table';
 import { DashboardPipelineBar } from './components/dashboard-pipeline-bar';
+import { DashboardUnitQueueTable } from './components/dashboard-unit-queue-table';
 import type { DashboardPageProps } from './types/dashboard';
 
 export default function Dashboard({
@@ -15,6 +17,8 @@ export default function Dashboard({
     pipeline,
     actionFeed,
     facilitySnapshot,
+    unitQueueSummaries,
+    financialSummaries,
 }: DashboardPageProps) {
     return (
         <div className="space-y-6">
@@ -59,6 +63,12 @@ export default function Dashboard({
                 <div className="lg:col-span-1">
                     <DashboardFacilitySnapshot snapshot={facilitySnapshot} />
                 </div>
+            </div>
+
+            {/* 3. Grid Tabel Operasional Tambahan (Antrean Poli & Billing Penjamin) */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <DashboardUnitQueueTable items={unitQueueSummaries} />
+                <DashboardFinancialSummaryTable items={financialSummaries} />
             </div>
         </div>
     );
