@@ -1,9 +1,9 @@
-import { useForm } from "@inertiajs/react";
-import { Hospital, Loader2 } from "lucide-react";
-import type { FormEvent } from "react";
+import { useForm } from '@inertiajs/react';
+import { Hospital, Loader2 } from 'lucide-react';
+import type { FormEvent } from 'react';
 
-import { route } from "@/shared/lib/route";
-import { Button } from "@/shared/ui/button";
+import { route } from '@/shared/lib/route';
+import { Button } from '@/shared/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -11,18 +11,18 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/shared/ui/dialog";
-import { Label } from "@/shared/ui/label";
+} from '@/shared/ui/dialog';
+import { Label } from '@/shared/ui/label';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/shared/ui/select";
-import { Textarea } from "@/shared/ui/textarea";
+} from '@/shared/ui/select';
+import { Textarea } from '@/shared/ui/textarea';
 
-import type { AdmissionEncounter, Bed } from "../../../types/inpatient";
+import type { AdmissionEncounter, Bed } from '../../../types/inpatient';
 
 type Props = {
     open: boolean;
@@ -38,14 +38,14 @@ export function NewAdmissionDialog({
     activeEncounters,
 }: Props) {
     const { data, setData, post, processing, errors, reset } = useForm({
-        encounter_id: "",
-        bed_id: "",
-        initial_diagnosis: "",
+        encounter_id: '',
+        bed_id: '',
+        initial_diagnosis: '',
     });
 
     function handleSubmit(e: FormEvent) {
         e.preventDefault();
-        post(route("inpatient.admissions.store"), {
+        post(route('inpatient.admissions.store'), {
             onSuccess: () => {
                 reset();
                 onOpenChange(false);
@@ -73,13 +73,13 @@ export function NewAdmissionDialog({
                             htmlFor="encounter_id"
                             className="text-xs font-medium"
                         >
-                            Pilih Kunjungan / Pasien{" "}
+                            Pilih Kunjungan / Pasien{' '}
                             <span className="text-destructive">*</span>
                         </Label>
                         <Select
                             value={data.encounter_id}
                             onValueChange={(val) =>
-                                setData("encounter_id", val)
+                                setData('encounter_id', val)
                             }
                         >
                             <SelectTrigger
@@ -99,7 +99,7 @@ export function NewAdmissionDialog({
                                             key={enc.id}
                                             value={String(enc.id)}
                                         >
-                                            {enc.patient?.name} (RM:{" "}
+                                            {enc.patient?.name} (RM:{' '}
                                             {enc.patient?.medical_record_number}
                                             ) — {enc.encounter_number}
                                         </SelectItem>
@@ -116,12 +116,12 @@ export function NewAdmissionDialog({
 
                     <div className="space-y-1.5">
                         <Label htmlFor="bed_id" className="text-xs font-medium">
-                            Pilih Tempat Tidur (Bed Tersedia){" "}
+                            Pilih Tempat Tidur (Bed Tersedia){' '}
                             <span className="text-destructive">*</span>
                         </Label>
                         <Select
                             value={data.bed_id}
-                            onValueChange={(val) => setData("bed_id", val)}
+                            onValueChange={(val) => setData('bed_id', val)}
                         >
                             <SelectTrigger id="bed_id" className="h-8 text-xs">
                                 <SelectValue placeholder="Pilih bed ruangan yang masih kosong..." />
@@ -137,7 +137,7 @@ export function NewAdmissionDialog({
                                             key={bed.id}
                                             value={String(bed.id)}
                                         >
-                                            {bed.room_name} — Bed{" "}
+                                            {bed.room_name} — Bed{' '}
                                             {bed.bed_number} (
                                             {bed.class.toUpperCase()})
                                         </SelectItem>
@@ -163,7 +163,7 @@ export function NewAdmissionDialog({
                             id="initial_diagnosis"
                             value={data.initial_diagnosis}
                             onChange={(e) =>
-                                setData("initial_diagnosis", e.target.value)
+                                setData('initial_diagnosis', e.target.value)
                             }
                             placeholder="Tuliskan diagnosa kerja atau keluhan utama saat admisi..."
                             className="min-h-20 text-xs"

@@ -1,6 +1,7 @@
 import {
     BedDouble,
     Building2,
+    CalendarPlus,
     ClipboardList,
     Database,
     FileText,
@@ -12,6 +13,7 @@ import {
     ShieldAlert,
     ShieldCheck,
     Stethoscope,
+    Tv,
     Users,
 } from 'lucide-react';
 
@@ -136,10 +138,22 @@ export const navigationSections: NavSection[] = [
         label: 'Pelayanan',
         items: [
             {
-                title: 'Pendaftaran',
-                routeName: 'registration.index',
+                title: 'Pendaftaran Baru',
+                routeName: 'registration.visits.create',
+                icon: CalendarPlus,
+                permission: 'registration.visit.create',
+            },
+            {
+                title: 'Riwayat Kunjungan',
+                routeName: 'registration.visits.index',
                 icon: ClipboardList,
                 permission: 'registration.visit.view',
+            },
+            {
+                title: 'Papan Antrean',
+                routeName: 'registration.queues.board',
+                icon: Tv,
+                permission: 'registration.queue.view',
             },
             {
                 title: 'Rekam Medis',

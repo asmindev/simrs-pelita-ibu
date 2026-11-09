@@ -1,13 +1,13 @@
-import { useForm } from "@inertiajs/react";
-import { Loader2, UserPlus } from "lucide-react";
-import type { FormEvent } from "react";
-import { useEffect } from "react";
+import { useForm } from '@inertiajs/react';
+import { Loader2, UserPlus } from 'lucide-react';
+import type { FormEvent } from 'react';
+import { useEffect } from 'react';
 
-import { FormField } from "@/shared/components/form-field";
-import { route } from "@/shared/lib/route";
-import type { PatientSearchResult } from "@/shared/types/patient";
-import { Button } from "@/shared/ui/button";
-import { Checkbox } from "@/shared/ui/checkbox";
+import { FormField } from '@/shared/components/form-field';
+import { route } from '@/shared/lib/route';
+import type { PatientSearchResult } from '@/shared/types/patient';
+import { Button } from '@/shared/ui/button';
+import { Checkbox } from '@/shared/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -15,24 +15,24 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/shared/ui/dialog";
-import { Input } from "@/shared/ui/input";
-import { Label } from "@/shared/ui/label";
+} from '@/shared/ui/dialog';
+import { Input } from '@/shared/ui/input';
+import { Label } from '@/shared/ui/label';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/shared/ui/select";
-import { Textarea } from "@/shared/ui/textarea";
+} from '@/shared/ui/select';
+import { Textarea } from '@/shared/ui/textarea';
 
 export interface PatientDialogModel {
     id: number;
     medical_record_number: string;
     nik: string | null;
     name: string;
-    gender: "male" | "female";
+    gender: 'male' | 'female';
     birth_date: string;
     address: string | null;
     phone: string | null;
@@ -43,7 +43,7 @@ export type PatientDialogInput = {
     medical_record_number: string;
     nik: string;
     name: string;
-    gender: "male" | "female";
+    gender: 'male' | 'female';
     birth_date: string;
     address: string;
     phone: string;
@@ -67,30 +67,30 @@ export function PatientFormDialog({
 
     const { data, setData, post, put, processing, errors, reset } =
         useForm<PatientDialogInput>({
-            medical_record_number: patient?.medical_record_number ?? "",
-            nik: patient?.nik ?? "",
-            name: patient?.name ?? "",
-            gender: patient?.gender ?? "male",
+            medical_record_number: patient?.medical_record_number ?? '',
+            nik: patient?.nik ?? '',
+            name: patient?.name ?? '',
+            gender: patient?.gender ?? 'male',
             birth_date: patient?.birth_date
                 ? patient.birth_date.slice(0, 10)
-                : "",
-            address: patient?.address ?? "",
-            phone: patient?.phone ?? "",
+                : '',
+            address: patient?.address ?? '',
+            phone: patient?.phone ?? '',
             is_active: patient?.is_active ?? true,
         });
 
     useEffect(() => {
         if (open) {
             setData({
-                medical_record_number: patient?.medical_record_number ?? "",
-                nik: patient?.nik ?? "",
-                name: patient?.name ?? "",
-                gender: patient?.gender ?? "male",
+                medical_record_number: patient?.medical_record_number ?? '',
+                nik: patient?.nik ?? '',
+                name: patient?.name ?? '',
+                gender: patient?.gender ?? 'male',
                 birth_date: patient?.birth_date
                     ? patient.birth_date.slice(0, 10)
-                    : "",
-                address: patient?.address ?? "",
-                phone: patient?.phone ?? "",
+                    : '',
+                address: patient?.address ?? '',
+                phone: patient?.phone ?? '',
                 is_active: patient?.is_active ?? true,
             });
         }
@@ -100,7 +100,7 @@ export function PatientFormDialog({
         event.preventDefault();
 
         if (patient) {
-            put(route("master-data.patients.update", patient.id), {
+            put(route('master-data.patients.update', patient.id), {
                 onSuccess: () => {
                     onOpenChange(false);
                     reset();
@@ -108,7 +108,7 @@ export function PatientFormDialog({
                 },
             });
         } else {
-            post(route("master-data.patients.store"), {
+            post(route('master-data.patients.store'), {
                 onSuccess: () => {
                     onOpenChange(false);
                     reset();
@@ -124,12 +124,12 @@ export function PatientFormDialog({
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <UserPlus className="size-5 text-primary" />
-                        {isEdit ? "Ubah Data Pasien" : "Tambah Pasien Baru"}
+                        {isEdit ? 'Ubah Data Pasien' : 'Tambah Pasien Baru'}
                     </DialogTitle>
                     <DialogDescription>
                         {isEdit
                             ? `Ubah data identitas dan demografi pasien "${patient?.name}".`
-                            : "Daftarkan berkas rekam medis pasien baru ke sistem."}
+                            : 'Daftarkan berkas rekam medis pasien baru ke sistem.'}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -141,8 +141,8 @@ export function PatientFormDialog({
                             error={errors.medical_record_number}
                             hint={
                                 isEdit
-                                    ? "Nomor RM terkunci"
-                                    : "Kosongkan untuk otomatisasi"
+                                    ? 'Nomor RM terkunci'
+                                    : 'Kosongkan untuk otomatisasi'
                             }
                         >
                             <Input
@@ -150,7 +150,7 @@ export function PatientFormDialog({
                                 value={data.medical_record_number}
                                 onChange={(e) =>
                                     setData(
-                                        "medical_record_number",
+                                        'medical_record_number',
                                         e.target.value,
                                     )
                                 }
@@ -168,7 +168,7 @@ export function PatientFormDialog({
                             <Input
                                 id="shared-patient-dialog-nik"
                                 value={data.nik}
-                                onChange={(e) => setData("nik", e.target.value)}
+                                onChange={(e) => setData('nik', e.target.value)}
                                 placeholder="16 digit NIK"
                                 maxLength={16}
                                 className="h-8 bg-background font-mono text-xs"
@@ -184,7 +184,7 @@ export function PatientFormDialog({
                         <Input
                             id="shared-patient-dialog-name"
                             value={data.name}
-                            onChange={(e) => setData("name", e.target.value)}
+                            onChange={(e) => setData('name', e.target.value)}
                             placeholder="mis. Budi Santoso"
                             className="h-8 bg-background text-xs"
                             required
@@ -200,7 +200,7 @@ export function PatientFormDialog({
                             <Select
                                 value={data.gender}
                                 onValueChange={(val) =>
-                                    setData("gender", val as "male" | "female")
+                                    setData('gender', val as 'male' | 'female')
                                 }
                             >
                                 <SelectTrigger
@@ -230,7 +230,7 @@ export function PatientFormDialog({
                                 type="date"
                                 value={data.birth_date}
                                 onChange={(e) =>
-                                    setData("birth_date", e.target.value)
+                                    setData('birth_date', e.target.value)
                                 }
                                 className="h-8 bg-background text-xs"
                                 required
@@ -246,7 +246,7 @@ export function PatientFormDialog({
                         <Input
                             id="shared-patient-dialog-phone"
                             value={data.phone}
-                            onChange={(e) => setData("phone", e.target.value)}
+                            onChange={(e) => setData('phone', e.target.value)}
                             placeholder="mis. 081234567890"
                             className="h-8 bg-background text-xs"
                         />
@@ -261,7 +261,7 @@ export function PatientFormDialog({
                             id="shared-patient-dialog-address"
                             rows={2}
                             value={data.address}
-                            onChange={(e) => setData("address", e.target.value)}
+                            onChange={(e) => setData('address', e.target.value)}
                             placeholder="Alamat domisili lengkap pasien..."
                             className="bg-background text-xs"
                         />
@@ -272,7 +272,7 @@ export function PatientFormDialog({
                             id="shared-patient-dialog-active"
                             checked={data.is_active}
                             onCheckedChange={(checked) =>
-                                setData("is_active", checked === true)
+                                setData('is_active', checked === true)
                             }
                         />
                         <Label
@@ -298,9 +298,9 @@ export function PatientFormDialog({
                                     Menyimpan...
                                 </>
                             ) : isEdit ? (
-                                "Simpan Perubahan"
+                                'Simpan Perubahan'
                             ) : (
-                                "Daftarkan Pasien"
+                                'Daftarkan Pasien'
                             )}
                         </Button>
                     </DialogFooter>
