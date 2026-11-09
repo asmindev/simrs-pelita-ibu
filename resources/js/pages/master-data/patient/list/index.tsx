@@ -1,5 +1,6 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { Edit2, MoreHorizontal, UserX } from 'lucide-react';
+import { Head, router } from '@inertiajs/react';
+import { Edit2, MoreHorizontal, Plus, UserX } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 import { usePermissions } from '@/shared/hooks/use-permissions';
 import { Can } from '@/shared/components/can';
@@ -21,6 +22,7 @@ import {
 } from '@/shared/ui/dropdown-menu';
 
 import { PatientFilters } from '../components/patient-filters';
+import { PatientFormDialog } from './components/patient-form-dialog';
 import type {
     Paginated,
     Patient,
@@ -34,6 +36,20 @@ type Props = {
 
 export default function PatientIndex({ patients, filters }: Props) {
     const { can } = usePermissions();
+    const [formOpen, setFormOpen] = useState(false);
+    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(
+        null,
+    );
+
+    function handleCreate() {
+        setSelectedPatient(null);
+        setFormOpen(true);
+    }
+
+    function handleEdit(patient: Patient) {
+        setSelectedPatient(patient);
+        setFormOpen(true);
+    }
 
     function deactivate(patient: Patient) {
         if (!window.confirm(`Nonaktifkan pasien ${patient.name}?`)) {
@@ -45,129 +61,141 @@ export default function PatientIndex({ patients, filters }: Props) {
         });
     }
 
-    const columns: DataTableColumn<Patient>[] = [
-        {
-            key: 'medical_record_number',
-            header: 'No. RM',
-            render: (patient) => (
-                <span className="font-medium">
-                    {patient.medical_record_number}
-                </span>
-            ),
-        },
-        {
-            key: 'nik',
-            header: 'NIK',
-            render: (patient) => patient.nik ?? '-',
-        },
-        {
-            key: 'name',
-            header: 'Nama',
-            render: (patient) => (
-                <Link
-                    href={route('master-data.patients.edit', patient.id)}
-                    className="font-medium underline-offset-4 hover:underline"
-                >
-                    {patient.name}
-                </Link>
-            ),
-        },
-        {
-            key: 'gender',
-            header: 'Jenis kelamin',
-            render: (patient) =>
-                patient.gender === 'male' ? 'Laki-laki' : 'Perempuan',
-        },
-        {
-            key: 'birth_date',
-            header: 'Tanggal lahir',
-            render: (patient) => formatDate(patient.birth_date),
-        },
-        {
-            key: 'is_active',
-            header: 'Status',
-            render: (patient) => (
-                <Badge variant={patient.is_active ? 'default' : 'outline'}>
-                    {patient.is_active ? 'Aktif' : 'Nonaktif'}
-                </Badge>
-            ),
-        },
-        {
-            key: 'actions',
-            header: '',
-            className: 'w-12 text-right',
-            render: (patient) => {
-                const canUpdate = can('master-data.patient.update');
-                const canDelete = can('master-data.patient.delete');
+    const columns = useMemo<DataTableColumn<Patient>[]>(
+        () => [
+            {
+                key: 'medical_record_number',
+                header: 'No. RM',
+                render: (patient) => (
+                    <span className="font-mono text-xs font-bold text-primary tabular-nums">
+                        {patient.medical_record_number}
+                    </span>
+                ),
+            },
+            {
+                key: 'nik',
+                header: 'NIK',
+                render: (patient) => (
+                    <span className="font-mono text-xs text-muted-foreground">
+                        {patient.nik ?? '-'}
+                    </span>
+                ),
+            },
+            {
+                key: 'name',
+                header: 'Nama Pasien',
+                render: (patient) => (
+                    <button
+                        type="button"
+                        onClick={() => handleEdit(patient)}
+                        className="text-left text-xs font-semibold text-foreground transition-colors hover:text-primary"
+                    >
+                        {patient.name}
+                    </button>
+                ),
+            },
+            {
+                key: 'gender',
+                header: 'Jenis Kelamin',
+                render: (patient) =>
+                    patient.gender === 'male' ? 'Laki-laki' : 'Perempuan',
+            },
+            {
+                key: 'birth_date',
+                header: 'Tanggal Lahir',
+                render: (patient) => formatDate(patient.birth_date),
+            },
+            {
+                key: 'is_active',
+                header: 'Status',
+                render: (patient) => (
+                    <Badge
+                        variant={patient.is_active ? 'default' : 'outline'}
+                        className="text-[10px]"
+                    >
+                        {patient.is_active ? 'Aktif' : 'Nonaktif'}
+                    </Badge>
+                ),
+            },
+            {
+                key: 'actions',
+                header: '',
+                className: 'w-12 text-right',
+                render: (patient) => {
+                    const canUpdate = can('master-data.patient.update');
+                    const canDelete = can('master-data.patient.delete');
 
-                if (!canUpdate && (!canDelete || !patient.is_active)) {
-                    return null;
-                }
+                    if (!canUpdate && (!canDelete || !patient.is_active)) {
+                        return null;
+                    }
 
-                return (
-                    <div className="flex justify-end">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="size-8 p-0"
+                    return (
+                        <div className="flex justify-end">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="size-8 p-0"
+                                    >
+                                        <MoreHorizontal className="size-4" />
+                                        <span className="sr-only">
+                                            Buka menu aksi
+                                        </span>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                    align="end"
+                                    className="w-40"
                                 >
-                                    <MoreHorizontal className="size-4" />
-                                    <span className="sr-only">
-                                        Buka menu aksi
-                                    </span>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-36">
-                                {canUpdate && (
-                                    <DropdownMenuItem asChild>
-                                        <Link
-                                            href={route(
-                                                'master-data.patients.edit',
-                                                patient.id,
-                                            )}
+                                    {canUpdate && (
+                                        <DropdownMenuItem
+                                            onClick={() => handleEdit(patient)}
                                         >
                                             <Edit2 className="mr-2 size-3.5" />
-                                            Ubah
-                                        </Link>
-                                    </DropdownMenuItem>
-                                )}
-                                {canDelete && patient.is_active && (
-                                    <DropdownMenuItem
-                                        variant="destructive"
-                                        onClick={() => deactivate(patient)}
-                                    >
-                                        <UserX className="mr-2 size-3.5" />
-                                        Nonaktifkan
-                                    </DropdownMenuItem>
-                                )}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                );
+                                            Ubah Data
+                                        </DropdownMenuItem>
+                                    )}
+                                    {canDelete && patient.is_active && (
+                                        <DropdownMenuItem
+                                            variant="destructive"
+                                            onClick={() => deactivate(patient)}
+                                        >
+                                            <UserX className="mr-2 size-3.5" />
+                                            Nonaktifkan
+                                        </DropdownMenuItem>
+                                    )}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    );
+                },
             },
-        },
-    ];
+        ],
+        [can],
+    );
 
     return (
-        <>
-            <Head title="Pasien" />
+        <div className="space-y-6">
+            <Head title="Master Data Pasien — SIMRS" />
             <PageHeader
-                title="Pasien"
-                description="Data identitas dan nomor rekam medis."
+                title="Pasien & Rekam Medis"
+                description="Database identitas pasien, nomor rekam medis, NIK, dan demografi."
                 actions={
                     <Can permission="master-data.patient.create">
-                        <Button asChild>
-                            <Link href={route('master-data.patients.create')}>
-                                Tambah pasien
-                            </Link>
+                        <Button
+                            size="sm"
+                            onClick={handleCreate}
+                            className="gap-1.5"
+                        >
+                            <Plus className="size-4" />
+                            Tambah Pasien
                         </Button>
                     </Can>
                 }
             />
 
-            <DataTable
+            <DataTable<Patient>
                 columns={columns}
                 rows={patients.data}
                 rowKey={(patient) => patient.id}
@@ -188,6 +216,12 @@ export default function PatientIndex({ patients, filters }: Props) {
                     />
                 }
             />
-        </>
+
+            <PatientFormDialog
+                patient={selectedPatient}
+                open={formOpen}
+                onOpenChange={setFormOpen}
+            />
+        </div>
     );
 }

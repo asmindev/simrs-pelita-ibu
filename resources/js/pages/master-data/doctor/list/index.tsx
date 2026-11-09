@@ -1,5 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Edit2, MoreHorizontal, UserX } from 'lucide-react';
+import { Calendar, Edit2, MoreHorizontal, Plus, UserX } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 import { usePermissions } from '@/shared/hooks/use-permissions';
 import { Can } from '@/shared/components/can';
@@ -20,6 +21,7 @@ import {
 } from '@/shared/ui/dropdown-menu';
 
 import { DoctorFilters } from '../components/doctor-filters';
+import { DoctorFormDialog } from './components/doctor-form-dialog';
 import type {
     Doctor,
     DoctorFilters as Filters,
@@ -33,6 +35,18 @@ type Props = {
 
 export default function DoctorIndex({ doctors, filters }: Props) {
     const { can } = usePermissions();
+    const [formOpen, setFormOpen] = useState(false);
+    const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
+
+    function handleCreate() {
+        setSelectedDoctor(null);
+        setFormOpen(true);
+    }
+
+    function handleEdit(doctor: Doctor) {
+        setSelectedDoctor(doctor);
+        setFormOpen(true);
+    }
 
     function deactivate(doctor: Doctor) {
         if (!window.confirm(`Nonaktifkan dokter ${doctor.name}?`)) {
@@ -44,123 +58,156 @@ export default function DoctorIndex({ doctors, filters }: Props) {
         });
     }
 
-    const columns: DataTableColumn<Doctor>[] = [
-        {
-            key: 'code',
-            header: 'Kode',
-            render: (doctor) => (
-                <span className="font-medium">{doctor.code}</span>
-            ),
-        },
-        {
-            key: 'name',
-            header: 'Nama',
-            render: (doctor) => (
-                <Link
-                    href={route('master-data.doctors.edit', doctor.id)}
-                    className="font-medium underline-offset-4 hover:underline"
-                >
-                    {doctor.name}
-                </Link>
-            ),
-        },
-        {
-            key: 'specialization',
-            header: 'Spesialisasi',
-            render: (doctor) => doctor.specialization ?? '-',
-        },
-        {
-            key: 'license_number',
-            header: 'SIP',
-            render: (doctor) => doctor.license_number ?? '-',
-        },
-        {
-            key: 'phone',
-            header: 'Telepon',
-            render: (doctor) => doctor.phone ?? '-',
-        },
-        {
-            key: 'is_active',
-            header: 'Status',
-            render: (doctor) => (
-                <Badge variant={doctor.is_active ? 'default' : 'outline'}>
-                    {doctor.is_active ? 'Aktif' : 'Nonaktif'}
-                </Badge>
-            ),
-        },
-        {
-            key: 'actions',
-            header: '',
-            className: 'w-12 text-right',
-            render: (doctor) => {
-                const canManage = can('master-data.doctor.manage');
+    const columns = useMemo<DataTableColumn<Doctor>[]>(
+        () => [
+            {
+                key: 'code',
+                header: 'Kode',
+                render: (doctor) => (
+                    <span className="font-mono text-xs font-semibold text-foreground">
+                        {doctor.code}
+                    </span>
+                ),
+            },
+            {
+                key: 'name',
+                header: 'Nama Dokter',
+                render: (doctor) => (
+                    <button
+                        type="button"
+                        onClick={() => handleEdit(doctor)}
+                        className="text-left text-xs font-semibold text-foreground transition-colors hover:text-primary"
+                    >
+                        {doctor.name}
+                    </button>
+                ),
+            },
+            {
+                key: 'specialization',
+                header: 'Spesialisasi',
+                render: (doctor) => (
+                    <Badge variant="secondary" className="text-[10px]">
+                        {doctor.specialization ?? 'Dokter Umum'}
+                    </Badge>
+                ),
+            },
+            {
+                key: 'license_number',
+                header: 'SIP / Izin Praktik',
+                render: (doctor) => (
+                    <span className="font-mono text-xs text-muted-foreground">
+                        {doctor.license_number ?? '-'}
+                    </span>
+                ),
+            },
+            {
+                key: 'phone',
+                header: 'Telepon',
+                render: (doctor) => (
+                    <span className="text-xs text-muted-foreground">
+                        {doctor.phone ?? '-'}
+                    </span>
+                ),
+            },
+            {
+                key: 'is_active',
+                header: 'Status',
+                render: (doctor) => (
+                    <Badge
+                        variant={doctor.is_active ? 'default' : 'outline'}
+                        className="text-[10px]"
+                    >
+                        {doctor.is_active ? 'Aktif' : 'Nonaktif'}
+                    </Badge>
+                ),
+            },
+            {
+                key: 'actions',
+                header: '',
+                className: 'w-12 text-right',
+                render: (doctor) => {
+                    const canManage = can('master-data.doctor.manage');
 
-                if (!canManage) {
-                    return null;
-                }
+                    if (!canManage) {
+                        return null;
+                    }
 
-                return (
-                    <div className="flex justify-end">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="size-8 p-0"
+                    return (
+                        <div className="flex justify-end">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="size-8 p-0"
+                                    >
+                                        <MoreHorizontal className="size-4" />
+                                        <span className="sr-only">
+                                            Buka menu aksi
+                                        </span>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                    align="end"
+                                    className="w-40"
                                 >
-                                    <MoreHorizontal className="size-4" />
-                                    <span className="sr-only">
-                                        Buka menu aksi
-                                    </span>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-36">
-                                <DropdownMenuItem asChild>
-                                    <Link
-                                        href={route(
-                                            'master-data.doctors.edit',
-                                            doctor.id,
-                                        )}
+                                    <DropdownMenuItem
+                                        onClick={() => handleEdit(doctor)}
                                     >
                                         <Edit2 className="mr-2 size-3.5" />
                                         Ubah Profil
-                                    </Link>
-                                </DropdownMenuItem>
-                                {doctor.is_active && (
-                                    <DropdownMenuItem
-                                        variant="destructive"
-                                        onClick={() => deactivate(doctor)}
-                                    >
-                                        <UserX className="mr-2 size-3.5" />
-                                        Nonaktifkan
                                     </DropdownMenuItem>
-                                )}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                );
+                                    <DropdownMenuItem asChild>
+                                        <Link
+                                            href={route(
+                                                'master-data.doctors.edit',
+                                                doctor.id,
+                                            )}
+                                        >
+                                            <Calendar className="mr-2 size-3.5" />
+                                            Jadwal Praktik
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    {doctor.is_active && (
+                                        <DropdownMenuItem
+                                            variant="destructive"
+                                            onClick={() => deactivate(doctor)}
+                                        >
+                                            <UserX className="mr-2 size-3.5" />
+                                            Nonaktifkan
+                                        </DropdownMenuItem>
+                                    )}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    );
+                },
             },
-        },
-    ];
+        ],
+        [can],
+    );
 
     return (
-        <>
-            <Head title="Dokter" />
+        <div className="space-y-6">
+            <Head title="Master Data Dokter — SIMRS" />
             <PageHeader
-                title="Dokter"
-                description="Profil dokter dan nomor izin praktik."
+                title="Dokter Pemeriksa"
+                description="Profil dokter spesialis/umum, nomor izin praktik (SIP), dan jadwal pelayanan poli."
                 actions={
                     <Can permission="master-data.doctor.manage">
-                        <Button asChild>
-                            <Link href={route('master-data.doctors.create')}>
-                                Tambah dokter
-                            </Link>
+                        <Button
+                            size="sm"
+                            onClick={handleCreate}
+                            className="gap-1.5"
+                        >
+                            <Plus className="size-4" />
+                            Tambah Dokter
                         </Button>
                     </Can>
                 }
             />
 
-            <DataTable
+            <DataTable<Doctor>
                 columns={columns}
                 rows={doctors.data}
                 rowKey={(doctor) => doctor.id}
@@ -181,6 +228,12 @@ export default function DoctorIndex({ doctors, filters }: Props) {
                     />
                 }
             />
-        </>
+
+            <DoctorFormDialog
+                doctor={selectedDoctor}
+                open={formOpen}
+                onOpenChange={setFormOpen}
+            />
+        </div>
     );
 }
