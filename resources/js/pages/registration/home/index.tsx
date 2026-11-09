@@ -171,12 +171,12 @@ export default function RegistrationIndex({ metrics, units }: Props) {
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-2 pt-1">
+                                <div className="grid grid-cols-2 gap-2 pt-2">
                                     <Button
                                         asChild
                                         size="sm"
                                         variant="outline"
-                                        className="w-full"
+                                        className="w-full shrink-0"
                                     >
                                         <Link
                                             href={route(
@@ -187,13 +187,13 @@ export default function RegistrationIndex({ metrics, units }: Props) {
                                             )}
                                         >
                                             <Clock className="mr-1 size-3.5" />
-                                            Buka Antrean
+                                            Antrean
                                         </Link>
                                     </Button>
                                     <Button
                                         asChild
                                         size="sm"
-                                        className="w-full"
+                                        className="w-full shrink-0"
                                     >
                                         <Link
                                             href={route(
