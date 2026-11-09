@@ -1,0 +1,1 @@
+import{r as e,t}from"./jsx-runtime-BBKj0GLx.js";import{t as n}from"./error-page-BmDItB7l.js";var r=e(),i=t();function a(){let e=(0,r.c)(1),t;return e[0]===Symbol.for(`react.memo_cache_sentinel`)?(t=(0,i.jsx)(n,{status:403,title:`Akses ditolak`,description:`Anda tidak memiliki izin untuk membuka halaman ini.`}),e[0]=t):t=e[0],t}export{a as default};
