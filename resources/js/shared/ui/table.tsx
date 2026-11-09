@@ -30,10 +30,7 @@ function TableBody({ className, ...props }: React.ComponentProps<'tbody'>) {
     return (
         <tbody
             data-slot="table-body"
-            className={cn(
-                '[&_td]:py-0.5 [&_th]:py-0.5 [&_tr:last-child]:border-0',
-                className,
-            )}
+            className={cn('[&_tr:last-child]:border-0', className)}
             {...props}
         />
     );
@@ -83,7 +80,7 @@ function TableCell({ className, ...props }: React.ComponentProps<'td'>) {
         <td
             data-slot="table-cell"
             className={cn(
-                'p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0',
+                'px-3 py-2.5 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0',
                 className,
             )}
             {...props}
