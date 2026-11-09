@@ -1,4 +1,11 @@
-import { ChevronsUpDown, Loader2, Search, UserCheck, X } from 'lucide-react';
+import {
+    ChevronsUpDown,
+    Loader2,
+    Plus,
+    Search,
+    UserCheck,
+    X,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { route } from '@/shared/lib/route';
@@ -9,6 +16,7 @@ import { Button } from '@/shared/ui/button';
 import { Card } from '@/shared/ui/card';
 import { Input } from '@/shared/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
+import { PatientFormDialog } from '@/shared/components/patient-form-dialog';
 
 type Props = {
     value?: PatientSearchResult | null;
@@ -19,6 +27,7 @@ type Props = {
     error?: string;
     label?: string;
     className?: string;
+    allowCreate?: boolean;
 };
 
 export function PatientPicker({
@@ -30,13 +39,15 @@ export function PatientPicker({
     error,
     label,
     className,
+    allowCreate = true,
 }: Props) {
     const [open, setOpen] = useState(false);
+    const [createDialogOpen, setCreateDialogOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [results, setResults] = useState<PatientSearchResult[]>([]);
     const [loading, setLoading] = useState(false);
 
-    // Initial load: fetch recent patients if opened with empty search
+    // Initial load: fetch recent patients when popover is open
     useEffect(() => {
         if (!open) return;
 
@@ -85,6 +96,11 @@ export function PatientPicker({
     function clearSelection() {
         onChange?.(null);
         setSearchQuery('');
+    }
+
+    function handleOpenCreate() {
+        setOpen(false);
+        setCreateDialogOpen(true);
     }
 
     return (
@@ -204,6 +220,26 @@ export function PatientPicker({
                         </div>
 
                         <div className="max-h-72 space-y-1 overflow-y-auto">
+                            {/* OPSI PERTAMA: Tambah Pasien Baru */}
+                            {allowCreate && (
+                                <button
+                                    type="button"
+                                    onClick={handleOpenCreate}
+                                    className="mb-1.5 flex w-full items-center gap-2.5 rounded-lg border border-dashed border-primary/40 bg-primary/5 p-2.5 text-left text-xs font-semibold text-primary transition-colors hover:bg-primary/10"
+                                >
+                                    <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                        <Plus className="size-4" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <div>+ Tambah Data Pasien Baru</div>
+                                        <p className="text-[10px] font-normal text-muted-foreground">
+                                            Buat berkas rekam medis untuk pasien
+                                            baru langsung di sini
+                                        </p>
+                                    </div>
+                                </button>
+                            )}
+
                             {loading && results.length === 0 ? (
                                 <div className="py-6 text-center text-xs text-muted-foreground">
                                     Memuat daftar pasien...
@@ -270,6 +306,33 @@ export function PatientPicker({
             )}
 
             {error && <p className="text-xs text-destructive">{error}</p>}
+
+            {/* Modal Dialog Tambah Pasien Baru */}
+            {allowCreate && (
+                <PatientFormDialog
+                    open={createDialogOpen}
+                    onOpenChange={setCreateDialogOpen}
+                    onSuccess={() => {
+                        // After patient creation, fetch latest patient list and let user pick or auto-select
+                        void fetch(
+                            route('master-data.patients.search', { limit: 1 }),
+                            {
+                                headers: {
+                                    Accept: 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                },
+                            },
+                        )
+                            .then((res) => res.json())
+                            .then((json: { data?: PatientSearchResult[] }) => {
+                                if (json.data && json.data.length > 0) {
+                                    onChange?.(json.data[0]);
+                                }
+                            })
+                            .catch(() => {});
+                    }}
+                />
+            )}
         </div>
     );
 }
