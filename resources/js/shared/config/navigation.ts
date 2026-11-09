@@ -163,12 +163,36 @@ export const navigationSections: NavSection[] = [
                 routeName: 'medical-record.index',
                 icon: Stethoscope,
                 permission: 'medical-record.encounter.view',
+                items: [
+                    {
+                        title: 'Pemeriksaan EMR',
+                        routeName: 'medical-record.index',
+                        permission: 'medical-record.encounter.view',
+                    },
+                    {
+                        title: 'Laporan Khusus',
+                        routeName: 'medical-record.reports.index',
+                        permission: 'medical-record.report.view',
+                    },
+                ],
             },
             {
                 title: 'Rawat Inap',
                 routeName: 'inpatient.index',
                 icon: BedDouble,
                 permission: 'inpatient.admission.view',
+                items: [
+                    {
+                        title: 'Admisi Pasien',
+                        routeName: 'inpatient.admissions.index',
+                        permission: 'inpatient.admission.view',
+                    },
+                    {
+                        title: 'Ketersediaan Bed',
+                        routeName: 'inpatient.beds.index',
+                        permission: 'inpatient.bed.view',
+                    },
+                ],
             },
         ],
     },
@@ -180,6 +204,18 @@ export const navigationSections: NavSection[] = [
                 routeName: 'pharmacy.index',
                 icon: Pill,
                 permission: 'pharmacy.prescription.view',
+                items: [
+                    {
+                        title: 'Resep Obat',
+                        routeName: 'pharmacy.prescriptions.index',
+                        permission: 'pharmacy.prescription.view',
+                    },
+                    {
+                        title: 'Inventaris & Stok',
+                        routeName: 'pharmacy.stock.index',
+                        permission: 'pharmacy.stock.view',
+                    },
+                ],
             },
             {
                 title: 'Kasir',
@@ -217,10 +253,25 @@ export const navigationSections: NavSection[] = [
                 permission: 'rbac.break-glass.review',
             },
             {
-                title: 'Audit Log',
-                routeName: 'audit.logs.index',
+                title: 'Audit Trail',
+                routeName: 'audit.index',
                 icon: FileText,
-                permission: 'audit.log.view',
+                permission: [
+                    'audit.log.view',
+                    'audit.patient-access.view',
+                ] as const,
+                items: [
+                    {
+                        title: 'Log Aktivitas',
+                        routeName: 'audit.logs.index',
+                        permission: 'audit.log.view',
+                    },
+                    {
+                        title: 'Akses Rekam Medis',
+                        routeName: 'audit.patient-access.index',
+                        permission: 'audit.patient-access.view',
+                    },
+                ],
             },
         ],
     },
