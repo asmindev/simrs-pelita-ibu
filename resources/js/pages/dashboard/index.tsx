@@ -1,86 +1,65 @@
 import { Head } from '@inertiajs/react';
+import { ShieldCheck } from 'lucide-react';
 
 import { PageHeader } from '@/shared/components/page-header';
+import { Badge } from '@/shared/ui/badge';
 
-import { CashierDashboardView } from './components/cashier-dashboard-view';
-import { DiagnosticsDashboardView } from './components/diagnostics-dashboard-view';
-import { DoctorDashboardView } from './components/doctor-dashboard-view';
-import { ExecutiveDashboardView } from './components/executive-dashboard-view';
-import { NurseDashboardView } from './components/nurse-dashboard-view';
-import { PharmacyDashboardView } from './components/pharmacy-dashboard-view';
-import { RegistrationDashboardView } from './components/registration-dashboard-view';
-import { RoleSwitcher } from './components/role-switcher';
-import { type RoleOption } from './types/dashboard';
-
-interface DashboardPageProps {
-    activeRole: string;
-    availableRoles: RoleOption[];
-    metrics: Record<string, any>;
-    widgets: Record<string, any>;
-}
+import { DashboardActionFeed } from './components/dashboard-action-feed';
+import { DashboardFacilitySnapshot } from './components/dashboard-facility-snapshot';
+import { DashboardPipelineBar } from './components/dashboard-pipeline-bar';
+import type { DashboardPageProps } from './types/dashboard';
 
 export default function Dashboard({
-    activeRole,
-    availableRoles,
-    metrics,
-    widgets,
+    assignedRoles,
+    isSuperAdmin,
+    pipeline,
+    actionFeed,
+    facilitySnapshot,
 }: DashboardPageProps) {
     return (
         <div className="space-y-6">
-            <Head title="Dashboard Operasional" />
+            <Head title="Dashboard Operasional Terpadu — SIMRS" />
+
             <PageHeader
-                title="Dashboard Operasional"
-                description="Pusat monitoring dan aktivitas rumah sakit harian."
+                title="Pusat Operasional Rumah Sakit"
+                description="Monitoring alur pasien, feed tugas aktif, dan kapasitas fasilitas hari ini."
                 actions={
-                    <RoleSwitcher
-                        activeRole={activeRole}
-                        availableRoles={availableRoles}
-                    />
+                    <div className="flex flex-wrap items-center gap-1.5">
+                        {isSuperAdmin ? (
+                            <Badge
+                                variant="default"
+                                className="gap-1 text-xs font-semibold"
+                            >
+                                <ShieldCheck className="size-3.5" />
+                                Super Admin (Bypass Global)
+                            </Badge>
+                        ) : (
+                            assignedRoles.map((role) => (
+                                <Badge
+                                    key={role}
+                                    variant="secondary"
+                                    className="font-mono text-[11px]"
+                                >
+                                    {role}
+                                </Badge>
+                            ))
+                        )}
+                    </div>
                 }
             />
 
-            {activeRole === 'doctor' && (
-                <DoctorDashboardView
-                    metrics={metrics as any}
-                    widgets={widgets as any}
-                />
-            )}
-            {activeRole === 'registration' && (
-                <RegistrationDashboardView
-                    metrics={metrics as any}
-                    widgets={widgets as any}
-                />
-            )}
-            {activeRole === 'pharmacist' && (
-                <PharmacyDashboardView
-                    metrics={metrics as any}
-                    widgets={widgets as any}
-                />
-            )}
-            {activeRole === 'cashier' && (
-                <CashierDashboardView
-                    metrics={metrics as any}
-                    widgets={widgets as any}
-                />
-            )}
-            {activeRole === 'nurse' && (
-                <NurseDashboardView
-                    metrics={metrics as any}
-                    widgets={widgets as any}
-                />
-            )}
-            {activeRole === 'diagnostics' && (
-                <DiagnosticsDashboardView
-                    metrics={metrics as any}
-                    widgets={widgets as any}
-                />
-            )}
-            {activeRole === 'executive' && (
-                <ExecutiveDashboardView
-                    metrics={metrics as any}
-                    widgets={widgets as any}
-                />
-            )}
+            {/* 1. Baris Alur Pasien Utama (Pipeline) */}
+            <DashboardPipelineBar pipeline={pipeline} />
+
+            {/* 2. Grid Utama (Feed Tugas 65% + Fasilitas 35%) */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <div className="lg:col-span-2">
+                    <DashboardActionFeed items={actionFeed} />
+                </div>
+                <div className="lg:col-span-1">
+                    <DashboardFacilitySnapshot snapshot={facilitySnapshot} />
+                </div>
+            </div>
         </div>
     );
 }
