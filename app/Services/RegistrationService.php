@@ -15,6 +15,12 @@ use Illuminate\Support\Facades\DB;
 
 class RegistrationService
 {
+    public function __construct(
+        protected ?BillingCalculationService $billingService = null
+    ) {
+        $this->billingService ??= app(BillingCalculationService::class);
+    }
+
     /**
      * @param  array<string, mixed>  $data
      */
@@ -82,6 +88,9 @@ class RegistrationService
                 'user_agent' => request()->userAgent(),
                 'accessed_at' => now(),
             ]);
+
+            // Otomatis terbitkan draft invoice awal untuk pendaftaran
+            $this->billingService->createFromEncounter($encounter, $actor);
 
             return $encounter->load(['patient', 'unit', 'doctor', 'guarantor', 'queue', 'insuranceCoverage']);
         });

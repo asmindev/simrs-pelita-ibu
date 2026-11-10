@@ -351,6 +351,12 @@ class MedicalRecordService
                 ],
             ]);
 
+            // Sinkronkan draft invoice kunjungan agar otomatis memuat biaya tindakan baru
+            $draftInvoice = $encounter->invoices()->where('status', 'draft')->first();
+            if ($draftInvoice) {
+                app(BillingCalculationService::class)->syncInvoiceItems($draftInvoice, $encounter);
+            }
+
             return $procedure;
         });
     }
@@ -368,7 +374,16 @@ class MedicalRecordService
                 ])
                 ->log("Penghapusan tindakan {$procedure->name}");
 
+            $encounter = $procedure->encounter;
             $procedure->delete();
+
+            // Sinkronkan ulang tagihan draft jika ada tindakan yang dihapus
+            if ($encounter) {
+                $draftInvoice = $encounter->invoices()->where('status', 'draft')->first();
+                if ($draftInvoice) {
+                    app(BillingCalculationService::class)->syncInvoiceItems($draftInvoice, $encounter);
+                }
+            }
         });
     }
 

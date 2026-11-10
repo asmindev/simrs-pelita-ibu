@@ -425,6 +425,13 @@ declare module 'ziggy-js' {
             "binding": "id"
         }
     ],
+    "cashier.invoices.payments.index": [
+        {
+            "name": "invoice",
+            "required": true,
+            "binding": "id"
+        }
+    ],
     "cashier.invoices.finalize": [
         {
             "name": "invoice",

@@ -1,1 +1,0 @@
-import{r as e,t}from"./jsx-runtime-BBKj0GLx.js";import{t as n}from"./error-page-B0b37Nm_.js";var r=e(),i=t();function a(){let e=(0,r.c)(1),t;return e[0]===Symbol.for(`react.memo_cache_sentinel`)?(t=(0,i.jsx)(n,{status:404,title:`Halaman tidak ditemukan`,description:`Halaman yang Anda cari tidak tersedia.`}),e[0]=t):t=e[0],t}export{a as default};

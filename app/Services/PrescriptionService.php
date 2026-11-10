@@ -135,6 +135,15 @@ class PrescriptionService
                 'dispensed_at' => now(),
             ]);
 
+            // Sinkronkan draft invoice kunjungan agar otomatis memuat obat yang diserahkan
+            $encounter = $prescription->encounter;
+            if ($encounter) {
+                $draftInvoice = $encounter->invoices()->where('status', 'draft')->first();
+                if ($draftInvoice) {
+                    app(BillingCalculationService::class)->syncInvoiceItems($draftInvoice, $encounter);
+                }
+            }
+
             return $prescription->fresh(['items.drug', 'items.dispensings.drugBatch', 'patient', 'doctor', 'pharmacist']);
         });
     }

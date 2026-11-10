@@ -132,3 +132,33 @@ test('cashier can process refund on paid invoice', function () {
         'approved_by' => $cashierUser->id,
     ]);
 });
+
+test('cashier can view payment history page for an invoice', function () {
+    $cashierUser = User::factory()->create();
+    $cashierUser->assignRole(RoleName::Cashier->value);
+
+    $invoice = Invoice::factory()->create([
+        'total_amount' => 100000,
+        'paid_amount' => 100000,
+        'status' => 'paid',
+    ]);
+
+    Payment::factory()->create([
+        'invoice_id' => $invoice->id,
+        'amount' => 100000,
+        'method' => 'cash',
+        'received_by' => $cashierUser->id,
+    ]);
+
+    $response = $this->actingAs($cashierUser)->get(
+        route('cashier.invoices.payments.index', $invoice->id)
+    );
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('cashier/invoice/payment/index')
+            ->has('invoice')
+            ->where('invoice.id', $invoice->id)
+            ->has('invoice.payments', 1)
+        );
+});

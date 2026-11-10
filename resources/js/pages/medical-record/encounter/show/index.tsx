@@ -7,11 +7,12 @@ import {
     Lock,
     Stethoscope,
 } from 'lucide-react';
-import { useState } from 'react';
 
 import { PageHeader } from '@/shared/components/page-header';
 import { route } from '@/shared/lib/route';
+import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 
 import type { EncounterWithEmr } from '../../types/medical-record';
 import { AssessmentForm } from '../components/assessment-form';
@@ -26,11 +27,7 @@ type Props = {
     doctors: Array<{ id: number; name: string }>;
 };
 
-type TabKey = 'soap' | 'diagnoses' | 'procedures' | 'sensitive' | 'reports';
-
 export default function EncounterEmrShow({ encounter, doctors }: Props) {
-    const [activeTab, setActiveTab] = useState<TabKey>('soap');
-
     const diagnosisCount = encounter.diagnoses?.length || 0;
     const procedureCount = encounter.procedures?.length || 0;
     const sensitiveCount = encounter.sensitive_notes?.length || 0;
@@ -39,116 +36,139 @@ export default function EncounterEmrShow({ encounter, doctors }: Props) {
     return (
         <div className="space-y-6">
             <Head
-                title={`EMR - ${encounter.patient?.name || 'Pasien'} (${encounter.encounter_number})`}
+                title={`EMR - ${encounter.patient?.name || 'Pasien'} (${encounter.encounter_number}) — SIMRS`}
             />
 
             <PageHeader
                 title="Lembar Kerja Rekam Medis Elektronik"
-                description={`Pelayanan rawat ${encounter.unit?.name || ''} • No. Rawat ${encounter.encounter_number}`}
+                description={`Pelayanan ${encounter.unit?.name || 'Klinik'} • No. Rawat ${encounter.encounter_number}`}
                 actions={
-                    <Button asChild variant="outline">
+                    <Button asChild variant="outline" size="sm">
                         <Link href={route('medical-record.index')}>
-                            <ArrowLeft className="mr-1.5 size-4" />
+                            <ArrowLeft className="mr-1.5 size-3.5" />
                             Kembali ke Daftar Pasien
                         </Link>
                     </Button>
                 }
             />
 
-            {/* Bilah Konteks Pasien */}
+            {/* Bilah Konteks Pasien Terpilih */}
             <PatientContextBar encounter={encounter} />
 
-            {/* Navigasi Tab Klinis */}
-            <div className="flex flex-wrap items-center gap-1.5 border-b border-border pb-2">
-                <Button
-                    size="sm"
-                    variant={activeTab === 'soap' ? 'default' : 'ghost'}
-                    onClick={() => setActiveTab('soap')}
-                    className="gap-1.5"
-                >
-                    <Stethoscope className="size-4" />
-                    Asesmen SOAP
-                </Button>
+            {/* Navigasi Klinis berbasis shadcn Tabs */}
+            <Tabs defaultValue="soap" className="space-y-6">
+                <div className="border-b border-border pb-px">
+                    <TabsList className="h-11 w-full justify-start gap-1 overflow-x-auto bg-muted/40 p-1 text-muted-foreground sm:w-auto">
+                        <TabsTrigger
+                            value="soap"
+                            className="gap-2 px-3.5 py-1.5 text-xs font-medium data-[state=active]:bg-background data-[state=active]:font-semibold data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+                        >
+                            <Stethoscope className="size-3.5" />
+                            <span>Asesmen SOAP</span>
+                        </TabsTrigger>
 
-                <Button
-                    size="sm"
-                    variant={activeTab === 'diagnoses' ? 'default' : 'ghost'}
-                    onClick={() => setActiveTab('diagnoses')}
-                    className="gap-1.5"
-                >
-                    <CheckSquare className="size-4" />
-                    Diagnosis ICD-10
-                    {diagnosisCount > 0 && (
-                        <span className="rounded-full bg-secondary px-1.5 py-0.5 text-xs font-semibold text-secondary-foreground">
-                            {diagnosisCount}
-                        </span>
-                    )}
-                </Button>
+                        <TabsTrigger
+                            value="diagnoses"
+                            className="gap-2 px-3.5 py-1.5 text-xs font-medium data-[state=active]:bg-background data-[state=active]:font-semibold data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+                        >
+                            <CheckSquare className="size-3.5" />
+                            <span>Diagnosis ICD-10</span>
+                            {diagnosisCount > 0 && (
+                                <Badge
+                                    variant="secondary"
+                                    className="px-1.5 py-0 font-mono text-[10px]"
+                                >
+                                    {diagnosisCount}
+                                </Badge>
+                            )}
+                        </TabsTrigger>
 
-                <Button
-                    size="sm"
-                    variant={activeTab === 'procedures' ? 'default' : 'ghost'}
-                    onClick={() => setActiveTab('procedures')}
-                    className="gap-1.5"
-                >
-                    <Activity className="size-4" />
-                    Tindakan ICD-9
-                    {procedureCount > 0 && (
-                        <span className="rounded-full bg-secondary px-1.5 py-0.5 text-xs font-semibold text-secondary-foreground">
-                            {procedureCount}
-                        </span>
-                    )}
-                </Button>
+                        <TabsTrigger
+                            value="procedures"
+                            className="gap-2 px-3.5 py-1.5 text-xs font-medium data-[state=active]:bg-background data-[state=active]:font-semibold data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+                        >
+                            <Activity className="size-3.5" />
+                            <span>Tindakan ICD-9</span>
+                            {procedureCount > 0 && (
+                                <Badge
+                                    variant="secondary"
+                                    className="px-1.5 py-0 font-mono text-[10px]"
+                                >
+                                    {procedureCount}
+                                </Badge>
+                            )}
+                        </TabsTrigger>
 
-                <Button
-                    size="sm"
-                    variant={activeTab === 'sensitive' ? 'default' : 'ghost'}
-                    onClick={() => setActiveTab('sensitive')}
-                    className="gap-1.5"
-                >
-                    <Lock className="size-4" />
-                    Catatan Sensitif
-                    {sensitiveCount > 0 && (
-                        <span className="rounded-full bg-secondary px-1.5 py-0.5 text-xs font-semibold text-secondary-foreground">
-                            {sensitiveCount}
-                        </span>
-                    )}
-                </Button>
+                        <TabsTrigger
+                            value="sensitive"
+                            className="gap-2 px-3.5 py-1.5 text-xs font-medium data-[state=active]:bg-background data-[state=active]:font-semibold data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+                        >
+                            <Lock className="size-3.5" />
+                            <span>Catatan Sensitif</span>
+                            {sensitiveCount > 0 && (
+                                <Badge
+                                    variant="secondary"
+                                    className="px-1.5 py-0 font-mono text-[10px]"
+                                >
+                                    {sensitiveCount}
+                                </Badge>
+                            )}
+                        </TabsTrigger>
 
-                <Button
-                    size="sm"
-                    variant={activeTab === 'reports' ? 'default' : 'ghost'}
-                    onClick={() => setActiveTab('reports')}
-                    className="gap-1.5"
-                >
-                    <FileText className="size-4" />
-                    Laporan Klinis
-                    {reportCount > 0 && (
-                        <span className="rounded-full bg-secondary px-1.5 py-0.5 text-xs font-semibold text-secondary-foreground">
-                            {reportCount}
-                        </span>
-                    )}
-                </Button>
-            </div>
+                        <TabsTrigger
+                            value="reports"
+                            className="gap-2 px-3.5 py-1.5 text-xs font-medium data-[state=active]:bg-background data-[state=active]:font-semibold data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+                        >
+                            <FileText className="size-3.5" />
+                            <span>Laporan Khusus</span>
+                            {reportCount > 0 && (
+                                <Badge
+                                    variant="secondary"
+                                    className="px-1.5 py-0 font-mono text-[10px]"
+                                >
+                                    {reportCount}
+                                </Badge>
+                            )}
+                        </TabsTrigger>
+                    </TabsList>
+                </div>
 
-            {/* Isi Tab Aktif */}
-            <div>
-                {activeTab === 'soap' && (
+                {/* Konten Tiap Tab */}
+                <TabsContent
+                    value="soap"
+                    className="m-0 focus-visible:outline-none"
+                >
                     <AssessmentForm encounter={encounter} />
-                )}
-                {activeTab === 'diagnoses' && (
+                </TabsContent>
+
+                <TabsContent
+                    value="diagnoses"
+                    className="m-0 focus-visible:outline-none"
+                >
                     <DiagnosisEditor encounter={encounter} />
-                )}
-                {activeTab === 'procedures' && (
+                </TabsContent>
+
+                <TabsContent
+                    value="procedures"
+                    className="m-0 focus-visible:outline-none"
+                >
                     <ProcedureEditor encounter={encounter} doctors={doctors} />
-                )}
-                {activeTab === 'sensitive' && (
+                </TabsContent>
+
+                <TabsContent
+                    value="sensitive"
+                    className="m-0 focus-visible:outline-none"
+                >
                     <SensitiveNoteBox encounter={encounter} />
-                )}
-                {activeTab === 'reports' && (
+                </TabsContent>
+
+                <TabsContent
+                    value="reports"
+                    className="m-0 focus-visible:outline-none"
+                >
                     <ReportListTab encounter={encounter} />
-                )}
-            </div>
+                </TabsContent>
+            </Tabs>
         </div>
     );
 }

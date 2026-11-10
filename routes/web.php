@@ -401,6 +401,10 @@ Route::middleware(['auth', 'verified'])
                 ->middleware('permission:cashier.invoice.view')
                 ->name('show');
 
+            Route::get('{invoice}/payments', [PaymentController::class, 'index'])
+                ->middleware('permission:cashier.invoice.view')
+                ->name('payments.index');
+
             Route::post('{invoice}/finalize', [InvoiceController::class, 'finalize'])
                 ->middleware('permission:cashier.invoice.finalize')
                 ->name('finalize');

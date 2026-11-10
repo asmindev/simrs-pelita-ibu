@@ -1,12 +1,14 @@
 import { Head, Link, router, usePoll } from '@inertiajs/react';
 import {
-    Bell,
+    ArrowLeft,
     CheckCircle2,
     Clock,
     FastForward,
     Play,
+    Ticket,
     Tv,
     UserCheck,
+    Users,
 } from 'lucide-react';
 
 import { Can } from '@/shared/components/can';
@@ -47,7 +49,7 @@ export default function QueueBoard({ units, selectedUnitId, queues }: Props) {
 
     const callingQueue = queues.find((q) => q.status === 'calling');
     const servingQueue = queues.find((q) => q.status === 'serving');
-    const currentActive = callingQueue ?? servingQueue ?? null;
+    const currentActive = servingQueue ?? callingQueue ?? null;
 
     const waitingQueues = queues.filter((q) => q.status === 'waiting');
     const completedQueues = queues.filter(
@@ -59,14 +61,6 @@ export default function QueueBoard({ units, selectedUnitId, queues }: Props) {
             route('registration.queues.board'),
             { unit_id: unitId },
             { preserveState: true, preserveScroll: true, replace: true },
-        );
-    }
-
-    function callQueue(queue: Queue) {
-        router.post(
-            route('registration.queues.call', queue.id),
-            {},
-            { preserveScroll: true },
         );
     }
 
@@ -103,15 +97,10 @@ export default function QueueBoard({ units, selectedUnitId, queues }: Props) {
                     </Badge>
                 );
             case 'calling':
-                return (
-                    <Badge variant="default" className="animate-pulse text-xs">
-                        Dipanggil
-                    </Badge>
-                );
             case 'serving':
                 return (
                     <Badge variant="default" className="text-xs">
-                        Dilayani
+                        Sedang Dilayani
                     </Badge>
                 );
             case 'completed':
@@ -143,19 +132,21 @@ export default function QueueBoard({ units, selectedUnitId, queues }: Props) {
 
     return (
         <div className="space-y-6">
-            <Head title={`Papan Antrean ${activeUnit?.name ?? ''}`} />
+            <Head
+                title={`Papan Antrean Internal — ${activeUnit?.name ?? ''}`}
+            />
 
             <PageHeader
                 title="Papan Antrean Unit"
-                description="Monitor dan pemanggilan antrean pasien secara langsung per unit pelayanan."
+                description="Monitoring antrean internal klinik & poliklinik secara langsung tanpa perangkat eksternal."
                 actions={
                     <div className="flex items-center gap-2">
                         <Select
                             value={String(selectedUnitId)}
                             onValueChange={switchUnit}
                         >
-                            <SelectTrigger className="h-9 w-56 text-xs">
-                                <SelectValue placeholder="Pilih Unit Antrean" />
+                            <SelectTrigger className="h-9 w-60 text-xs">
+                                <SelectValue placeholder="Pilih Poliklinik / Unit" />
                             </SelectTrigger>
                             <SelectContent>
                                 {units.map((unit) => (
@@ -169,8 +160,9 @@ export default function QueueBoard({ units, selectedUnitId, queues }: Props) {
                             </SelectContent>
                         </Select>
 
-                        <Button asChild variant="outline">
+                        <Button asChild variant="outline" size="sm">
                             <Link href={route('registration.visits.index')}>
+                                <ArrowLeft className="mr-1.5 size-3.5" />
                                 Daftar Kunjungan
                             </Link>
                         </Button>
@@ -178,25 +170,76 @@ export default function QueueBoard({ units, selectedUnitId, queues }: Props) {
                 }
             />
 
-            {/* Calling / Active Banner Display */}
-            <Card className="border-border bg-card shadow-sm">
-                <CardHeader className="border-b border-border pb-2">
+            {/* Kartu Ringkasan Status Antrean Internal */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <Card className="border-border bg-card">
+                    <CardContent className="flex items-center gap-4 p-4">
+                        <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <Ticket className="size-5" />
+                        </div>
+                        <div>
+                            <div className="text-xs text-muted-foreground">
+                                Sedang Berlangsung
+                            </div>
+                            <div className="font-mono text-xl font-bold text-foreground">
+                                {currentActive?.queue_code ?? '-'}
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-border bg-card">
+                    <CardContent className="flex items-center gap-4 p-4">
+                        <div className="flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                            <Clock className="size-5" />
+                        </div>
+                        <div>
+                            <div className="text-xs text-muted-foreground">
+                                Antrean Menunggu
+                            </div>
+                            <div className="font-mono text-xl font-bold text-foreground">
+                                {waitingQueues.length} Pasien
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-border bg-card">
+                    <CardContent className="flex items-center gap-4 p-4">
+                        <div className="flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                            <CheckCircle2 className="size-5" />
+                        </div>
+                        <div>
+                            <div className="text-xs text-muted-foreground">
+                                Selesai Hari Ini
+                            </div>
+                            <div className="font-mono text-xl font-bold text-foreground">
+                                {completedQueues.length} Pasien
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Focus Banner: Antrean Aktif yang Sedang Dilayani */}
+            <Card className="border-border bg-card shadow-xs">
+                <CardHeader className="border-b border-border pb-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <Tv className="size-5 text-primary" />
-                            <CardTitle className="text-base font-semibold text-foreground">
-                                Antrean Sedang Berlangsung — {activeUnit?.name}
+                            <Tv className="size-4 text-primary" />
+                            <CardTitle className="text-sm font-semibold text-foreground">
+                                Pasien di Ruang Pelayanan — {activeUnit?.name}
                             </CardTitle>
                         </div>
                         <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                             <span className="inline-block size-2 animate-ping rounded-full bg-primary" />
-                            Live Sync
+                            Live Monitor
                         </span>
                     </div>
                 </CardHeader>
-                <CardContent className="pt-6">
+                <CardContent className="p-6">
                     {currentActive ? (
-                        <div className="flex flex-col items-center justify-center space-y-4 py-4 text-center">
+                        <div className="flex flex-col items-center justify-center space-y-4 text-center">
                             <div className="flex items-center gap-2">
                                 <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                     Status Pelayanan:
@@ -214,13 +257,17 @@ export default function QueueBoard({ units, selectedUnitId, queues }: Props) {
                                 </div>
                                 <div className="text-xs text-muted-foreground">
                                     No. RM:{' '}
-                                    {
-                                        currentActive.encounter?.patient
-                                            ?.medical_record_number
-                                    }{' '}
-                                    · Dokter:{' '}
-                                    {currentActive.encounter?.doctor?.name ??
-                                        'Dokter Jaga'}
+                                    <span className="font-mono font-medium">
+                                        {
+                                            currentActive.encounter?.patient
+                                                ?.medical_record_number
+                                        }
+                                    </span>{' '}
+                                    &bull; Dokter:{' '}
+                                    <span className="font-medium text-foreground">
+                                        {currentActive.encounter?.doctor
+                                            ?.name ?? 'Dokter Jaga'}
+                                    </span>
                                 </div>
                             </div>
 
@@ -228,67 +275,56 @@ export default function QueueBoard({ units, selectedUnitId, queues }: Props) {
                                 <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
                                     <Button
                                         size="sm"
-                                        variant="outline"
-                                        onClick={() => callQueue(currentActive)}
+                                        onClick={() =>
+                                            completeQueue(currentActive)
+                                        }
+                                        className="h-8 gap-1.5 text-xs font-medium"
                                     >
-                                        <Bell className="mr-1.5 size-4" />
-                                        Panggil Ulang
+                                        <CheckCircle2 className="size-3.5" />
+                                        Selesaikan Pelayanan
                                     </Button>
-
-                                    {currentActive.status === 'calling' && (
-                                        <Button
-                                            size="sm"
-                                            onClick={() =>
-                                                serveQueue(currentActive)
-                                            }
-                                        >
-                                            <Play className="mr-1.5 size-4" />
-                                            Mulai Layani
-                                        </Button>
-                                    )}
-
-                                    {currentActive.status === 'serving' && (
-                                        <Button
-                                            size="sm"
-                                            onClick={() =>
-                                                completeQueue(currentActive)
-                                            }
-                                        >
-                                            <CheckCircle2 className="mr-1.5 size-4" />
-                                            Selesai Pelayanan
-                                        </Button>
-                                    )}
 
                                     <Button
                                         size="sm"
-                                        variant="ghost"
+                                        variant="outline"
                                         onClick={() => skipQueue(currentActive)}
-                                        className="text-muted-foreground hover:text-foreground"
+                                        className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
                                     >
-                                        <FastForward className="mr-1.5 size-4" />
-                                        Lewati
+                                        <FastForward className="size-3.5" />
+                                        Lewati Antrean
                                     </Button>
                                 </div>
                             </Can>
                         </div>
                     ) : (
-                        <div className="space-y-2 py-8 text-center text-muted-foreground">
-                            <Clock className="mx-auto size-8 text-muted-foreground/60" />
-                            <p className="text-sm font-medium">
-                                Belum ada antrean yang sedang dipanggil atau
-                                dilayani.
-                            </p>
+                        <div className="space-y-3 py-6 text-center text-muted-foreground">
+                            <Clock className="mx-auto size-8 text-muted-foreground/50" />
+                            <div className="space-y-0.5">
+                                <p className="text-sm font-semibold text-foreground">
+                                    Ruang Pemeriksaan Sedang Kosong
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    Belum ada pasien yang sedang dilayani di
+                                    poli ini.
+                                </p>
+                            </div>
                             {waitingQueues.length > 0 && (
                                 <Can permission="registration.queue.call">
                                     <Button
                                         size="sm"
                                         onClick={() =>
-                                            callQueue(waitingQueues[0])
+                                            serveQueue(waitingQueues[0])
                                         }
+                                        className="h-8 gap-1.5 text-xs font-medium"
                                     >
-                                        <Bell className="mr-1.5 size-4" />
-                                        Panggil Antrean Pertama (
-                                        {waitingQueues[0].queue_code})
+                                        <Play className="size-3.5" />
+                                        Mulai Layani (
+                                        {waitingQueues[0].queue_code} -{' '}
+                                        {
+                                            waitingQueues[0].encounter?.patient
+                                                ?.name
+                                        }
+                                        )
                                     </Button>
                                 </Can>
                             )}
@@ -304,7 +340,7 @@ export default function QueueBoard({ units, selectedUnitId, queues }: Props) {
                     <CardHeader className="border-b border-border pb-3">
                         <div className="flex items-center justify-between">
                             <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-                                <Clock className="size-4 text-primary" />
+                                <Users className="size-4 text-primary" />
                                 Antrean Menunggu ({waitingQueues.length})
                             </CardTitle>
                         </div>
@@ -313,7 +349,7 @@ export default function QueueBoard({ units, selectedUnitId, queues }: Props) {
                         {waitingQueues.length === 0 ? (
                             <EmptyState
                                 title="Tidak ada antrean menunggu"
-                                description="Semua pasien di unit ini telah dipanggil atau dilayani."
+                                description="Semua pasien di unit ini telah selesai atau sedang dilayani."
                             />
                         ) : (
                             <ul className="space-y-2">
@@ -336,10 +372,12 @@ export default function QueueBoard({ units, selectedUnitId, queues }: Props) {
                                             </div>
                                             <div className="text-xs text-muted-foreground">
                                                 No. RM:{' '}
-                                                {
-                                                    queue.encounter?.patient
-                                                        ?.medical_record_number
-                                                }
+                                                <span className="font-mono">
+                                                    {
+                                                        queue.encounter?.patient
+                                                            ?.medical_record_number
+                                                    }
+                                                </span>
                                             </div>
                                         </div>
 
@@ -347,10 +385,13 @@ export default function QueueBoard({ units, selectedUnitId, queues }: Props) {
                                             <Button
                                                 size="sm"
                                                 variant="outline"
-                                                onClick={() => callQueue(queue)}
+                                                onClick={() =>
+                                                    serveQueue(queue)
+                                                }
+                                                className="h-8 gap-1 text-xs font-medium"
                                             >
-                                                <Bell className="mr-1 size-3.5" />
-                                                Panggil
+                                                <Play className="size-3" />
+                                                Layani
                                             </Button>
                                         </Can>
                                     </li>

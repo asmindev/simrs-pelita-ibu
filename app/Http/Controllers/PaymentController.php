@@ -8,12 +8,31 @@ use App\Models\Invoice;
 use App\Services\PaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class PaymentController extends Controller
 {
     public function __construct(
         protected PaymentService $paymentService
     ) {}
+
+    public function index(Invoice $invoice): Response
+    {
+        Gate::authorize('view', $invoice);
+
+        $invoice->load([
+            'patient',
+            'encounter.unit',
+            'encounter.doctor',
+            'guarantor',
+            'payments.receivedBy',
+        ]);
+
+        return Inertia::render('cashier/invoice/payment/index', [
+            'invoice' => $invoice,
+        ]);
+    }
 
     public function store(RecordPaymentRequest $request, Invoice $invoice): RedirectResponse
     {

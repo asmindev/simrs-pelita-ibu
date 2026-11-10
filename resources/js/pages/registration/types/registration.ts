@@ -84,6 +84,13 @@ export type Encounter = {
     insurance_coverage?: InsuranceCoverage | null;
     cancelled_by?: { id: number; name: string } | null;
     created_by?: { id: number; name: string } | null;
+    invoices?: Array<{
+        id: number;
+        invoice_number: string;
+        status: string;
+        total_amount: number;
+        paid_amount: number;
+    }>;
 };
 
 export type EncounterFilters = {

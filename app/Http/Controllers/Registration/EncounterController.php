@@ -148,6 +148,7 @@ class EncounterController extends Controller
             'insuranceCoverage',
             'cancelledBy',
             'createdBy',
+            'invoices',
         ]);
 
         return Inertia::render('registration/visit/show/index', [

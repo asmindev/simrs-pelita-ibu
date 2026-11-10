@@ -1,5 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, FileText, Printer, Wallet, XCircle } from 'lucide-react';
+import {
+    ArrowLeft,
+    FileText,
+    Printer,
+    Receipt,
+    Wallet,
+    XCircle,
+} from 'lucide-react';
 import { useState } from 'react';
 
 import { formatCurrency, formatDateTime } from '@/shared/lib/format';
@@ -19,7 +26,6 @@ import {
 import type { Invoice, InvoiceItem } from '../../types/cashier';
 import { InvoiceStatusBadge } from '../components/invoice-status-badge';
 import { PaymentDialog } from '../components/payment-dialog';
-import { PaymentHistoryDialog } from './components/payment-history-dialog';
 import { VoidInvoiceDialog } from './components/void-invoice-dialog';
 
 type Props = {
@@ -61,23 +67,6 @@ function getItemTypeBadge(type: InvoiceItem['item_type']) {
     }
 }
 
-function getPaymentMethodLabel(method: string) {
-    switch (method) {
-        case 'cash':
-            return 'Tunai (Cash)';
-        case 'qris':
-            return 'QRIS';
-        case 'bank_transfer':
-            return 'Transfer Bank';
-        case 'debit_card':
-            return 'Kartu Debit';
-        case 'credit_card':
-            return 'Kartu Kredit';
-        default:
-            return method;
-    }
-}
-
 export default function InvoiceShowIndex({ invoice }: Props) {
     const [isPaymentOpen, setIsPaymentOpen] = useState(false);
     const [isVoidOpen, setIsVoidOpen] = useState(false);
@@ -110,10 +99,30 @@ export default function InvoiceShowIndex({ invoice }: Props) {
                 </Button>
 
                 <div className="flex flex-wrap items-center gap-2">
-                    <PaymentHistoryDialog
-                        invoice={invoice}
-                        getPaymentMethodLabel={getPaymentMethodLabel}
-                    />
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 gap-1.5 text-xs font-medium"
+                        asChild
+                    >
+                        <Link
+                            href={route(
+                                'cashier.invoices.payments.index',
+                                invoice.id,
+                            )}
+                        >
+                            <Receipt className="size-3.5" />
+                            <span>Riwayat Pembayaran</span>
+                            {(invoice.payments?.length ?? 0) > 0 && (
+                                <Badge
+                                    variant="secondary"
+                                    className="px-1.5 py-0 font-mono text-[10px]"
+                                >
+                                    {invoice.payments?.length}
+                                </Badge>
+                            )}
+                        </Link>
+                    </Button>
 
                     <Button
                         variant="outline"

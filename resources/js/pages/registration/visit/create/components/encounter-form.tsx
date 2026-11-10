@@ -1,10 +1,12 @@
 import { Link, useForm } from '@inertiajs/react';
 import {
+    Activity,
     AlertCircle,
     Building2,
     Calendar,
     CreditCard,
     FileText,
+    Stethoscope,
     UserCheck,
 } from 'lucide-react';
 import { type FormEvent, useMemo, useState } from 'react';
@@ -20,7 +22,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Checkbox } from '@/shared/ui/checkbox';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
+import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { Textarea } from '@/shared/ui/textarea';
+
+import { SelectedPatientCard } from './selected-patient-card';
 
 type UnitOption = {
     id: number;
@@ -66,7 +71,7 @@ export function EncounterForm({
     units,
     doctors,
     guarantors,
-    types,
+    types: _types,
     preselectedPatient = null,
 }: Props) {
     const [selectedPatient, setSelectedPatient] =
@@ -94,16 +99,30 @@ export function EncounterForm({
         selectedGuarantor?.type === 'bpjs' ||
         selectedGuarantor?.type === 'insurance';
 
+    // Filter units based on service tab (Emergency vs Outpatient)
+    const filteredUnits = useMemo(() => {
+        if (data.type === 'emergency') {
+            const igdUnits = units.filter(
+                (u) =>
+                    u.code.toLowerCase().includes('igd') ||
+                    u.name.toLowerCase().includes('gawat darurat') ||
+                    u.type?.toLowerCase() === 'emergency',
+            );
+            return igdUnits.length > 0 ? igdUnits : units;
+        }
+        return units;
+    }, [units, data.type]);
+
     // Combobox Options
     const unitOptions: ComboboxOption[] = useMemo(
         () =>
-            units.map((u) => ({
+            filteredUnits.map((u) => ({
                 value: String(u.id),
                 label: u.name,
                 badge: u.code,
                 description: u.type ? `Jenis: ${u.type}` : undefined,
             })),
-        [units],
+        [filteredUnits],
     );
 
     const doctorOptions: ComboboxOption[] = useMemo(
@@ -133,6 +152,21 @@ export function EncounterForm({
         setData('patient_id', patient?.id ?? 0);
     }
 
+    function handleTypeTabChange(typeValue: string) {
+        setData('type', typeValue);
+        // If switched to emergency, auto select IGD unit if found
+        if (typeValue === 'emergency') {
+            const igdUnit = units.find(
+                (u) =>
+                    u.code.toLowerCase().includes('igd') ||
+                    u.name.toLowerCase().includes('gawat darurat'),
+            );
+            if (igdUnit) {
+                setData('unit_id', String(igdUnit.id));
+            }
+        }
+    }
+
     function submit(event: FormEvent) {
         event.preventDefault();
         post(route('registration.visits.store'));
@@ -143,21 +177,28 @@ export function EncounterForm({
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 {/* Kolom Kiri (2/3): Form Utama */}
                 <div className="space-y-6 lg:col-span-2">
-                    {/* Seksi 1: Pencarian Berkas Pasien */}
-                    <Card className="border-border/80 shadow-xs">
-                        <CardHeader className="border-b border-border/60 pb-3">
+                    {/* Seksi 1: Pasien Terpilih / Pencarian Berkas */}
+                    <Card className="border-border shadow-xs">
+                        <CardHeader className="border-b border-border pb-3">
                             <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                                 <UserCheck className="size-4 text-primary" />
-                                1. Berkas Rekam Medis Pasien
+                                1. Identitas & Berkas Pasien
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3 pt-4">
-                            <PatientPicker
-                                value={selectedPatient}
-                                onChange={handlePatientChange}
-                                error={errors.patient_id}
-                                placeholder="Ketik nama pasien, NIK, atau nomor rekam medis..."
-                            />
+                            {selectedPatient ? (
+                                <SelectedPatientCard
+                                    patient={selectedPatient}
+                                    onClear={() => handlePatientChange(null)}
+                                />
+                            ) : (
+                                <PatientPicker
+                                    value={selectedPatient}
+                                    onChange={handlePatientChange}
+                                    error={errors.patient_id}
+                                    placeholder="Ketik nama pasien, NIK, atau nomor rekam medis..."
+                                />
+                            )}
 
                             {/* Warning / Duplicate override alert */}
                             {errors.patient_id && (
@@ -190,53 +231,49 @@ export function EncounterForm({
                         </CardContent>
                     </Card>
 
-                    {/* Seksi 2: Tujuan Pelayanan & Penjamin */}
-                    <Card className="border-border/80 shadow-xs">
-                        <CardHeader className="border-b border-border/60 pb-3">
-                            <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-                                <Building2 className="size-4 text-primary" />
-                                2. Unit Tujuan & Penjamin
-                            </CardTitle>
+                    {/* Seksi 2: Jenis Pelayanan (Tabs), Unit & Penjamin */}
+                    <Card className="border-border shadow-xs">
+                        <CardHeader className="border-b border-border pb-3">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+                                    <Building2 className="size-4 text-primary" />
+                                    2. Unit Tujuan & Penjamin Pelayanan
+                                </CardTitle>
+
+                                {/* Tabs Jenis Pelayanan */}
+                                <Tabs
+                                    value={data.type}
+                                    onValueChange={handleTypeTabChange}
+                                    className="w-full sm:w-auto"
+                                >
+                                    <TabsList className="grid w-full grid-cols-2">
+                                        <TabsTrigger
+                                            value="outpatient"
+                                            className="gap-1.5 text-xs font-medium"
+                                        >
+                                            <Stethoscope className="size-3.5" />
+                                            Rawat Jalan
+                                        </TabsTrigger>
+                                        <TabsTrigger
+                                            value="emergency"
+                                            className="gap-1.5 text-xs font-medium"
+                                        >
+                                            <Activity className="size-3.5" />
+                                            Gawat Darurat (IGD)
+                                        </TabsTrigger>
+                                    </TabsList>
+                                </Tabs>
+                            </div>
                         </CardHeader>
                         <CardContent className="space-y-4 pt-4">
-                            {/* Jenis Kunjungan (Radio / Button Pills) */}
-                            <div className="space-y-1.5">
-                                <Label className="text-xs font-medium">
-                                    Jenis Pelayanan
-                                </Label>
-                                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                                    {types.map((type) => {
-                                        const isSelected =
-                                            data.type === type.value;
-                                        return (
-                                            <button
-                                                key={type.value}
-                                                type="button"
-                                                onClick={() =>
-                                                    setData('type', type.value)
-                                                }
-                                                className={`flex items-center justify-center rounded-lg border p-2.5 text-xs font-medium transition-colors ${
-                                                    isSelected
-                                                        ? 'border-primary/40 bg-primary/10 font-semibold text-primary'
-                                                        : 'border-border/80 bg-card text-muted-foreground hover:bg-muted/40'
-                                                }`}
-                                            >
-                                                {type.label}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                                {errors.type && (
-                                    <p className="text-xs text-destructive">
-                                        {errors.type}
-                                    </p>
-                                )}
-                            </div>
-
                             <div className="grid gap-4 sm:grid-cols-2">
-                                {/* Unit / Poli Tujuan (Combobox Search) */}
+                                {/* Unit / Poli Tujuan */}
                                 <FormField
-                                    label="Unit / Poliklinik Tujuan"
+                                    label={
+                                        data.type === 'emergency'
+                                            ? 'Unit Gawat Darurat'
+                                            : 'Poliklinik Tujuan'
+                                    }
                                     htmlFor="unit_id"
                                     error={errors.unit_id}
                                 >
@@ -251,7 +288,7 @@ export function EncounterForm({
                                     />
                                 </FormField>
 
-                                {/* Dokter Pemeriksa (Combobox Search) */}
+                                {/* Dokter Pemeriksa */}
                                 <FormField
                                     label="Dokter Pemeriksa (Opsional)"
                                     htmlFor="doctor_id"
@@ -271,7 +308,7 @@ export function EncounterForm({
                                 </FormField>
                             </div>
 
-                            {/* Penjamin Pembayaran (Combobox Search) */}
+                            {/* Penjamin Pembayaran */}
                             <FormField
                                 label="Penjamin Pembayaran Pasien"
                                 htmlFor="guarantor_id"
@@ -338,7 +375,7 @@ export function EncounterForm({
                                 </div>
                             )}
 
-                            {/* Catatan / Keluhan Awal */}
+                            {/* Catatan Pendaftaran */}
                             <FormField
                                 label="Catatan Pendaftaran / Keluhan Awal"
                                 htmlFor="notes"
@@ -382,8 +419,8 @@ export function EncounterForm({
 
                 {/* Kolom Kanan (1/3): Summary Card Preview */}
                 <div className="space-y-4">
-                    <Card className="border-border/80 bg-card shadow-xs">
-                        <CardHeader className="border-b border-border/60 pb-3">
+                    <Card className="border-border bg-card shadow-xs">
+                        <CardHeader className="border-b border-border pb-3">
                             <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                                 <FileText className="size-4 text-primary" />
                                 Ringkasan Tiket Pendaftaran
@@ -391,6 +428,26 @@ export function EncounterForm({
                         </CardHeader>
                         <CardContent className="space-y-4 pt-4 text-xs">
                             <div className="space-y-1">
+                                <span className="text-[11px] text-muted-foreground uppercase">
+                                    Jenis Pelayanan
+                                </span>
+                                <div>
+                                    <Badge
+                                        variant={
+                                            data.type === 'emergency'
+                                                ? 'destructive'
+                                                : 'secondary'
+                                        }
+                                        className="text-xs font-semibold uppercase"
+                                    >
+                                        {data.type === 'emergency'
+                                            ? 'Gawat Darurat (IGD)'
+                                            : 'Rawat Jalan'}
+                                    </Badge>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1 border-t border-border pt-3">
                                 <span className="text-[11px] text-muted-foreground uppercase">
                                     Pasien Terpilih
                                 </span>
@@ -401,13 +458,13 @@ export function EncounterForm({
                                 </div>
                                 {selectedPatient && (
                                     <p className="font-mono text-[11px] text-muted-foreground">
-                                        RM:{' '}
+                                        No. RM:{' '}
                                         {selectedPatient.medical_record_number}
                                     </p>
                                 )}
                             </div>
 
-                            <div className="space-y-1 border-t border-border/60 pt-3">
+                            <div className="space-y-1 border-t border-border pt-3">
                                 <span className="text-[11px] text-muted-foreground uppercase">
                                     Unit Tujuan
                                 </span>
@@ -418,7 +475,7 @@ export function EncounterForm({
                                 </div>
                             </div>
 
-                            <div className="space-y-1 border-t border-border/60 pt-3">
+                            <div className="space-y-1 border-t border-border pt-3">
                                 <span className="text-[11px] text-muted-foreground uppercase">
                                     Dokter Pemeriksa
                                 </span>
@@ -429,7 +486,7 @@ export function EncounterForm({
                                 </div>
                             </div>
 
-                            <div className="space-y-1 border-t border-border/60 pt-3">
+                            <div className="space-y-1 border-t border-border pt-3">
                                 <span className="text-[11px] text-muted-foreground uppercase">
                                     Penjamin Pembayaran
                                 </span>
@@ -446,8 +503,8 @@ export function EncounterForm({
 
                             <div className="rounded-lg border border-border bg-muted/40 p-3 text-[11px] text-muted-foreground">
                                 💡 Setelah pendaftaran berhasil disimpan, nomor
-                                antrean otomatis diterbitkan dan langsung muncul
-                                pada papan antrean poli terkait.
+                                antrean otomatis diterbitkan dan langsung siap
+                                diproses di unit pelayanan.
                             </div>
                         </CardContent>
                     </Card>
