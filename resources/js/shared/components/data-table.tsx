@@ -14,7 +14,7 @@ import {
 export type DataTableColumn<T> = {
     key: string;
     header: ReactNode;
-    render: (row: T) => ReactNode;
+    render: (row: T, index?: number) => ReactNode;
     className?: string;
 };
 
@@ -67,7 +67,7 @@ export function DataTable<T>({
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {rows.map((row) => (
+                                {rows.map((row, index) => (
                                     <TableRow
                                         key={rowKey(row)}
                                         className="transition-colors duration-150 hover:bg-accent/40"
@@ -77,7 +77,7 @@ export function DataTable<T>({
                                                 key={column.key}
                                                 className={column.className}
                                             >
-                                                {column.render(row)}
+                                                {column.render(row, index)}
                                             </TableCell>
                                         ))}
                                     </TableRow>

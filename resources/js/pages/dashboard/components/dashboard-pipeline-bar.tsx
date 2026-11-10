@@ -1,8 +1,8 @@
-import { BedDouble, DollarSign, Pill, Stethoscope, Users } from "lucide-react";
+import { BedDouble, DollarSign, Pill, Stethoscope, Users } from 'lucide-react';
 
-import { Card, CardContent } from "@/shared/ui/card";
+import { Card, CardContent } from '@/shared/ui/card';
 
-import type { DashboardPipeline } from "../types/dashboard";
+import type { DashboardPipeline } from '../types/dashboard';
 
 interface Props {
     pipeline: DashboardPipeline;
@@ -11,35 +11,35 @@ interface Props {
 export function DashboardPipelineBar({ pipeline }: Props) {
     const stats = [
         {
-            label: "1. Pendaftaran",
+            label: '1. Pendaftaran',
             value: pipeline.registration_count,
             sub: `${pipeline.registration_count} kunjungan hari ini`,
             icon: Users,
             highlight: false,
         },
         {
-            label: "2. Antrean Dokter",
+            label: '2. Antrean Dokter',
             value: pipeline.waiting_consultations,
             sub: `${pipeline.waiting_consultations} pasien menunggu periksa`,
             icon: Stethoscope,
             highlight: pipeline.waiting_consultations > 0,
         },
         {
-            label: "3. Farmasi & Resep",
+            label: '3. Farmasi & Resep',
             value: pipeline.pending_prescriptions,
             sub: `${pipeline.pending_prescriptions} resep menunggu racik`,
             icon: Pill,
             highlight: pipeline.pending_prescriptions > 0,
         },
         {
-            label: "4. Kasir & Billing",
+            label: '4. Kasir & Billing',
             value: pipeline.pending_invoices,
             sub: `${pipeline.pending_invoices} tagihan belum lunas`,
             icon: DollarSign,
             highlight: pipeline.pending_invoices > 0,
         },
         {
-            label: "5. Rawat Inap (BOR)",
+            label: '5. Rawat Inap (BOR)',
             value: `${pipeline.bor_percentage}%`,
             sub: `${pipeline.occupied_beds}/${pipeline.total_beds} bed terisi`,
             icon: BedDouble,
@@ -56,27 +56,27 @@ export function DashboardPipelineBar({ pipeline }: Props) {
                     <Card
                         key={stat.label}
                         className={`overflow-hidden border-none bg-muted p-0 shadow-none ${
-                            stat.highlight ? "ring-1 ring-primary/20" : ""
+                            stat.highlight ? 'ring-1 ring-primary/20' : ''
                         }`}
                     >
                         <CardContent
-                            className={`flex w-full flex-col items-center p-0 ${!stat.highlight && "bg-primary"}`}
+                            className={`flex w-full flex-col items-center p-0 ${!stat.highlight && 'bg-primary'}`}
                         >
                             <div className="w-full p-0.5 sm:p-1">
                                 <div
                                     className={`rounded-lg border p-2.5 shadow-xs transition-colors sm:p-4 ${
                                         stat.highlight
-                                            ? "border-primary bg-primary"
-                                            : "border-border bg-card shadow-xs"
+                                            ? 'border-primary bg-primary'
+                                            : 'border-border bg-card shadow-xs'
                                     }`}
                                 >
                                     <div className="mb-1.5 flex items-center justify-between gap-1.5 sm:mb-2 sm:gap-2">
                                         <div className="flex min-w-0 items-center gap-1.5 text-muted-foreground/80 sm:gap-2">
                                             <Icon
-                                                className={`size-3.5 shrink-0 ${stat.highlight && "text-foreground"}`}
+                                                className={`size-3.5 shrink-0 ${stat.highlight && 'text-foreground'}`}
                                             />
                                             <p
-                                                className={`truncate font-mono text-[10px] font-semibold tracking-wider ${stat.highlight && "text-foreground"} uppercase sm:text-xs`}
+                                                className={`truncate font-mono text-[10px] font-semibold tracking-wider ${stat.highlight && 'text-foreground'} uppercase sm:text-xs`}
                                             >
                                                 {stat.label}
                                             </p>
@@ -86,7 +86,7 @@ export function DashboardPipelineBar({ pipeline }: Props) {
                                     <h3
                                         className={`font-mono text-xl font-bold tracking-tight sm:text-2xl md:text-3xl ${
                                             stat.highlight &&
-                                            "font-black text-foreground"
+                                            'font-black text-foreground'
                                         }`}
                                     >
                                         {stat.value}
@@ -94,7 +94,7 @@ export function DashboardPipelineBar({ pipeline }: Props) {
                                 </div>
                             </div>
 
-                            <div className="hidden w-full justify-between px-3 py-1.5 text-[10px] font-medium  uppercase sm:flex">
+                            <div className="hidden w-full justify-between px-3 py-1.5 text-[10px] font-medium uppercase sm:flex">
                                 <p className="truncate">{stat.sub}</p>
                             </div>
                         </CardContent>

@@ -1,10 +1,13 @@
-import { useMemo } from 'react';
+import { Building2, Search } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 import {
     DataTable,
     type DataTableColumn,
 } from '@/shared/components/data-table';
+import { TableToolbar } from '@/shared/components/table-toolbar';
 import { Badge } from '@/shared/ui/badge';
+import { Input } from '@/shared/ui/input';
 
 import type { UnitQueueSummary } from '../types/dashboard';
 
@@ -13,6 +16,19 @@ interface Props {
 }
 
 export function DashboardUnitQueueTable({ items }: Props) {
+    const [search, setSearch] = useState('');
+
+    const filteredItems = useMemo(() => {
+        if (!search.trim()) return items;
+        const q = search.toLowerCase();
+        return items.filter(
+            (item) =>
+                item.unit_name.toLowerCase().includes(q) ||
+                item.unit_code.toLowerCase().includes(q) ||
+                item.doctor_name.toLowerCase().includes(q),
+        );
+    }, [items, search]);
+
     const columns: DataTableColumn<UnitQueueSummary>[] = useMemo(
         () => [
             {
@@ -82,28 +98,30 @@ export function DashboardUnitQueueTable({ items }: Props) {
     );
 
     return (
-        <div className="space-y-2">
-            <div className="flex items-center justify-between px-1">
-                <div>
-                    <h3 className="text-sm font-semibold text-foreground">
-                        Monitoring Antrean & Beban Kerja Poli
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                        Status antrean pasien rawat jalan dan instalasi gawat
-                        darurat hari ini.
-                    </p>
-                </div>
-                <Badge variant="outline" className="text-xs">
-                    {items.length} Poli Aktif
-                </Badge>
-            </div>
-
-            <DataTable<UnitQueueSummary>
-                columns={columns}
-                rows={items}
-                rowKey={(item) => item.id}
-                empty="Belum ada aktivitas antrean poli tercatat hari ini."
-            />
-        </div>
+        <DataTable<UnitQueueSummary>
+            columns={columns}
+            rows={filteredItems}
+            rowKey={(item) => item.id}
+            empty="Belum ada aktivitas antrean poli tercatat hari ini."
+            toolbar={
+                <TableToolbar
+                    title="Monitoring Antrean & Beban Kerja Poli"
+                    description="Status antrean pasien rawat jalan dan instalasi gawat darurat hari ini."
+                    icon={Building2}
+                    current={filteredItems.length}
+                    total={items.length}
+                >
+                    <div className="relative min-w-44 sm:w-60">
+                        <Search className="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            placeholder="Cari poli atau dokter..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="h-8 bg-background pl-8 text-xs"
+                        />
+                    </div>
+                </TableToolbar>
+            }
+        />
     );
 }

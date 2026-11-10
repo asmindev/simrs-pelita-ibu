@@ -119,10 +119,18 @@ Tetap hindari hook yang hanya meneruskan props.
 
 ### 4.7 Tabel dan filter
 
-- API `DataTable` props-only.
-- Filter/sort/page/search disimpan di query string; reload dengan
-  `router.get(..., { preserveState: true, preserveScroll: true })`.
-- Data tabel selalu dipaginasi server-side.
+- **Standarisasi Desain Tabel (`DataTable`)**:
+  - Seluruh tabel di aplikasi (baik halaman daftar utama, modal, tab, maupun detail riwayat) wajib menggunakan komponen terpadu `DataTable` dari `@/shared/components/data-table`.
+  - Dilarang membungkus tabel secara inkonsisten (misal manual wrapper border/card ganda di luar `DataTable`).
+  - Seluruh tabel wajib menyertakan header dan ringkasan toolbar standar melalui `TableToolbar` (`@/shared/components/table-toolbar`), minimal memuat:
+    - Judul tabel (`title`) & deskripsi konteks (`description`).
+    - Ikon modul/entitas (`icon`).
+    - Indikator counter baris data (`current` & `total`).
+    - Input pencarian cepat (*search field*) di sisi kanan toolbar untuk kenyamanan pengguna saat memfilter data.
+    - **Konsistensi Background Input Toolbar**: Setiap input field (seperti search input, text input, dan select trigger dropdown) di dalam toolbar tabel **wajib memakai kelas `bg-background`** (bukan tombol / button) agar kontras terhadap background toolbar `bg-muted` tetap tajam, konsisten, dan rapi di seluruh sistem.
+- API `DataTable` props-only (`columns`, `rows`, `rowKey`, `empty`, `toolbar`, `footer`).
+- Filter/sort/page/search pada halaman utama disimpan di query string; reload dengan `router.get(..., { preserveState: true, preserveScroll: true })`.
+- Data tabel pada halaman daftar utama selalu dipaginasi server-side.
 
 ### 4.8 State
 

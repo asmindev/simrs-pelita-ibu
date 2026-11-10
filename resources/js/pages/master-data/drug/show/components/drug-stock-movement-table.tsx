@@ -1,39 +1,41 @@
+import { History, Search } from "lucide-react";
+import { useMemo, useState } from "react";
 import {
     ArrowDownRight,
     ArrowUpRight,
     RotateCcw,
     SlidersHorizontal,
-} from 'lucide-react';
+} from "lucide-react";
 
-import { formatDateTime } from '@/shared/lib/format';
-import { Badge } from '@/shared/ui/badge';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/shared/ui/table';
+    DataTable,
+    type DataTableColumn,
+} from "@/shared/components/data-table";
+import { TableToolbar } from "@/shared/components/table-toolbar";
+import { formatDateTime } from "@/shared/lib/format";
+import { Badge } from "@/shared/ui/badge";
+import { Input } from "@/shared/ui/input";
 
-import type { Drug } from '../../types/drug';
+import type { Drug } from "../../types/drug";
+
+type NonNullableMovement = NonNullable<Drug["stock_movements"]>[number];
 
 interface DrugStockMovementTableProps {
-    movements?: Drug['stock_movements'];
+    movements?: Drug["stock_movements"];
     unitOfMeasure: string;
 }
 
 function getMovementTypeBadge(type: string) {
     switch (type) {
-        case 'in':
+        case "in":
             return (
                 <Badge variant="default" className="gap-1 text-[10px]">
                     <ArrowDownRight className="size-3" />
                     Penerimaan Masuk
                 </Badge>
             );
-        case 'dispensing':
-        case 'out':
+        case "dispensing":
+        case "out":
             return (
                 <Badge
                     variant="outline"
@@ -43,15 +45,15 @@ function getMovementTypeBadge(type: string) {
                     Keluar / Resep
                 </Badge>
             );
-        case 'adjustment':
-        case 'opname':
+        case "adjustment":
+        case "opname":
             return (
                 <Badge variant="secondary" className="gap-1 text-[10px]">
                     <SlidersHorizontal className="size-3" />
                     Penyesuaian (Opname)
                 </Badge>
             );
-        case 'return':
+        case "return":
             return (
                 <Badge variant="outline" className="gap-1 text-[10px]">
                     <RotateCcw className="size-3" />
@@ -68,99 +70,146 @@ function getMovementTypeBadge(type: string) {
 }
 
 export function DrugStockMovementTable({
-    movements,
+    movements = [],
     unitOfMeasure,
 }: DrugStockMovementTableProps) {
+    const [search, setSearch] = useState("");
+
+    const filteredMovements = useMemo(() => {
+        if (!search.trim()) return movements;
+        const q = search.toLowerCase();
+        return movements.filter(
+            (m) =>
+                (m.drug_batch?.batch_number &&
+                    m.drug_batch.batch_number.toLowerCase().includes(q)) ||
+                (m.reason && m.reason.toLowerCase().includes(q)) ||
+                (m.user?.name && m.user.name.toLowerCase().includes(q)) ||
+                m.type.toLowerCase().includes(q),
+        );
+    }, [movements, search]);
+
+    const columns = useMemo<DataTableColumn<NonNullableMovement>[]>(
+        () => [
+            {
+                key: "index",
+                header: "No.",
+                className: "w-12 text-center",
+                render: (_, index) => (
+                    <span className="font-mono text-xs text-muted-foreground">
+                        {(index ?? 0) + 1}
+                    </span>
+                ),
+            },
+            {
+                key: "created_at",
+                header: "Tanggal & Waktu",
+                render: (move) => (
+                    <span className="text-xs text-muted-foreground">
+                        {formatDateTime(move.created_at)}
+                    </span>
+                ),
+            },
+            {
+                key: "type",
+                header: "Jenis Mutasi",
+                render: (move) => getMovementTypeBadge(move.type),
+            },
+            {
+                key: "batch",
+                header: "Batch Terkait",
+                render: (move) => (
+                    <span className="font-mono text-xs text-foreground">
+                        {move.drug_batch?.batch_number ?? "-"}
+                    </span>
+                ),
+            },
+            {
+                key: "quantity",
+                header: "Kuantitas",
+                className: "text-right",
+                render: (move) => {
+                    const isPositive = move.quantity > 0;
+                    return (
+                        <span
+                            className={`font-mono text-xs font-bold tabular-nums ${
+                                isPositive ? "text-primary" : "text-destructive"
+                            }`}
+                        >
+                            {isPositive ? `+${move.quantity}` : move.quantity}{" "}
+                            {unitOfMeasure}
+                        </span>
+                    );
+                },
+            },
+            {
+                key: "balance_before",
+                header: "Stok Sebelum",
+                className: "text-right",
+                render: (move) => (
+                    <span className="font-mono text-xs text-muted-foreground tabular-nums">
+                        {move.balance_before.toLocaleString("id-ID")}{" "}
+                        {unitOfMeasure}
+                    </span>
+                ),
+            },
+            {
+                key: "balance_after",
+                header: "Stok Sesudah",
+                className: "text-right",
+                render: (move) => (
+                    <span className="font-mono text-xs font-bold text-foreground tabular-nums">
+                        {move.balance_after.toLocaleString("id-ID")}{" "}
+                        {unitOfMeasure}
+                    </span>
+                ),
+            },
+            {
+                key: "user",
+                header: "Petugas / PIC",
+                render: (move) => (
+                    <span className="text-xs text-foreground">
+                        {move.user?.name ?? "-"}
+                    </span>
+                ),
+            },
+            {
+                key: "reason",
+                header: "Keterangan",
+                render: (move) => (
+                    <span className="max-w-[200px] truncate text-xs text-muted-foreground">
+                        {move.reason || "-"}
+                    </span>
+                ),
+            },
+        ],
+        [unitOfMeasure],
+    );
+
     return (
-        <div className="overflow-hidden rounded-lg border border-border">
-            <Table>
-                <TableHeader>
-                    <TableRow className="hover:bg-transparent">
-                        <TableHead className="w-12 text-center text-xs">
-                            No.
-                        </TableHead>
-                        <TableHead className="text-xs">
-                            Tanggal & Waktu
-                        </TableHead>
-                        <TableHead className="text-xs">Jenis Mutasi</TableHead>
-                        <TableHead className="text-xs">Batch Terkait</TableHead>
-                        <TableHead className="text-right text-xs">
-                            Kuantitas
-                        </TableHead>
-                        <TableHead className="text-right text-xs">
-                            Stok Sebelum
-                        </TableHead>
-                        <TableHead className="text-right text-xs">
-                            Stok Sesudah
-                        </TableHead>
-                        <TableHead className="text-xs">Petugas / PIC</TableHead>
-                        <TableHead className="text-xs">Keterangan</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {!movements || movements.length === 0 ? (
-                        <TableRow>
-                            <TableCell
-                                colSpan={9}
-                                className="h-32 text-center text-xs text-muted-foreground"
-                            >
-                                Belum ada riwayat mutasi / stock move untuk obat
-                                ini.
-                            </TableCell>
-                        </TableRow>
-                    ) : (
-                        movements.map((move, index) => {
-                            const isPositive = move.quantity > 0;
-                            return (
-                                <TableRow key={move.id}>
-                                    <TableCell className="text-center font-mono text-xs text-muted-foreground">
-                                        {index + 1}
-                                    </TableCell>
-                                    <TableCell className="text-xs text-muted-foreground">
-                                        {formatDateTime(move.created_at)}
-                                    </TableCell>
-                                    <TableCell className="text-xs">
-                                        {getMovementTypeBadge(move.type)}
-                                    </TableCell>
-                                    <TableCell className="font-mono text-xs text-foreground">
-                                        {move.drug_batch?.batch_number ?? '-'}
-                                    </TableCell>
-                                    <TableCell
-                                        className={`text-right font-mono text-xs font-bold ${
-                                            isPositive
-                                                ? 'text-primary'
-                                                : 'text-destructive'
-                                        }`}
-                                    >
-                                        {isPositive
-                                            ? `+${move.quantity}`
-                                            : move.quantity}{' '}
-                                        {unitOfMeasure}
-                                    </TableCell>
-                                    <TableCell className="text-right font-mono text-xs text-muted-foreground">
-                                        {move.balance_before.toLocaleString(
-                                            'id-ID',
-                                        )}{' '}
-                                        {unitOfMeasure}
-                                    </TableCell>
-                                    <TableCell className="text-right font-mono text-xs font-bold text-foreground">
-                                        {move.balance_after.toLocaleString(
-                                            'id-ID',
-                                        )}{' '}
-                                        {unitOfMeasure}
-                                    </TableCell>
-                                    <TableCell className="text-xs text-foreground">
-                                        {move.user?.name ?? '-'}
-                                    </TableCell>
-                                    <TableCell className="max-w-[200px] truncate text-xs text-muted-foreground">
-                                        {move.reason || '-'}
-                                    </TableCell>
-                                </TableRow>
-                            );
-                        })
-                    )}
-                </TableBody>
-            </Table>
-        </div>
+        <DataTable<NonNullableMovement>
+            columns={columns}
+            rows={filteredMovements}
+            rowKey={(move) => move.id}
+            empty="Belum ada riwayat mutasi / stock move untuk obat ini."
+            toolbar={
+                <TableToolbar
+                    title="Riwayat Mutasi & Pergerakan Stok"
+                    description="Catatan audit penerimaan, pengeluaran resep, penyesuaian opname, dan retur."
+                    icon={History}
+                    current={filteredMovements.length}
+                    total={movements.length}
+                >
+                    <div className="relative min-w-48 sm:w-64">
+                        <Search className="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            placeholder="Cari mutasi, batch, keterangan..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="h-8 bg-background pl-8 text-xs"
+                        />
+                    </div>
+                </TableToolbar>
+            }
+        />
     );
 }

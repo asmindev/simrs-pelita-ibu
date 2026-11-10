@@ -68,6 +68,7 @@
   `shared/`.
 - `DataTable` memakai API props-only: `columns`, `rows`, `rowKey`, `empty`,
   `toolbar`, `footer`.
+- **Standar Tampilan Tabel**: Seluruh tabel wajib konsisten menggunakan `DataTable` dengan `TableToolbar` sebagai header (wajib menyertakan icon, title, description, counter `current`/`total`, dan minimal field pencarian *search*). Field input pada toolbar selain tombol (seperti `Input` dan `SelectTrigger`) wajib menggunakan kelas `bg-background` agar kontras terhadap background toolbar `bg-muted` konsisten di seluruh aplikasi. Dilarang membuat wrapper tabel kardus manual atau tabel tanpa header/search field yang memecah konsistensi layout.
 
 ### Styling dan Palet Warna
 

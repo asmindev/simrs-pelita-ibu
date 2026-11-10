@@ -1,9 +1,4 @@
-import {
-    Building2,
-    DollarSign,
-    Layers,
-    Package,
-} from 'lucide-react';
+import { Building2, DollarSign, Layers, Package } from 'lucide-react';
 
 import { formatCurrency } from '@/shared/lib/format';
 import { Badge } from '@/shared/ui/badge';

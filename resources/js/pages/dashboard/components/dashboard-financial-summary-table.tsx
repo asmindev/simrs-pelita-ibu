@@ -1,11 +1,14 @@
-import { useMemo } from 'react';
+import { Receipt, Search } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 import {
     DataTable,
     type DataTableColumn,
 } from '@/shared/components/data-table';
+import { TableToolbar } from '@/shared/components/table-toolbar';
 import { formatCurrency } from '@/shared/lib/format';
 import { Badge } from '@/shared/ui/badge';
+import { Input } from '@/shared/ui/input';
 
 import type { FinancialSummaryItem } from '../types/dashboard';
 
@@ -14,6 +17,16 @@ interface Props {
 }
 
 export function DashboardFinancialSummaryTable({ items }: Props) {
+    const [search, setSearch] = useState('');
+
+    const filteredItems = useMemo(() => {
+        if (!search.trim()) return items;
+        const q = search.toLowerCase();
+        return items.filter((item) =>
+            item.guarantor_name.toLowerCase().includes(q),
+        );
+    }, [items, search]);
+
     const columns: DataTableColumn<FinancialSummaryItem>[] = useMemo(
         () => [
             {
@@ -67,28 +80,30 @@ export function DashboardFinancialSummaryTable({ items }: Props) {
     );
 
     return (
-        <div className="space-y-2">
-            <div className="flex items-center justify-between px-1">
-                <div>
-                    <h3 className="text-sm font-semibold text-foreground">
-                        Ringkasan Billing & Penjamin Hari Ini
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                        Rekapitulasi tagihan pasien rawat jalan/inap berdasarkan
-                        penjamin.
-                    </p>
-                </div>
-                <Badge variant="outline" className="font-mono text-xs">
-                    {items.length} Kelompok Penjamin
-                </Badge>
-            </div>
-
-            <DataTable<FinancialSummaryItem>
-                columns={columns}
-                rows={items}
-                rowKey={(item) => item.guarantor_id ?? item.guarantor_name}
-                empty="Belum ada transaksi invoice kasir tercatat hari ini."
-            />
-        </div>
+        <DataTable<FinancialSummaryItem>
+            columns={columns}
+            rows={filteredItems}
+            rowKey={(item) => item.guarantor_id ?? item.guarantor_name}
+            empty="Belum ada transaksi invoice kasir tercatat hari ini."
+            toolbar={
+                <TableToolbar
+                    title="Ringkasan Billing & Penjamin Hari Ini"
+                    description="Rekapitulasi tagihan pasien rawat jalan/inap berdasarkan penjamin."
+                    icon={Receipt}
+                    current={filteredItems.length}
+                    total={items.length}
+                >
+                    <div className="relative min-w-44 sm:w-60">
+                        <Search className="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            placeholder="Cari penjamin..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="h-8 bg-background pl-8 text-xs"
+                        />
+                    </div>
+                </TableToolbar>
+            }
+        />
     );
 }

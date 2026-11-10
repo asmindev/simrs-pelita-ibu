@@ -87,12 +87,12 @@ export function GuarantorFilters({ filters, current, total }: Props) {
                         placeholder="Cari kode atau nama..."
                         value={search}
                         onChange={(event) => setSearch(event.target.value)}
-                        className="h-8 pl-8 text-xs"
+                        className="h-8 bg-background pl-8 text-xs"
                     />
                 </div>
 
                 <Select value={type} onValueChange={setType}>
-                    <SelectTrigger className="h-8 w-40 text-xs">
+                    <SelectTrigger className="h-8 w-40 bg-background text-xs">
                         <SelectValue placeholder="Semua tipe" />
                     </SelectTrigger>
                     <SelectContent>
@@ -106,7 +106,7 @@ export function GuarantorFilters({ filters, current, total }: Props) {
                 </Select>
 
                 <Select value={status} onValueChange={setStatus}>
-                    <SelectTrigger className="h-8 w-32 text-xs">
+                    <SelectTrigger className="h-8 w-32 bg-background text-xs">
                         <SelectValue placeholder="Semua status" />
                     </SelectTrigger>
                     <SelectContent>

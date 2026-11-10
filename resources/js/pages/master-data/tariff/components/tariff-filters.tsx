@@ -92,12 +92,12 @@ export function TariffFilters({ filters, units, current, total }: Props) {
                         placeholder="Cari kode atau nama tarif..."
                         value={search}
                         onChange={(event) => setSearch(event.target.value)}
-                        className="h-8 pl-8 text-xs"
+                        className="h-8 bg-background pl-8 text-xs"
                     />
                 </div>
 
                 <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="h-8 w-36 text-xs">
+                    <SelectTrigger className="h-8 w-36 bg-background text-xs">
                         <SelectValue placeholder="Semua kategori" />
                     </SelectTrigger>
                     <SelectContent>
@@ -111,7 +111,7 @@ export function TariffFilters({ filters, units, current, total }: Props) {
                 </Select>
 
                 <Select value={unitId} onValueChange={setUnitId}>
-                    <SelectTrigger className="h-8 w-36 text-xs">
+                    <SelectTrigger className="h-8 w-36 bg-background text-xs">
                         <SelectValue placeholder="Semua unit" />
                     </SelectTrigger>
                     <SelectContent>
@@ -125,7 +125,7 @@ export function TariffFilters({ filters, units, current, total }: Props) {
                 </Select>
 
                 <Select value={status} onValueChange={setStatus}>
-                    <SelectTrigger className="h-8 w-32 text-xs">
+                    <SelectTrigger className="h-8 w-32 bg-background text-xs">
                         <SelectValue placeholder="Semua status" />
                     </SelectTrigger>
                     <SelectContent>

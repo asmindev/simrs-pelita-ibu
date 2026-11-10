@@ -4,7 +4,6 @@ import { ArrowLeft, Boxes, Edit2, History } from 'lucide-react';
 import { Can } from '@/shared/components/can';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 
 import type { Drug } from '../types/drug';
@@ -95,52 +94,22 @@ export default function DrugShow({ drug, statistics }: Props) {
 
                 <TabsContent
                     value="batches"
-                    className="m-0 focus-visible:outline-none"
+                    className="space-y-4 focus-visible:outline-none"
                 >
-                    <Card className="border-border bg-card">
-                        <CardHeader className="flex flex-row items-center justify-between pb-3">
-                            <div>
-                                <CardTitle className="text-sm font-semibold text-foreground">
-                                    Daftar Batch & Masa Kedaluwarsa
-                                </CardTitle>
-                                <p className="text-xs text-muted-foreground">
-                                    Rincian lot nomor batch dan kuantitas fisik
-                                    aktif di gudang/depo farmasi.
-                                </p>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            <DrugBatchTable
-                                batches={drug.batches}
-                                unitOfMeasure={drug.unit_of_measure}
-                            />
-                        </CardContent>
-                    </Card>
+                    <DrugBatchTable
+                        batches={drug.batches}
+                        unitOfMeasure={drug.unit_of_measure}
+                    />
                 </TabsContent>
 
                 <TabsContent
                     value="movements"
-                    className="m-0 focus-visible:outline-none"
+                    className="space-y-4 focus-visible:outline-none"
                 >
-                    <Card className="border-border bg-card">
-                        <CardHeader className="flex flex-row items-center justify-between pb-3">
-                            <div>
-                                <CardTitle className="text-sm font-semibold text-foreground">
-                                    Log Pergerakan Stok (Stock Moves)
-                                </CardTitle>
-                                <p className="text-xs text-muted-foreground">
-                                    Catatan audit penerimaan, pengeluaran resep,
-                                    penyesuaian opname, dan retur obat.
-                                </p>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            <DrugStockMovementTable
-                                movements={drug.stock_movements}
-                                unitOfMeasure={drug.unit_of_measure}
-                            />
-                        </CardContent>
-                    </Card>
+                    <DrugStockMovementTable
+                        movements={drug.stock_movements}
+                        unitOfMeasure={drug.unit_of_measure}
+                    />
                 </TabsContent>
             </Tabs>
         </div>
