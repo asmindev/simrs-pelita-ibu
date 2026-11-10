@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Edit2, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
+import { Edit2, Eye, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 
 import { usePermissions } from '@/shared/hooks/use-permissions';
 import { Can } from '@/shared/components/can';
@@ -61,17 +61,12 @@ export default function DrugIndex({ drugs, categories, filters }: Props) {
             key: 'name',
             header: 'Nama Obat',
             render: (drug) => (
-                <Can
-                    permission="master-data.drug.manage"
-                    fallback={<span className="font-medium">{drug.name}</span>}
+                <Link
+                    href={route('master-data.drugs.show', drug.id)}
+                    className="font-medium underline-offset-4 hover:underline"
                 >
-                    <Link
-                        href={route('master-data.drugs.edit', drug.id)}
-                        className="font-medium underline-offset-4 hover:underline"
-                    >
-                        {drug.name}
-                    </Link>
-                </Can>
+                    {drug.name}
+                </Link>
             ),
         },
         {
@@ -145,6 +140,17 @@ export default function DrugIndex({ drugs, categories, filters }: Props) {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-36">
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        href={route(
+                                            'master-data.drugs.show',
+                                            drug.id,
+                                        )}
+                                    >
+                                        <Eye className="mr-2 size-3.5" />
+                                        Detail & Stok
+                                    </Link>
+                                </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
                                     <Link
                                         href={route(

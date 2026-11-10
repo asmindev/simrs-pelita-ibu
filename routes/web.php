@@ -119,6 +119,9 @@ Route::middleware(['auth', 'verified'])
             Route::post('/', [DrugController::class, 'store'])
                 ->middleware('permission:master-data.drug.manage')
                 ->name('store');
+            Route::get('{drug}', [DrugController::class, 'show'])
+                ->middleware('permission:master-data.drug.view')
+                ->name('show');
             Route::get('{drug}/edit', [DrugController::class, 'edit'])
                 ->middleware('permission:master-data.drug.manage')
                 ->name('edit');

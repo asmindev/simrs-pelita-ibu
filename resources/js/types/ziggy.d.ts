@@ -94,6 +94,12 @@ declare module 'ziggy-js' {
     "master-data.drugs.index": [],
     "master-data.drugs.create": [],
     "master-data.drugs.store": [],
+    "master-data.drugs.show": [
+        {
+            "name": "drug",
+            "required": true
+        }
+    ],
     "master-data.drugs.edit": [
         {
             "name": "drug",

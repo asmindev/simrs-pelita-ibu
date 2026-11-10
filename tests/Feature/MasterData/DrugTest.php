@@ -98,6 +98,24 @@ test('user with drug view permission can view drug index', function () {
         );
 });
 
+test('user with drug view permission can view drug show page with batches and stock movements', function () {
+    $doctor = User::factory()->create();
+    $doctor->assignRole(RoleName::Doctor->value);
+
+    $category = DrugCategory::factory()->create(['name' => 'Antibiotik']);
+    $drug = Drug::factory()->create(['drug_category_id' => $category->id]);
+
+    $this->actingAs($doctor)
+        ->get(route('master-data.drugs.show', $drug->id))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('master-data/drug/show/index')
+            ->has('drug')
+            ->where('drug.id', $drug->id)
+            ->has('statistics.total_stock')
+        );
+});
+
 test('drug index filters by search query on name, code, or manufacturer', function () {
     $pharmacist = User::factory()->create();
     $pharmacist->assignRole(RoleName::Pharmacist->value);

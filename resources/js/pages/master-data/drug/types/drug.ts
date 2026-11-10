@@ -20,7 +20,38 @@ export type Drug = {
     category?: {
         id: number;
         name: string;
+        description?: string | null;
     };
+    batches?: Array<{
+        id: number;
+        drug_id: number;
+        batch_number: string;
+        expiry_date: string;
+        initial_quantity: number;
+        current_quantity: number;
+        buy_price: number;
+        is_active: boolean;
+        created_at: string;
+    }>;
+    stock_movements?: Array<{
+        id: number;
+        drug_id: number;
+        drug_batch_id: number | null;
+        type: 'in' | 'out' | 'dispensing' | 'adjustment' | 'return' | 'opname';
+        quantity: number;
+        balance_before: number;
+        balance_after: number;
+        reason: string | null;
+        created_at: string;
+        drug_batch?: {
+            id: number;
+            batch_number: string;
+        };
+        user?: {
+            id: number;
+            name: string;
+        };
+    }>;
 };
 
 export type DrugFilters = {

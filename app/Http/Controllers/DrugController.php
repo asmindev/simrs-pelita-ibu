@@ -70,6 +70,29 @@ class DrugController extends Controller
             ->with('success', 'Obat berhasil ditambahkan.');
     }
 
+    public function show(Drug $drug): Response
+    {
+        Gate::authorize('view', $drug);
+
+        $drug->load([
+            'category:id,name,description',
+            'batches' => fn ($query) => $query->orderBy('expiry_date'),
+            'stockMovements' => fn ($query) => $query->with(['drugBatch', 'user'])->latest('id')->limit(50),
+        ]);
+
+        $totalStock = (int) $drug->batches->sum('current_quantity');
+        $activeBatchesCount = $drug->batches->where('current_quantity', '>', 0)->count();
+
+        return Inertia::render('master-data/drug/show/index', [
+            'drug' => $drug,
+            'statistics' => [
+                'total_stock' => $totalStock,
+                'active_batches' => $activeBatchesCount,
+                'total_batches' => $drug->batches->count(),
+            ],
+        ]);
+    }
+
     public function edit(Drug $drug): Response
     {
         Gate::authorize('update', $drug);
