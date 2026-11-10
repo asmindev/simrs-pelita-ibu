@@ -1,12 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import {
-    ArrowLeft,
-    FileText,
-    Printer,
-    Receipt,
-    Wallet,
-    XCircle,
-} from 'lucide-react';
+import { ArrowLeft, FileText, Printer, Wallet, XCircle } from 'lucide-react';
 import { useState } from 'react';
 
 import { formatCurrency, formatDateTime } from '@/shared/lib/format';
@@ -26,6 +19,7 @@ import {
 import type { Invoice, InvoiceItem } from '../../types/cashier';
 import { InvoiceStatusBadge } from '../components/invoice-status-badge';
 import { PaymentDialog } from '../components/payment-dialog';
+import { PaymentHistoryDialog } from './components/payment-history-dialog';
 import { VoidInvoiceDialog } from './components/void-invoice-dialog';
 
 type Props = {
@@ -116,6 +110,11 @@ export default function InvoiceShowIndex({ invoice }: Props) {
                 </Button>
 
                 <div className="flex flex-wrap items-center gap-2">
+                    <PaymentHistoryDialog
+                        invoice={invoice}
+                        getPaymentMethodLabel={getPaymentMethodLabel}
+                    />
+
                     <Button
                         variant="outline"
                         size="sm"
@@ -134,7 +133,7 @@ export default function InvoiceShowIndex({ invoice }: Props) {
                                 onClick={() => setIsPaymentOpen(true)}
                             >
                                 <Wallet className="mr-1.5 size-3.5" />
-                                Terima Pembayaran
+                                Payment
                             </Button>
                         )}
 
@@ -339,75 +338,6 @@ export default function InvoiceShowIndex({ invoice }: Props) {
                             </div>
                         </div>
                     </div>
-                </CardContent>
-            </Card>
-
-            {/* Riwayat Pembayaran */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-                        <Receipt className="size-4 text-muted-foreground" />
-                        Riwayat Pembayaran Diterima
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="text-xs">
-                                    No. Transaksi
-                                </TableHead>
-                                <TableHead className="text-xs">Waktu</TableHead>
-                                <TableHead className="text-xs">
-                                    Metode
-                                </TableHead>
-                                <TableHead className="text-right text-xs">
-                                    Nominal Dibayar
-                                </TableHead>
-                                <TableHead className="text-right text-xs">
-                                    Kembalian
-                                </TableHead>
-                                <TableHead className="text-xs">Kasir</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {!invoice.payments ||
-                            invoice.payments.length === 0 ? (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={6}
-                                        className="h-20 text-center text-xs text-muted-foreground"
-                                    >
-                                        Belum ada pembayaran yang tercatat untuk
-                                        tagihan ini.
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                invoice.payments.map((pay) => (
-                                    <TableRow key={pay.id}>
-                                        <TableCell className="font-mono text-xs font-semibold">
-                                            {pay.payment_number}
-                                        </TableCell>
-                                        <TableCell className="text-xs text-muted-foreground">
-                                            {formatDateTime(pay.paid_at)}
-                                        </TableCell>
-                                        <TableCell className="text-xs font-medium">
-                                            {getPaymentMethodLabel(pay.method)}
-                                        </TableCell>
-                                        <TableCell className="text-right font-mono text-xs font-bold text-foreground">
-                                            {formatCurrency(pay.amount)}
-                                        </TableCell>
-                                        <TableCell className="text-right font-mono text-xs text-muted-foreground">
-                                            {formatCurrency(pay.change_amount)}
-                                        </TableCell>
-                                        <TableCell className="text-xs">
-                                            {pay.received_by?.name ?? 'Kasir'}
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
                 </CardContent>
             </Card>
 
