@@ -97,7 +97,8 @@ declare module 'ziggy-js' {
     "master-data.drugs.show": [
         {
             "name": "drug",
-            "required": true
+            "required": true,
+            "binding": "id"
         }
     ],
     "master-data.drugs.edit": [

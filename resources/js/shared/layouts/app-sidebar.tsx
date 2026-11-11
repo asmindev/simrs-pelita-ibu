@@ -43,6 +43,8 @@ import type { User } from '@/types/auth';
 
 type Props = ComponentProps<typeof Sidebar> & {
     name: string;
+    logoUrl?: string | null;
+    tagline?: string | null;
     user?: User | null;
 };
 
@@ -63,7 +65,7 @@ function getInitials(name: string): string {
         .toUpperCase();
 }
 
-export function AppSidebar({ name, user, ...props }: Props) {
+export function AppSidebar({ name, logoUrl, tagline, user, ...props }: Props) {
     const { can, canAny } = usePermissions();
     const current = useCurrentRoute();
     const { state } = useSidebar();
@@ -111,15 +113,23 @@ export function AppSidebar({ name, user, ...props }: Props) {
                             className="border bg-muted"
                         >
                             <Link href={route('dashboard')}>
-                                <div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                                    <HeartPulse className="size-4" />
+                                <div className="flex aspect-square size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                                    {logoUrl ? (
+                                        <img
+                                            src={logoUrl}
+                                            alt={name}
+                                            className="size-full object-contain p-0.5"
+                                        />
+                                    ) : (
+                                        <HeartPulse className="size-4" />
+                                    )}
                                 </div>
                                 <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                                     <span className="truncate font-semibold">
                                         {name}
                                     </span>
                                     <span className="truncate text-xs text-muted-foreground">
-                                        SIMRS
+                                        {tagline || 'SIMRS'}
                                     </span>
                                 </div>
                             </Link>

@@ -19,16 +19,29 @@ type Props = {
 };
 
 export default function AppLayout({ children }: Props) {
-    const { auth, name, flash, sidebarOpen } = usePage<{
+    const { auth, name, setting, flash, sidebarOpen } = usePage<{
         auth?: Auth;
         name: string;
+        setting?: {
+            app_name: string;
+            app_tagline?: string | null;
+            logo_url?: string | null;
+            favicon_url?: string | null;
+        };
         flash: Flash;
         sidebarOpen?: boolean;
     }>().props;
 
+    const appName = setting?.app_name || name || 'SIMRS';
+
     return (
         <SidebarProvider defaultOpen={sidebarOpen ?? true}>
-            <AppSidebar name={name ?? "SIMRS"} user={auth?.user} />
+            <AppSidebar
+                name={appName}
+                logoUrl={setting?.logo_url}
+                tagline={setting?.app_tagline}
+                user={auth?.user}
+            />
 
             <SidebarInset className="flex min-w-0 flex-col">
                 <header className="sticky top-0 z-30 flex h-12 shrink-0 items-center gap-2.5 border-b bg-background/95 px-2 shadow-xs backdrop-blur supports-backdrop-filter:bg-background/60">

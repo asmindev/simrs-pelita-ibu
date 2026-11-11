@@ -1,0 +1,22 @@
+export type HospitalSetting = {
+    id: number;
+    app_name: string;
+    app_tagline: string | null;
+    logo_path: string | null;
+    favicon_path: string | null;
+    logo_url: string | null;
+    favicon_url: string | null;
+    hospital_name: string;
+    hospital_code: string | null;
+    license_number: string | null;
+    phone: string | null;
+    email: string | null;
+    address: string | null;
+    city: string | null;
+    province: string | null;
+    postal_code: string | null;
+    print_header: string | null;
+    print_footer: string | null;
+    created_at: string;
+    updated_at: string;
+};

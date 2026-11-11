@@ -65,6 +65,7 @@ class RoleSeeder extends Seeder
                 RbacPermission::UserView->value,
                 RbacPermission::RoleView->value,
                 RbacPermission::PermissionView->value,
+                RbacPermission::SettingManage->value,
                 AuditPermission::LogView->value,
             ],
             RoleName::Registration->value => [

@@ -30,6 +30,7 @@ use App\Http\Controllers\Rbac\UserController;
 use App\Http\Controllers\Registration\EncounterController;
 use App\Http\Controllers\Registration\QueueController;
 use App\Http\Controllers\Registration\RegistrationController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TariffController;
 use App\Http\Controllers\UnitController;
 use Illuminate\Support\Facades\Route;
@@ -553,6 +554,19 @@ Route::middleware(['auth', 'verified'])
                 ->middleware('permission:rbac.break-glass.review')
                 ->name('revoke');
         });
+    });
+
+Route::middleware(['auth', 'verified'])
+    ->prefix('settings')
+    ->name('settings.')
+    ->group(function (): void {
+        Route::get('/', [SettingController::class, 'edit'])
+            ->middleware('permission:rbac.setting.manage')
+            ->name('edit');
+
+        Route::post('/', [SettingController::class, 'update'])
+            ->middleware('permission:rbac.setting.manage')
+            ->name('update');
     });
 
 Route::middleware(['auth', 'verified'])

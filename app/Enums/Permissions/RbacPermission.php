@@ -11,4 +11,5 @@ enum RbacPermission: string
     case RoleAssign = 'rbac.role.assign';
     case UserView = 'rbac.user.view';
     case UserManage = 'rbac.user.manage';
+    case SettingManage = 'rbac.setting.manage';
 }

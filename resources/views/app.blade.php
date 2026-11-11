@@ -30,9 +30,14 @@
             }
         </style>
 
-        <link rel="icon" href="/favicon.ico" sizes="any">
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        @php
+            $hospitalSetting = \App\Models\HospitalSetting::instance();
+            $faviconUrl = $hospitalSetting->favicon_url ?: '/favicon.ico';
+        @endphp
+
+        <link rel="icon" href="{{ $faviconUrl }}" sizes="any">
+        <link rel="icon" href="{{ $faviconUrl }}" type="image/svg+xml">
+        <link rel="apple-touch-icon" href="{{ $hospitalSetting->logo_url ?: '/apple-touch-icon.png' }}">
 
         @fonts
 
@@ -40,7 +45,7 @@
         @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
         <x-inertia::head>
-            <title>{{ config('app.name', 'Laravel') }}</title>
+            <title>{{ $hospitalSetting->app_name ?: config('app.name', 'Laravel') }}</title>
         </x-inertia::head>
     </head>
     <body class="font-sans antialiased">

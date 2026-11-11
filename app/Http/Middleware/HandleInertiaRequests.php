@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Enums\RoleName;
+use App\Models\HospitalSetting;
 use App\Support\PermissionRegistry;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -45,9 +46,12 @@ class HandleInertiaRequests extends Middleware
                 ? collect(PermissionRegistry::all())->sort()->values()->all()
                 : $user->getAllPermissions()->pluck('name')->sort()->values()->all());
 
+        $setting = HospitalSetting::instance();
+
         return [
             ...parent::share($request),
-            'name' => config('app.name'),
+            'name' => $setting->app_name ?: config('app.name', 'SIMRS'),
+            'setting' => $setting,
             'auth' => [
                 'user' => $user,
                 'roles' => $user?->getRoleNames()->all() ?? [],

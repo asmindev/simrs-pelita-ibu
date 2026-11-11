@@ -66,6 +66,7 @@ export type PermissionName =
     | 'rbac.permission.view'
     | 'rbac.role.assign'
     | 'rbac.role.view'
+    | 'rbac.setting.manage'
     | 'rbac.user.manage'
     | 'rbac.user.view'
     | 'registration.guarantor.manage'
