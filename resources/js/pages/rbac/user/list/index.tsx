@@ -3,7 +3,6 @@ import { Key, ShieldAlert, UserPlus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { DataTable } from '@/shared/components/data-table';
-import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
@@ -53,33 +52,8 @@ export default function UserListIndex({
     const columns = useMemo(() => getUserColumns({ onEdit: handleEdit }), []);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Head title="Manajemen Pengguna & Staf — SIMRS" />
-
-            <PageHeader
-                title="Manajemen Pengguna & Staf"
-                description="Kelola akun pengguna, hak akses peran medis/administrasi, serta unit pelayanan."
-                actions={
-                    <div className="flex flex-wrap items-center gap-2">
-                        <Button variant="outline" size="sm" asChild>
-                            <Link href={route('rbac.roles.index')}>
-                                <Key className="mr-1.5 size-4" />
-                                Matriks Role
-                            </Link>
-                        </Button>
-                        <Button variant="outline" size="sm" asChild>
-                            <Link href={route('rbac.break-glass.index')}>
-                                <ShieldAlert className="mr-1.5 size-4" />
-                                Break-Glass
-                            </Link>
-                        </Button>
-                        <Button size="sm" onClick={handleCreate}>
-                            <UserPlus className="mr-1.5 size-4" />
-                            Tambah Pengguna
-                        </Button>
-                    </div>
-                }
-            />
 
             <UserStatistics statistics={statistics} />
 
@@ -94,6 +68,42 @@ export default function UserListIndex({
                         availableRoles={availableRoles}
                         current={users.data.length}
                         total={users.total}
+                        actions={
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 gap-1.5 text-xs font-medium"
+                                    asChild
+                                >
+                                    <Link href={route('rbac.roles.index')}>
+                                        <Key className="size-3.5" />
+                                        Matriks Role
+                                    </Link>
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 gap-1.5 text-xs font-medium"
+                                    asChild
+                                >
+                                    <Link
+                                        href={route('rbac.break-glass.index')}
+                                    >
+                                        <ShieldAlert className="size-3.5" />
+                                        Break-Glass
+                                    </Link>
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    onClick={handleCreate}
+                                    className="h-8 gap-1.5 text-xs font-medium"
+                                >
+                                    <UserPlus className="size-3.5" />
+                                    Tambah Pengguna
+                                </Button>
+                            </div>
+                        }
                     />
                 }
                 footer={

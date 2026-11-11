@@ -16,7 +16,6 @@ import {
     DataTable,
     type DataTableColumn,
 } from '@/shared/components/data-table';
-import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 import {
     formatCurrency,
@@ -258,13 +257,8 @@ export default function PharmacyStockIndex({
     ];
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Head title="Inventaris Stok & Batch Obat — SIMRS" />
-
-            <PageHeader
-                title="Inventaris & Batch Farmasi"
-                description="Pelacakan batch obat berbasis FEFO (First Expired, First Out) dan penyesuaian stok opname."
-            />
 
             {/* Statistik Banner */}
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

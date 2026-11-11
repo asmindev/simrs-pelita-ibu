@@ -1,8 +1,4 @@
 import { Head } from '@inertiajs/react';
-import { ShieldCheck } from 'lucide-react';
-
-import { PageHeader } from '@/shared/components/page-header';
-import { Badge } from '@/shared/ui/badge';
 
 import { DashboardActionFeed } from './components/dashboard-action-feed';
 import { DashboardFacilitySnapshot } from './components/dashboard-facility-snapshot';
@@ -12,8 +8,8 @@ import { DashboardUnitQueueTable } from './components/dashboard-unit-queue-table
 import type { DashboardPageProps } from './types/dashboard';
 
 export default function Dashboard({
-    assignedRoles,
-    isSuperAdmin,
+    assignedRoles: _assignedRoles,
+    isSuperAdmin: _isSuperAdmin,
     pipeline,
     actionFeed,
     facilitySnapshot,
@@ -21,36 +17,8 @@ export default function Dashboard({
     financialSummaries,
 }: DashboardPageProps) {
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Head title="Dashboard Operasional Terpadu — SIMRS" />
-
-            <PageHeader
-                title="Pusat Operasional Rumah Sakit"
-                description="Monitoring alur pasien, feed tugas aktif, dan kapasitas fasilitas hari ini."
-                actions={
-                    <div className="flex flex-wrap items-center gap-1.5">
-                        {isSuperAdmin ? (
-                            <Badge
-                                variant="default"
-                                className="gap-1 text-xs font-semibold"
-                            >
-                                <ShieldCheck className="size-3.5" />
-                                Super Admin (Bypass Global)
-                            </Badge>
-                        ) : (
-                            assignedRoles.map((role) => (
-                                <Badge
-                                    key={role}
-                                    variant="secondary"
-                                    className="font-mono text-[11px]"
-                                >
-                                    {role}
-                                </Badge>
-                            ))
-                        )}
-                    </div>
-                }
-            />
 
             {/* 1. Baris Alur Pasien Utama (Pipeline) */}
             <DashboardPipelineBar pipeline={pipeline} />

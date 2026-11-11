@@ -2,7 +2,6 @@ import { Head } from '@inertiajs/react';
 import { useMemo } from 'react';
 
 import { DataTable } from '@/shared/components/data-table';
-import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 
 import { PaymentDialog } from '../components/payment-dialog';
@@ -41,13 +40,8 @@ export default function InvoiceListIndex({
     );
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Head title="Kasir & Tagihan Pasien — SIMRS" />
-
-            <PageHeader
-                title="Kasir & Billing Tagihan"
-                description="Pengelolaan dan penerimaan pembayaran langsung untuk layanan poli, tindakan, dan obat farmasi."
-            />
 
             <InvoiceStatistics statistics={statistics} />
 

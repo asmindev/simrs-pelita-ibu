@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 import { Pill, Search } from 'lucide-react';
-import type { FormEvent } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import { useState } from 'react';
 
 import { FilterPopover } from '@/shared/components/filter-popover';
@@ -24,9 +24,16 @@ type Props = {
     categories: DrugCategory[];
     current: number;
     total: number;
+    actions?: ReactNode;
 };
 
-export function DrugFilters({ filters, categories, current, total }: Props) {
+export function DrugFilters({
+    filters,
+    categories,
+    current,
+    total,
+    actions,
+}: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
     const [categoryId, setCategoryId] = useState(filters.category_id || 'all');
     const [status, setStatus] = useState(filters.status || 'all');
@@ -92,6 +99,7 @@ export function DrugFilters({ filters, categories, current, total }: Props) {
             icon={Pill}
             current={current}
             total={total}
+            actions={actions}
         >
             <form
                 onSubmit={submit}

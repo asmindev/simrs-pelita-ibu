@@ -1,7 +1,9 @@
 import { usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 
+import { AppBreadcrumb } from '@/shared/components/app-breadcrumb';
 import { ThemeSwitcher } from '@/shared/components/theme-switcher';
+import { Separator } from '@/shared/ui/separator';
 import {
     SidebarInset,
     SidebarProvider,
@@ -29,11 +31,10 @@ export default function AppLayout({ children }: Props) {
             <AppSidebar name={name ?? 'SIMRS'} user={auth?.user} />
 
             <SidebarInset className="flex min-w-0 flex-col">
-                <header className="sticky top-0 z-30 flex h-12 shrink-0 items-center gap-2 border-b bg-background/95 px-4 shadow-xs backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                <header className="sticky top-0 z-30 flex h-12 shrink-0 items-center gap-2.5 border-b bg-background/95 px-4 shadow-xs backdrop-blur supports-[backdrop-filter]:bg-background/60">
                     <SidebarTrigger className="-ml-1" />
-                    <span className="hidden text-sm font-medium text-muted-foreground sm:inline">
-                        {name ?? 'SIMRS'}
-                    </span>
+                    <Separator orientation="vertical" className="mr-1 h-4" />
+                    <AppBreadcrumb />
                     <div className="flex-1" />
                     <div className="flex items-center gap-2">
                         <ThemeSwitcher />

@@ -3,7 +3,6 @@ import { Hospital, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { DataTable } from '@/shared/components/data-table';
-import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
@@ -34,27 +33,8 @@ export default function BedIndexPage({ beds, filters, statistics }: Props) {
     const columns = useMemo(() => getBedColumns(), []);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Head title="Manajemen Bed & Kamar — SIMRS" />
-
-            <PageHeader
-                title="Manajemen Bed & Kamar"
-                description="Kelola ketersediaan tempat tidur, status kamar, dan pantau pasien rawat inap."
-                actions={
-                    <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" asChild>
-                            <Link href={route('inpatient.admissions.index')}>
-                                <Hospital className="mr-1.5 size-4" />
-                                Daftar Pasien Rawat Inap
-                            </Link>
-                        </Button>
-                        <Button size="sm" onClick={() => setNewBedOpen(true)}>
-                            <Plus className="mr-1.5 size-4" />
-                            Tambah Bed
-                        </Button>
-                    </div>
-                }
-            />
 
             <BedStatistics statistics={statistics} />
 
@@ -68,6 +48,33 @@ export default function BedIndexPage({ beds, filters, statistics }: Props) {
                         filters={filters}
                         current={beds.data.length}
                         total={beds.total}
+                        actions={
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 gap-1.5 text-xs font-medium"
+                                    asChild
+                                >
+                                    <Link
+                                        href={route(
+                                            'inpatient.admissions.index',
+                                        )}
+                                    >
+                                        <Hospital className="size-3.5" />
+                                        Pasien Rawat Inap
+                                    </Link>
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    onClick={() => setNewBedOpen(true)}
+                                    className="h-8 gap-1.5 text-xs font-medium"
+                                >
+                                    <Plus className="size-3.5" />
+                                    Tambah Bed
+                                </Button>
+                            </div>
+                        }
                     />
                 }
                 footer={

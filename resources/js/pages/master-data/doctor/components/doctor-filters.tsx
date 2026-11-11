@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 import { Search, Stethoscope } from 'lucide-react';
-import type { FormEvent } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import { useState } from 'react';
 
 import { TableToolbar } from '@/shared/components/table-toolbar';
@@ -21,9 +21,10 @@ type Props = {
     filters: Filters;
     current: number;
     total: number;
+    actions?: ReactNode;
 };
 
-export function DoctorFilters({ filters, current, total }: Props) {
+export function DoctorFilters({ filters, current, total, actions }: Props) {
     const [search, setSearch] = useState(filters.search);
     const [status, setStatus] = useState(filters.status || 'all');
 
@@ -58,6 +59,7 @@ export function DoctorFilters({ filters, current, total }: Props) {
             icon={Stethoscope}
             current={current}
             total={total}
+            actions={actions}
         >
             <form
                 onSubmit={submit}

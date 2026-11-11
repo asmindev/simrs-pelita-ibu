@@ -8,7 +8,6 @@ import {
     DataTable,
     type DataTableColumn,
 } from '@/shared/components/data-table';
-import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 import { formatDate } from '@/shared/lib/format';
 import { route } from '@/shared/lib/route';
@@ -176,24 +175,8 @@ export default function PatientIndex({ patients, filters }: Props) {
     );
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Head title="Master Data Pasien — SIMRS" />
-            <PageHeader
-                title="Pasien & Rekam Medis"
-                description="Database identitas pasien, nomor rekam medis, NIK, dan demografi."
-                actions={
-                    <Can permission="master-data.patient.create">
-                        <Button
-                            size="sm"
-                            onClick={handleCreate}
-                            className="gap-1.5"
-                        >
-                            <Plus className="size-4" />
-                            Tambah Pasien
-                        </Button>
-                    </Can>
-                }
-            />
 
             <DataTable<Patient>
                 columns={columns}
@@ -205,6 +188,18 @@ export default function PatientIndex({ patients, filters }: Props) {
                         filters={filters}
                         current={patients.data.length}
                         total={patients.total}
+                        actions={
+                            <Can permission="master-data.patient.create">
+                                <Button
+                                    size="sm"
+                                    onClick={handleCreate}
+                                    className="h-8 gap-1.5 text-xs font-medium"
+                                >
+                                    <Plus className="size-3.5" />
+                                    Tambah Pasien
+                                </Button>
+                            </Can>
+                        }
                     />
                 }
                 footer={

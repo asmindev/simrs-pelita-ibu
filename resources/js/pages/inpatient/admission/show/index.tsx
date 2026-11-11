@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-import { PageHeader } from '@/shared/components/page-header';
 import { formatCurrency, formatDateTime } from '@/shared/lib/format';
 import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
@@ -44,54 +43,69 @@ export default function AdmissionShowPage({ admission, availableBeds }: Props) {
     const isActive = admission.status === 'active';
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Head
                 title={`Rawat Inap: ${admission.patient?.name ?? 'Pasien'} — SIMRS`}
             />
-            <PageHeader
-                title={`Rawat Inap: ${admission.patient?.name ?? 'Pasien'}`}
-                description={`No. Admisi: ${admission.admission_number} | No. RM: ${admission.patient?.medical_record_number ?? '-'}`}
-                actions={
-                    <div className="flex flex-wrap items-center gap-2">
-                        <Button variant="outline" size="sm" asChild>
-                            <Link href={route('inpatient.admissions.index')}>
-                                <ArrowLeft className="mr-1.5 size-4" />
-                                Kembali
-                            </Link>
-                        </Button>
 
-                        {isActive && (
-                            <>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setTransferOpen(true)}
-                                >
-                                    <ArrowRightLeft className="mr-1.5 size-4" />
-                                    Pindah Bed
-                                </Button>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 className="text-base font-bold text-foreground">
+                        Rawat Inap: {admission.patient?.name ?? 'Pasien'}
+                    </h2>
+                    <p className="font-mono text-xs text-muted-foreground">
+                        No. Admisi: {admission.admission_number} | No. RM:{' '}
+                        {admission.patient?.medical_record_number ?? '-'}
+                    </p>
+                </div>
 
-                                <Button
-                                    size="sm"
-                                    onClick={() => setDailyNoteOpen(true)}
-                                >
-                                    <Plus className="mr-1.5 size-4" />
-                                    Catat CPPT
-                                </Button>
+                <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 gap-1.5 text-xs font-medium"
+                        asChild
+                    >
+                        <Link href={route('inpatient.admissions.index')}>
+                            <ArrowLeft className="size-3.5" />
+                            Kembali
+                        </Link>
+                    </Button>
 
-                                <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={() => setDischargeOpen(true)}
-                                >
-                                    <LogOut className="mr-1.5 size-4" />
-                                    Pulangkan Pasien
-                                </Button>
-                            </>
-                        )}
-                    </div>
-                }
-            />
+                    {isActive && (
+                        <>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 gap-1.5 text-xs font-medium"
+                                onClick={() => setTransferOpen(true)}
+                            >
+                                <ArrowRightLeft className="size-3.5" />
+                                Pindah Bed
+                            </Button>
+
+                            <Button
+                                size="sm"
+                                className="h-8 gap-1.5 text-xs font-medium"
+                                onClick={() => setDailyNoteOpen(true)}
+                            >
+                                <Plus className="size-3.5" />
+                                Catat CPPT
+                            </Button>
+
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                className="h-8 gap-1.5 text-xs font-medium"
+                                onClick={() => setDischargeOpen(true)}
+                            >
+                                <LogOut className="size-3.5" />
+                                Pulangkan Pasien
+                            </Button>
+                        </>
+                    )}
+                </div>
+            </div>
 
             {/* Top Cards: Status & Bed */}
             <div className="grid grid-cols-1 gap-6 md:grid-cols-3">

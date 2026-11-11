@@ -1,17 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
 
 import { Can } from '@/shared/components/can';
-import { PageHeader } from '@/shared/components/page-header';
 import { route } from '@/shared/lib/route';
 
 export default function MasterDataIndex() {
     return (
-        <>
-            <Head title="Master Data" />
-            <PageHeader
-                title="Master Data"
-                description="Pasien, dokter, poli, obat, dan tarif."
-            />
+        <div className="space-y-4">
+            <Head title="Master Data — SIMRS" />
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <Can permission="master-data.unit.view">
@@ -88,6 +83,6 @@ export default function MasterDataIndex() {
                     </Link>
                 </Can>
             </div>
-        </>
+        </div>
     );
 }

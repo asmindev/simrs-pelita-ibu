@@ -1,9 +1,8 @@
-import { Head, Link, useForm } from '@inertiajs/react';
-import { AlertTriangle, ArrowLeft, Ban } from 'lucide-react';
+import { Head, useForm } from '@inertiajs/react';
+import { AlertTriangle, Ban } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 
 import { FormField } from '@/shared/components/form-field';
-import { PageHeader } from '@/shared/components/page-header';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
 import {
@@ -45,24 +44,9 @@ export default function EncounterShow({ encounter }: Props) {
         encounter.status !== 'finished' && encounter.status !== 'cancelled';
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Head
                 title={`Detail Kunjungan ${encounter.encounter_number} — SIMRS`}
-            />
-
-            <PageHeader
-                title={encounter.encounter_number}
-                description="Rincian berkas kunjungan pasien, identitas penjamin, dan status antrean unit pelayanan."
-                actions={
-                    <div className="flex items-center gap-2">
-                        <Button asChild variant="outline" size="sm">
-                            <Link href={route('registration.visits.index')}>
-                                <ArrowLeft className="mr-1.5 size-3.5" />
-                                Kembali ke Daftar
-                            </Link>
-                        </Button>
-                    </div>
-                }
             />
 
             {/* Banner if cancelled */}

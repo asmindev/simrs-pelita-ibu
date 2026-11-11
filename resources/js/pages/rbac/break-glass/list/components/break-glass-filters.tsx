@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 import { Search, ShieldAlert } from 'lucide-react';
-import type { FormEvent } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import { useState } from 'react';
 
 import { FilterPopover } from '@/shared/components/filter-popover';
@@ -24,9 +24,10 @@ type Props = {
     };
     current: number;
     total: number;
+    actions?: ReactNode;
 };
 
-export function BreakGlassFilters({ filters, current, total }: Props) {
+export function BreakGlassFilters({ filters, current, total, actions }: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || 'all');
 
@@ -76,6 +77,7 @@ export function BreakGlassFilters({ filters, current, total }: Props) {
             icon={ShieldAlert}
             current={current}
             total={total}
+            actions={actions}
         >
             <form
                 onSubmit={handleSearchSubmit}

@@ -3,7 +3,6 @@ import { FileText } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { DataTable } from '@/shared/components/data-table';
-import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
@@ -28,26 +27,13 @@ type Props = {
 export default function PatientAccessLogListIndex({
     logs,
     filters,
-    statistics,
+    statistics: _statistics,
 }: Props) {
     const columns = useMemo(() => getPatientAccessColumns(), []);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Head title="Log Akses Pasien — SIMRS" />
-
-            <PageHeader
-                title="Log Akses Pasien"
-                description={`Audit trail kepatuhan privasi rekam medis. ${statistics.total_logs} kali akses tercatat (${statistics.total_today} akses hari ini).`}
-                actions={
-                    <Button variant="outline" size="sm" asChild>
-                        <Link href={route('audit.logs.index')}>
-                            <FileText className="mr-1.5 size-4" />
-                            Log Aktivitas Sistem
-                        </Link>
-                    </Button>
-                }
-            />
 
             <DataTable<PatientAccessLog>
                 columns={columns}
@@ -59,6 +45,19 @@ export default function PatientAccessLogListIndex({
                         filters={filters}
                         current={logs.data.length}
                         total={logs.total}
+                        actions={
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 gap-1.5 text-xs font-medium"
+                                asChild
+                            >
+                                <Link href={route('audit.logs.index')}>
+                                    <FileText className="size-3.5" />
+                                    Log Aktivitas Sistem
+                                </Link>
+                            </Button>
+                        }
                     />
                 }
                 footer={

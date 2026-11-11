@@ -1,8 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import { Activity, CheckCircle2, Clock, Plus, Tv, Users } from 'lucide-react';
+import { Activity, CheckCircle2, Clock, Plus, Users } from 'lucide-react';
 
-import { Can } from '@/shared/components/can';
-import { PageHeader } from '@/shared/components/page-header';
 import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
@@ -17,35 +15,8 @@ type Props = {
 
 export default function RegistrationIndex({ metrics, units }: Props) {
     return (
-        <div className="space-y-6">
-            <Head title="Pendaftaran Pasien & Antrean" />
-
-            <PageHeader
-                title="Pendaftaran & Antrean"
-                description="Pusat pendaftaran pasien rawat jalan, gawat darurat, dan pemantauan antrean unit."
-                actions={
-                    <div className="flex flex-wrap items-center gap-2">
-                        <Can permission="registration.queue.view">
-                            <Button asChild variant="outline">
-                                <Link href={route('registration.queues.board')}>
-                                    <Tv className="mr-1.5 size-4" />
-                                    Papan Antrean
-                                </Link>
-                            </Button>
-                        </Can>
-                        <Can permission="registration.visit.create">
-                            <Button asChild>
-                                <Link
-                                    href={route('registration.visits.create')}
-                                >
-                                    <Plus className="mr-1.5 size-4" />
-                                    Daftar Pasien
-                                </Link>
-                            </Button>
-                        </Can>
-                    </div>
-                }
-            />
+        <div className="space-y-4">
+            <Head title="Pendaftaran Pasien & Antrean — SIMRS" />
 
             {/* Metric Cards */}
             <div className="grid gap-4 sm:grid-cols-3">

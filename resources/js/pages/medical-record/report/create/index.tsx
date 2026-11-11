@@ -1,7 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Save } from 'lucide-react';
 
-import { PageHeader } from '@/shared/components/page-header';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
@@ -54,26 +53,37 @@ export default function ClinicalReportCreate({ encounter, doctors }: Props) {
     };
 
     return (
-        <div className="space-y-6">
-            <Head title="Penerbitan Laporan Klinis Khusus" />
+        <div className="space-y-4">
+            <Head title="Penerbitan Laporan Klinis Khusus — SIMRS" />
 
-            <PageHeader
-                title="Penerbitan Dokumen Laporan Klinis"
-                description={`Pasien: ${encounter.patient?.name || '-'} (No. Rawat ${encounter.encounter_number})`}
-                actions={
-                    <Button asChild variant="outline">
-                        <Link
-                            href={route(
-                                'medical-record.encounters.show',
-                                encounter.id,
-                            )}
-                        >
-                            <ArrowLeft className="mr-1.5 size-4" />
-                            Kembali ke EMR
-                        </Link>
-                    </Button>
-                }
-            />
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 className="text-base font-bold text-foreground">
+                        Penerbitan Dokumen Laporan Klinis
+                    </h2>
+                    <p className="text-xs text-muted-foreground">
+                        Pasien: {encounter.patient?.name || '-'} (No. Rawat{' '}
+                        {encounter.encounter_number})
+                    </p>
+                </div>
+
+                <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="h-8 gap-1.5 text-xs font-medium"
+                >
+                    <Link
+                        href={route(
+                            'medical-record.encounters.show',
+                            encounter.id,
+                        )}
+                    >
+                        <ArrowLeft className="size-3.5" />
+                        Kembali ke EMR
+                    </Link>
+                </Button>
+            </div>
 
             <Card className="border-border bg-card">
                 <CardHeader className="pb-3">

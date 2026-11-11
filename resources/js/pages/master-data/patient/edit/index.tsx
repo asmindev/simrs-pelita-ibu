@@ -3,7 +3,6 @@ import { AlertTriangle, GitMerge, History } from 'lucide-react';
 import { useState } from 'react';
 
 import { Can } from '@/shared/components/can';
-import { PageHeader } from '@/shared/components/page-header';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
 
@@ -19,27 +18,34 @@ export default function PatientEdit({ patient }: Props) {
     const [isMergeOpen, setIsMergeOpen] = useState(false);
 
     return (
-        <div className="space-y-6">
-            <Head title="Ubah pasien" />
-            <PageHeader
-                title="Ubah pasien"
-                description={`Perbarui data ${patient.name}.`}
-                actions={
-                    !patient.merged_to_patient_id && (
-                        <Can permission="master-data.patient.merge">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => setIsMergeOpen(true)}
-                                className="flex items-center gap-1.5"
-                            >
-                                <GitMerge className="size-4" />
-                                Gabungkan Berkas
-                            </Button>
-                        </Can>
-                    )
-                }
-            />
+        <div className="space-y-4">
+            <Head title={`Ubah Pasien — ${patient.name}`} />
+
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 className="text-base font-bold text-foreground">
+                        Ubah Pasien: {patient.name}
+                    </h2>
+                    <p className="font-mono text-xs text-muted-foreground">
+                        No. RM: {patient.medical_record_number}
+                    </p>
+                </div>
+
+                {!patient.merged_to_patient_id && (
+                    <Can permission="master-data.patient.merge">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setIsMergeOpen(true)}
+                            className="h-8 gap-1.5 text-xs font-medium"
+                        >
+                            <GitMerge className="size-3.5" />
+                            Gabungkan Berkas
+                        </Button>
+                    </Can>
+                )}
+            </div>
 
             {/* Alert if patient was already merged */}
             {patient.merged_to && (

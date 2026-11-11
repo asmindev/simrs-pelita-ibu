@@ -5,7 +5,6 @@ import {
     DataTable,
     type DataTableColumn,
 } from '@/shared/components/data-table';
-import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
@@ -128,21 +127,8 @@ export default function ClinicalReportList({ reports, filters }: Props) {
     ];
 
     return (
-        <div className="space-y-6">
-            <Head title="Daftar Laporan Klinis Rumah Sakit" />
-
-            <PageHeader
-                title="Laporan Klinis Khusus"
-                description="Pusat arsip dan penerbitan laporan operasi bedah, surat keterangan kelahiran, dan surat kematian."
-                actions={
-                    <Button asChild variant="outline">
-                        <Link href={route('medical-record.index')}>
-                            <ArrowLeft className="mr-1.5 size-4" />
-                            Kembali ke Rekam Medis
-                        </Link>
-                    </Button>
-                }
-            />
+        <div className="space-y-4">
+            <Head title="Daftar Laporan Klinis Rumah Sakit — SIMRS" />
 
             <DataTable
                 columns={columns}
@@ -154,6 +140,19 @@ export default function ClinicalReportList({ reports, filters }: Props) {
                         filters={filters}
                         current={reports.data.length}
                         total={reports.total}
+                        actions={
+                            <Button
+                                asChild
+                                variant="outline"
+                                size="sm"
+                                className="h-8 gap-1.5 text-xs font-medium"
+                            >
+                                <Link href={route('medical-record.index')}>
+                                    <ArrowLeft className="size-3.5" />
+                                    Kembali ke Rekam Medis
+                                </Link>
+                            </Button>
+                        }
                     />
                 }
                 footer={

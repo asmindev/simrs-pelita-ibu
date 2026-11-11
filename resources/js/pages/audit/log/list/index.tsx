@@ -3,7 +3,6 @@ import { UserCheck } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { DataTable } from '@/shared/components/data-table';
-import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
@@ -30,7 +29,7 @@ type Props = {
 export default function ActivityLogListIndex({
     logs,
     filters,
-    statistics,
+    statistics: _statistics,
     availableLogNames,
 }: Props) {
     const [detailOpen, setDetailOpen] = useState(false);
@@ -47,21 +46,8 @@ export default function ActivityLogListIndex({
     );
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Head title="Audit Trail Log — SIMRS" />
-
-            <PageHeader
-                title="Audit Trail Log Aktivitas"
-                description={`Tercatat ${statistics.total_logs} rekaman aktivitas sistem (${statistics.total_today} aktivitas tercatat hari ini).`}
-                actions={
-                    <Button variant="outline" size="sm" asChild>
-                        <Link href={route('audit.patient-access.index')}>
-                            <UserCheck className="mr-1.5 size-4" />
-                            Log Akses Pasien
-                        </Link>
-                    </Button>
-                }
-            />
 
             <DataTable<ActivityLog>
                 columns={columns}
@@ -74,6 +60,21 @@ export default function ActivityLogListIndex({
                         availableLogNames={availableLogNames}
                         current={logs.data.length}
                         total={logs.total}
+                        actions={
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 gap-1.5 text-xs font-medium"
+                                asChild
+                            >
+                                <Link
+                                    href={route('audit.patient-access.index')}
+                                >
+                                    <UserCheck className="size-3.5" />
+                                    Log Akses Pasien
+                                </Link>
+                            </Button>
+                        }
                     />
                 }
                 footer={

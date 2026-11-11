@@ -1,41 +1,41 @@
-import { History, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { History, Search } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import {
     ArrowDownRight,
     ArrowUpRight,
     RotateCcw,
     SlidersHorizontal,
-} from "lucide-react";
+} from 'lucide-react';
 
 import {
     DataTable,
     type DataTableColumn,
-} from "@/shared/components/data-table";
-import { TableToolbar } from "@/shared/components/table-toolbar";
-import { formatDateTime } from "@/shared/lib/format";
-import { Badge } from "@/shared/ui/badge";
-import { Input } from "@/shared/ui/input";
+} from '@/shared/components/data-table';
+import { TableToolbar } from '@/shared/components/table-toolbar';
+import { formatDateTime } from '@/shared/lib/format';
+import { Badge } from '@/shared/ui/badge';
+import { Input } from '@/shared/ui/input';
 
-import type { Drug } from "../../types/drug";
+import type { Drug } from '../../types/drug';
 
-type NonNullableMovement = NonNullable<Drug["stock_movements"]>[number];
+type NonNullableMovement = NonNullable<Drug['stock_movements']>[number];
 
 interface DrugStockMovementTableProps {
-    movements?: Drug["stock_movements"];
+    movements?: Drug['stock_movements'];
     unitOfMeasure: string;
 }
 
 function getMovementTypeBadge(type: string) {
     switch (type) {
-        case "in":
+        case 'in':
             return (
                 <Badge variant="default" className="gap-1 text-[10px]">
                     <ArrowDownRight className="size-3" />
                     Penerimaan Masuk
                 </Badge>
             );
-        case "dispensing":
-        case "out":
+        case 'dispensing':
+        case 'out':
             return (
                 <Badge
                     variant="outline"
@@ -45,15 +45,15 @@ function getMovementTypeBadge(type: string) {
                     Keluar / Resep
                 </Badge>
             );
-        case "adjustment":
-        case "opname":
+        case 'adjustment':
+        case 'opname':
             return (
                 <Badge variant="secondary" className="gap-1 text-[10px]">
                     <SlidersHorizontal className="size-3" />
                     Penyesuaian (Opname)
                 </Badge>
             );
-        case "return":
+        case 'return':
             return (
                 <Badge variant="outline" className="gap-1 text-[10px]">
                     <RotateCcw className="size-3" />
@@ -73,7 +73,7 @@ export function DrugStockMovementTable({
     movements = [],
     unitOfMeasure,
 }: DrugStockMovementTableProps) {
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState('');
 
     const filteredMovements = useMemo(() => {
         if (!search.trim()) return movements;
@@ -91,9 +91,9 @@ export function DrugStockMovementTable({
     const columns = useMemo<DataTableColumn<NonNullableMovement>[]>(
         () => [
             {
-                key: "index",
-                header: "No.",
-                className: "w-12 text-center",
+                key: 'index',
+                header: 'No.',
+                className: 'w-12 text-center',
                 render: (_, index) => (
                     <span className="font-mono text-xs text-muted-foreground">
                         {(index ?? 0) + 1}
@@ -101,8 +101,8 @@ export function DrugStockMovementTable({
                 ),
             },
             {
-                key: "created_at",
-                header: "Tanggal & Waktu",
+                key: 'created_at',
+                header: 'Tanggal & Waktu',
                 render: (move) => (
                     <span className="text-xs text-muted-foreground">
                         {formatDateTime(move.created_at)}
@@ -110,74 +110,74 @@ export function DrugStockMovementTable({
                 ),
             },
             {
-                key: "type",
-                header: "Jenis Mutasi",
+                key: 'type',
+                header: 'Jenis Mutasi',
                 render: (move) => getMovementTypeBadge(move.type),
             },
             {
-                key: "batch",
-                header: "Batch Terkait",
+                key: 'batch',
+                header: 'Batch Terkait',
                 render: (move) => (
                     <span className="font-mono text-xs text-foreground">
-                        {move.drug_batch?.batch_number ?? "-"}
+                        {move.drug_batch?.batch_number ?? '-'}
                     </span>
                 ),
             },
             {
-                key: "quantity",
-                header: "Kuantitas",
-                className: "text-right",
+                key: 'quantity',
+                header: 'Kuantitas',
+                className: 'text-right',
                 render: (move) => {
                     const isPositive = move.quantity > 0;
                     return (
                         <span
                             className={`font-mono text-xs font-bold tabular-nums ${
-                                isPositive ? "text-primary" : "text-destructive"
+                                isPositive ? 'text-primary' : 'text-destructive'
                             }`}
                         >
-                            {isPositive ? `+${move.quantity}` : move.quantity}{" "}
+                            {isPositive ? `+${move.quantity}` : move.quantity}{' '}
                             {unitOfMeasure}
                         </span>
                     );
                 },
             },
             {
-                key: "balance_before",
-                header: "Stok Sebelum",
-                className: "text-right",
+                key: 'balance_before',
+                header: 'Stok Sebelum',
+                className: 'text-right',
                 render: (move) => (
                     <span className="font-mono text-xs text-muted-foreground tabular-nums">
-                        {move.balance_before.toLocaleString("id-ID")}{" "}
+                        {move.balance_before.toLocaleString('id-ID')}{' '}
                         {unitOfMeasure}
                     </span>
                 ),
             },
             {
-                key: "balance_after",
-                header: "Stok Sesudah",
-                className: "text-right",
+                key: 'balance_after',
+                header: 'Stok Sesudah',
+                className: 'text-right',
                 render: (move) => (
                     <span className="font-mono text-xs font-bold text-foreground tabular-nums">
-                        {move.balance_after.toLocaleString("id-ID")}{" "}
+                        {move.balance_after.toLocaleString('id-ID')}{' '}
                         {unitOfMeasure}
                     </span>
                 ),
             },
             {
-                key: "user",
-                header: "Petugas / PIC",
+                key: 'user',
+                header: 'Petugas / PIC',
                 render: (move) => (
                     <span className="text-xs text-foreground">
-                        {move.user?.name ?? "-"}
+                        {move.user?.name ?? '-'}
                     </span>
                 ),
             },
             {
-                key: "reason",
-                header: "Keterangan",
+                key: 'reason',
+                header: 'Keterangan',
                 render: (move) => (
                     <span className="max-w-[200px] truncate text-xs text-muted-foreground">
-                        {move.reason || "-"}
+                        {move.reason || '-'}
                     </span>
                 ),
             },

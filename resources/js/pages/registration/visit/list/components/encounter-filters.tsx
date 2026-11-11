@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 import { ClipboardList, Search } from 'lucide-react';
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, type ReactNode, useState } from 'react';
 
 import { FilterPopover } from '@/shared/components/filter-popover';
 import { TableToolbar } from '@/shared/components/table-toolbar';
@@ -23,6 +23,7 @@ type Props = {
     units: Array<{ id: number; name: string; code: string }>;
     current: number;
     total: number;
+    actions?: ReactNode;
 };
 
 export function EncounterFiltersComponent({
@@ -30,6 +31,7 @@ export function EncounterFiltersComponent({
     units,
     current,
     total,
+    actions,
 }: Props) {
     const today = new Date().toISOString().slice(0, 10);
     const [search, setSearch] = useState(filters.search || '');
@@ -104,6 +106,7 @@ export function EncounterFiltersComponent({
             icon={ClipboardList}
             current={current}
             total={total}
+            actions={actions}
         >
             <form
                 onSubmit={handleSearchSubmit}

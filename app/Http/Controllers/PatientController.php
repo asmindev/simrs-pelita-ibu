@@ -138,12 +138,13 @@ class PatientController extends Controller
         $term = $request->string('q')->trim()->toString();
         $excludeId = $request->integer('exclude');
 
-        $query = Patient::query()
-            ->when($excludeId > 0, fn (Builder $q) => $q->whereKeyNot($excludeId));
-
-        if ($term !== '') {
-            $query->search($term);
+        if ($term === '') {
+            return response()->json(['data' => []]);
         }
+
+        $query = Patient::query()
+            ->when($excludeId > 0, fn (Builder $q) => $q->whereKeyNot($excludeId))
+            ->search($term);
 
         $patients = $query
             ->orderBy('name')

@@ -3,7 +3,6 @@ import { Boxes } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { DataTable } from '@/shared/components/data-table';
-import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
@@ -39,21 +38,8 @@ export default function PrescriptionList({
     const columns = useMemo(() => getPrescriptionColumns(), []);
 
     return (
-        <div className="space-y-6">
-            <Head title="Pelayanan Resep Farmasi" />
-
-            <PageHeader
-                title="Pelayanan Resep Farmasi"
-                description="Verifikasi resep dokter, pengalokasian batch obat FEFO, dan penyerahan obat kepada pasien."
-                actions={
-                    <Button asChild variant="outline">
-                        <Link href={route('pharmacy.stock.index')}>
-                            <Boxes className="mr-1.5 size-4" />
-                            Stok & Batch Obat
-                        </Link>
-                    </Button>
-                }
-            />
+        <div className="space-y-4">
+            <Head title="Pelayanan Resep Farmasi — SIMRS" />
 
             <PrescriptionStatistics statistics={statistics} />
 
@@ -68,6 +54,19 @@ export default function PrescriptionList({
                         units={units}
                         current={prescriptions.data.length}
                         total={prescriptions.total}
+                        actions={
+                            <Button
+                                asChild
+                                variant="outline"
+                                size="sm"
+                                className="h-8 gap-1.5 text-xs font-medium"
+                            >
+                                <Link href={route('pharmacy.stock.index')}>
+                                    <Boxes className="size-3.5" />
+                                    Stok & Batch Obat
+                                </Link>
+                            </Button>
+                        }
                     />
                 }
                 footer={

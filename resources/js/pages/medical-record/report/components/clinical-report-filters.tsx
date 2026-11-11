@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 import { FileText, Search } from 'lucide-react';
-import type { FormEvent } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import { useState } from 'react';
 
 import { TableToolbar } from '@/shared/components/table-toolbar';
@@ -22,9 +22,15 @@ type Props = {
     };
     current: number;
     total: number;
+    actions?: ReactNode;
 };
 
-export function ClinicalReportFilters({ filters, current, total }: Props) {
+export function ClinicalReportFilters({
+    filters,
+    current,
+    total,
+    actions,
+}: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [reportType, setReportType] = useState(filters.report_type || 'all');
 
@@ -59,6 +65,7 @@ export function ClinicalReportFilters({ filters, current, total }: Props) {
             icon={FileText}
             current={current}
             total={total}
+            actions={actions}
         >
             <form
                 onSubmit={submit}

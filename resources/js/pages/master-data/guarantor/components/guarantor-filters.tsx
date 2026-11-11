@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 import { Search, ShieldCheck } from 'lucide-react';
-import type { FormEvent } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import { useState } from 'react';
 
 import { TableToolbar } from '@/shared/components/table-toolbar';
@@ -24,9 +24,10 @@ type Props = {
     filters: Filters;
     current: number;
     total: number;
+    actions?: ReactNode;
 };
 
-export function GuarantorFilters({ filters, current, total }: Props) {
+export function GuarantorFilters({ filters, current, total, actions }: Props) {
     const [search, setSearch] = useState(filters.search);
     const [type, setType] = useState(filters.type || 'all');
     const [status, setStatus] = useState(filters.status || 'all');
@@ -65,15 +66,18 @@ export function GuarantorFilters({ filters, current, total }: Props) {
             current={current}
             total={total}
             actions={
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={reset}
-                    className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
-                >
-                    Reset
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={reset}
+                        className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
+                    >
+                        Reset
+                    </Button>
+                    {actions}
+                </div>
             }
         >
             <form

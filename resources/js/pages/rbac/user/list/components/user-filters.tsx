@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 import { Search, Users } from 'lucide-react';
-import type { FormEvent } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import { useState } from 'react';
 
 import { FilterPopover } from '@/shared/components/filter-popover';
@@ -27,6 +27,7 @@ type Props = {
     availableRoles: Role[];
     current: number;
     total: number;
+    actions?: ReactNode;
 };
 
 export function UserFilters({
@@ -34,6 +35,7 @@ export function UserFilters({
     availableRoles,
     current,
     total,
+    actions,
 }: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [role, setRole] = useState(filters.role || 'all');
@@ -83,6 +85,7 @@ export function UserFilters({
             icon={Users}
             current={current}
             total={total}
+            actions={actions}
         >
             <form
                 onSubmit={handleSearchSubmit}

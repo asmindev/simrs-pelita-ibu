@@ -1,7 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Printer } from 'lucide-react';
 
-import { PageHeader } from '@/shared/components/page-header';
 import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
@@ -32,41 +31,52 @@ export default function ClinicalReportShow({ report }: Props) {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Head
                 title={`${report.title} - ${report.patient?.name || 'Pasien'}`}
             />
 
-            <div className="print:hidden">
-                <PageHeader
-                    title="Dokumen Laporan Klinis"
-                    description={`Diterbitkan pada ${new Date(report.reported_at).toLocaleString('id-ID')}`}
-                    actions={
-                        <div className="flex items-center gap-2">
-                            <Button asChild variant="outline">
-                                <Link
-                                    href={
-                                        report.encounter?.id
-                                            ? route(
-                                                  'medical-record.encounters.show',
-                                                  report.encounter.id,
-                                              )
-                                            : route(
-                                                  'medical-record.reports.index',
-                                              )
-                                    }
-                                >
-                                    <ArrowLeft className="mr-1.5 size-4" />
-                                    Kembali
-                                </Link>
-                            </Button>
-                            <Button onClick={handlePrint}>
-                                <Printer className="mr-1.5 size-4" />
-                                Cetak Dokumen
-                            </Button>
-                        </div>
-                    }
-                />
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between print:hidden">
+                <div>
+                    <h2 className="text-base font-bold text-foreground">
+                        {report.title}
+                    </h2>
+                    <p className="text-xs text-muted-foreground">
+                        Diterbitkan pada{' '}
+                        {new Date(report.reported_at).toLocaleString('id-ID')}
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="h-8 gap-1.5 text-xs font-medium"
+                    >
+                        <Link
+                            href={
+                                report.encounter?.id
+                                    ? route(
+                                          'medical-record.encounters.show',
+                                          report.encounter.id,
+                                      )
+                                    : route('medical-record.reports.index')
+                            }
+                        >
+                            <ArrowLeft className="size-3.5" />
+                            Kembali
+                        </Link>
+                    </Button>
+                    <Button
+                        size="sm"
+                        onClick={handlePrint}
+                        className="h-8 gap-1.5 text-xs font-medium"
+                    >
+                        <Printer className="size-3.5" />
+                        Cetak Dokumen
+                    </Button>
+                </div>
             </div>
 
             {/* Lembar Dokumen Formal */}

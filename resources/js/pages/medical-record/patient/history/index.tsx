@@ -2,7 +2,6 @@ import { Head, Link } from '@inertiajs/react';
 import {
     Activity,
     AlertCircle,
-    ArrowLeft,
     Calendar,
     CheckSquare,
     ChevronRight,
@@ -12,7 +11,6 @@ import {
     User,
 } from 'lucide-react';
 
-import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
@@ -51,21 +49,8 @@ export default function PatientMedicalRecordHistory({
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Head title={`Riwayat Rekam Medis - ${patient.name}`} />
-
-            <PageHeader
-                title={`Riwayat Rekam Medis: ${patient.name}`}
-                description={`No. RM: ${patient.medical_record_number} • ${patient.gender === 'male' ? 'Laki-laki' : 'Perempuan'} • ${calculateAge(patient.birth_date)}`}
-                actions={
-                    <Button asChild variant="outline">
-                        <Link href={route('medical-record.index')}>
-                            <ArrowLeft className="mr-1.5 size-4" />
-                            Kembali ke Daftar Pasien
-                        </Link>
-                    </Button>
-                }
-            />
 
             {/* Profil Pasien Singkat */}
             <Card className="border-border bg-card">
@@ -91,6 +76,14 @@ export default function PatientMedicalRecordHistory({
                                     {new Date(
                                         patient.birth_date,
                                     ).toLocaleDateString('id-ID')}
+                                </span>
+                            </div>
+                            <div>
+                                <span className="text-muted-foreground">
+                                    Usia:{' '}
+                                </span>
+                                <span className="text-foreground">
+                                    {calculateAge(patient.birth_date)}
                                 </span>
                             </div>
                             <div>

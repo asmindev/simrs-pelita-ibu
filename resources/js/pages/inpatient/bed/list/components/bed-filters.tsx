@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 import { BedDouble, Search } from 'lucide-react';
-import type { FormEvent } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import { useState } from 'react';
 
 import { FilterPopover } from '@/shared/components/filter-popover';
@@ -25,9 +25,10 @@ type Props = {
     };
     current: number;
     total: number;
+    actions?: ReactNode;
 };
 
-export function BedFilters({ filters, current, total }: Props) {
+export function BedFilters({ filters, current, total, actions }: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || 'all');
     const [bedClass, setBedClass] = useState(filters.class || 'all');
@@ -91,6 +92,7 @@ export function BedFilters({ filters, current, total }: Props) {
             icon={BedDouble}
             current={current}
             total={total}
+            actions={actions}
         >
             <form
                 onSubmit={handleSearchSubmit}

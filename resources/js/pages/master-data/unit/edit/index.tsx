@@ -1,7 +1,5 @@
 import { Head } from '@inertiajs/react';
 
-import { PageHeader } from '@/shared/components/page-header';
-
 import { UnitForm } from '../components/unit-form';
 import type { Unit } from '../types/unit';
 
@@ -11,13 +9,9 @@ type Props = {
 
 export default function UnitEdit({ unit }: Props) {
     return (
-        <>
-            <Head title="Ubah unit" />
-            <PageHeader
-                title="Ubah unit"
-                description={`Perbarui data ${unit.name}.`}
-            />
+        <div className="space-y-4">
+            <Head title={`Ubah Unit — ${unit.name}`} />
             <UnitForm unit={unit} />
-        </>
+        </div>
     );
 }

@@ -8,7 +8,6 @@ import {
     DataTable,
     type DataTableColumn,
 } from '@/shared/components/data-table';
-import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
@@ -172,24 +171,8 @@ export default function UnitIndex({ units, filters }: Props) {
     );
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Head title="Master Data Unit — SIMRS" />
-            <PageHeader
-                title="Unit Pelayanan"
-                description="Poli rawat jalan, ruang rawat inap, instalasi gawat darurat, laboratorium, radiologi, dan farmasi."
-                actions={
-                    <Can permission="master-data.unit.manage">
-                        <Button
-                            size="sm"
-                            onClick={handleCreate}
-                            className="gap-1.5"
-                        >
-                            <Plus className="size-4" />
-                            Tambah Unit
-                        </Button>
-                    </Can>
-                }
-            />
 
             <DataTable<Unit>
                 columns={columns}
@@ -201,6 +184,18 @@ export default function UnitIndex({ units, filters }: Props) {
                         filters={filters}
                         current={units.data.length}
                         total={units.total}
+                        actions={
+                            <Can permission="master-data.unit.manage">
+                                <Button
+                                    size="sm"
+                                    onClick={handleCreate}
+                                    className="h-8 gap-1.5 text-xs font-medium"
+                                >
+                                    <Plus className="size-3.5" />
+                                    Tambah Unit
+                                </Button>
+                            </Can>
+                        }
                     />
                 }
                 footer={

@@ -3,7 +3,6 @@ import { Key, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { DataTable } from '@/shared/components/data-table';
-import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
@@ -49,29 +48,8 @@ export default function BreakGlassListIndex({
     );
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Head title="Akses Darurat Break-Glass — SIMRS" />
-
-            <PageHeader
-                title="Akses Darurat (Break-Glass)"
-                description="Tinjau dan audit rekaman pembukaan rekam medis pasien dalam kondisi kedaruratan klinis."
-                actions={
-                    <div className="flex flex-wrap items-center gap-2">
-                        <Button variant="outline" size="sm" asChild>
-                            <Link href={route('rbac.users.index')}>
-                                <Users className="mr-1.5 size-4" />
-                                Daftar Pengguna
-                            </Link>
-                        </Button>
-                        <Button variant="outline" size="sm" asChild>
-                            <Link href={route('rbac.roles.index')}>
-                                <Key className="mr-1.5 size-4" />
-                                Matriks Role
-                            </Link>
-                        </Button>
-                    </div>
-                }
-            />
 
             <BreakGlassStatistics statistics={statistics} />
 
@@ -85,6 +63,32 @@ export default function BreakGlassListIndex({
                         filters={filters}
                         current={grants.data.length}
                         total={grants.total}
+                        actions={
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 gap-1.5 text-xs font-medium"
+                                    asChild
+                                >
+                                    <Link href={route('rbac.users.index')}>
+                                        <Users className="size-3.5" />
+                                        Daftar Pengguna
+                                    </Link>
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 gap-1.5 text-xs font-medium"
+                                    asChild
+                                >
+                                    <Link href={route('rbac.roles.index')}>
+                                        <Key className="size-3.5" />
+                                        Matriks Role
+                                    </Link>
+                                </Button>
+                            </div>
+                        }
                     />
                 }
                 footer={

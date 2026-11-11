@@ -13,7 +13,6 @@ import {
     DataTable,
     type DataTableColumn,
 } from '@/shared/components/data-table';
-import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
@@ -231,23 +230,8 @@ export default function MedicalRecordIndex({
     ];
 
     return (
-        <div className="space-y-6">
-            <Head title="Pusat Rekam Medis Elektronik" />
-
-            <PageHeader
-                title="Rekam Medis Elektronik (EMR)"
-                description="Pusat kerja klinis dokter dan perawat untuk pencatatan asesmen SOAP, diagnosis ICD-10, tindakan, dan laporan medis."
-                actions={
-                    <div className="flex flex-wrap items-center gap-2">
-                        <Button asChild variant="outline">
-                            <Link href={route('medical-record.reports.index')}>
-                                <FileText className="mr-1.5 size-4" />
-                                Laporan Klinis
-                            </Link>
-                        </Button>
-                    </div>
-                }
-            />
+        <div className="space-y-4">
+            <Head title="Pusat Rekam Medis Elektronik — SIMRS" />
 
             {/* Statistik Hari Ini */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -331,6 +315,21 @@ export default function MedicalRecordIndex({
                         units={units}
                         current={encounters.data.length}
                         total={encounters.total}
+                        actions={
+                            <Button
+                                asChild
+                                variant="outline"
+                                size="sm"
+                                className="h-8 gap-1.5 text-xs font-medium"
+                            >
+                                <Link
+                                    href={route('medical-record.reports.index')}
+                                >
+                                    <FileText className="size-3.5" />
+                                    Laporan Klinis
+                                </Link>
+                            </Button>
+                        }
                     />
                 }
                 footer={

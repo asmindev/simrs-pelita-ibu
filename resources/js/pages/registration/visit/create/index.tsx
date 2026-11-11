@@ -1,6 +1,5 @@
 import { Head } from '@inertiajs/react';
 
-import { PageHeader } from '@/shared/components/page-header';
 import type { PatientSearchResult } from '@/shared/types/patient';
 
 import { EncounterForm } from './components/encounter-form';
@@ -53,13 +52,8 @@ export default function EncounterCreate({
     preselectedPatient,
 }: Props) {
     return (
-        <div className="space-y-6">
-            <Head title="Pendaftaran Kunjungan Baru" />
-
-            <PageHeader
-                title="Pendaftaran Kunjungan"
-                description="Pilih berkas pasien, unit tujuan, dan terbitkan nomor antrean pelayanan."
-            />
+        <div className="space-y-4">
+            <Head title="Pendaftaran Kunjungan Baru — SIMRS" />
 
             <EncounterForm
                 units={units}

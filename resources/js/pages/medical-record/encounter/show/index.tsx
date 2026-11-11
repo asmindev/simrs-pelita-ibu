@@ -1,17 +1,13 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import {
     Activity,
-    ArrowLeft,
     CheckSquare,
     FileText,
     Lock,
     Stethoscope,
 } from 'lucide-react';
 
-import { PageHeader } from '@/shared/components/page-header';
-import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
-import { Button } from '@/shared/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 
 import type { EncounterWithEmr } from '../../types/medical-record';
@@ -34,22 +30,9 @@ export default function EncounterEmrShow({ encounter, doctors }: Props) {
     const reportCount = encounter.clinical_reports?.length || 0;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Head
                 title={`EMR - ${encounter.patient?.name || 'Pasien'} (${encounter.encounter_number}) — SIMRS`}
-            />
-
-            <PageHeader
-                title="Lembar Kerja Rekam Medis Elektronik"
-                description={`Pelayanan ${encounter.unit?.name || 'Klinik'} • No. Rawat ${encounter.encounter_number}`}
-                actions={
-                    <Button asChild variant="outline" size="sm">
-                        <Link href={route('medical-record.index')}>
-                            <ArrowLeft className="mr-1.5 size-3.5" />
-                            Kembali ke Daftar Pasien
-                        </Link>
-                    </Button>
-                }
             />
 
             {/* Bilah Konteks Pasien Terpilih */}

@@ -2,7 +2,6 @@ import { Head } from '@inertiajs/react';
 import { useMemo } from 'react';
 
 import { DataTable } from '@/shared/components/data-table';
-import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 
 import { getDiagnosticOrderColumns } from './components/order-columns';
@@ -34,13 +33,8 @@ export default function DiagnosticOrderListIndex({
     const columns = useMemo(() => getDiagnosticOrderColumns(), []);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Head title="Pemeriksaan Penunjang — SIMRS" />
-
-            <PageHeader
-                title="Layanan Penunjang Medis"
-                description="Pengelolaan permintaan dan hasil pemeriksaan laboratorium serta radiologi."
-            />
 
             <DiagnosticOrderStatistics statistics={statistics} />
 

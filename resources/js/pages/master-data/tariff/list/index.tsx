@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Edit2, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Edit2, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 
 import { usePermissions } from '@/shared/hooks/use-permissions';
 import { Can } from '@/shared/components/can';
@@ -7,7 +7,6 @@ import {
     DataTable,
     type DataTableColumn,
 } from '@/shared/components/data-table';
-import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 import { formatCurrency } from '@/shared/lib/format';
 import { route } from '@/shared/lib/route';
@@ -158,21 +157,8 @@ export default function TariffIndex({ tariffs, units, filters }: Props) {
     ];
 
     return (
-        <>
-            <Head title="Master Data Tarif & Layanan" />
-            <PageHeader
-                title="Tarif & Layanan"
-                description="Kelola tarif konsultasi, tindakan medis, laboratorium, dan administrasi."
-                actions={
-                    <Can permission="master-data.tariff.manage">
-                        <Button asChild>
-                            <Link href={route('master-data.tariffs.create')}>
-                                Tambah Tarif
-                            </Link>
-                        </Button>
-                    </Can>
-                }
-            />
+        <div className="space-y-4">
+            <Head title="Master Data Tarif & Layanan — SIMRS" />
 
             <DataTable
                 columns={columns}
@@ -185,6 +171,24 @@ export default function TariffIndex({ tariffs, units, filters }: Props) {
                         units={units}
                         current={tariffs.data.length}
                         total={tariffs.total}
+                        actions={
+                            <Can permission="master-data.tariff.manage">
+                                <Button
+                                    asChild
+                                    size="sm"
+                                    className="h-8 gap-1.5 text-xs font-medium"
+                                >
+                                    <Link
+                                        href={route(
+                                            'master-data.tariffs.create',
+                                        )}
+                                    >
+                                        <Plus className="size-3.5" />
+                                        Tambah Tarif
+                                    </Link>
+                                </Button>
+                            </Can>
+                        }
                     />
                 }
                 footer={
@@ -196,6 +200,6 @@ export default function TariffIndex({ tariffs, units, filters }: Props) {
                     />
                 }
             />
-        </>
+        </div>
     );
 }

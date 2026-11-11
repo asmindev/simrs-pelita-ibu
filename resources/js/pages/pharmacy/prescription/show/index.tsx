@@ -4,7 +4,6 @@ import type { FormEvent } from 'react';
 import { useState } from 'react';
 
 import { Can } from '@/shared/components/can';
-import { PageHeader } from '@/shared/components/page-header';
 import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
@@ -114,25 +113,36 @@ export default function PrescriptionShow({ prescription }: Props) {
     const returns = prescription.returns || [];
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Head
                 title={`Resep ${prescription.prescription_number} — Farmasi`}
             />
 
-            <PageHeader
-                title={`Resep: ${prescription.prescription_number}`}
-                description="Rincian e-resep dokter, ketersediaan batch obat FEFO, verifikasi telaah apoteker, dan pencatatan dispensing."
-                actions={
-                    <div className="flex flex-wrap items-center gap-2">
-                        <Button asChild variant="outline">
-                            <Link href={route('pharmacy.prescriptions.index')}>
-                                <ArrowLeft className="mr-1.5 size-4" />
-                                Kembali ke Daftar Resep
-                            </Link>
-                        </Button>
-                    </div>
-                }
-            />
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 className="text-base font-bold text-foreground">
+                        Resep: {prescription.prescription_number}
+                    </h2>
+                    <p className="text-xs text-muted-foreground">
+                        Rincian e-resep dokter, ketersediaan batch obat FEFO,
+                        dan dispensing.
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="h-8 gap-1.5 text-xs font-medium"
+                    >
+                        <Link href={route('pharmacy.prescriptions.index')}>
+                            <ArrowLeft className="size-3.5" />
+                            Kembali ke Daftar Resep
+                        </Link>
+                    </Button>
+                </div>
+            </div>
 
             {/* Status & Identitas Pasien */}
             <div className="grid gap-4 md:grid-cols-3">

@@ -7,7 +7,6 @@ import {
     DataTable,
     type DataTableColumn,
 } from '@/shared/components/data-table';
-import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 import { formatCurrency } from '@/shared/lib/format';
 import { route } from '@/shared/lib/route';
@@ -178,22 +177,8 @@ export default function DrugIndex({ drugs, categories, filters }: Props) {
     ];
 
     return (
-        <>
-            <Head title="Master Obat & Farmasi" />
-            <PageHeader
-                title="Master Obat & Farmasi"
-                description="Katalog obat, kekuatan dosis, bentuk sediaan, produsen, dan harga satuan."
-                actions={
-                    <Can permission="master-data.drug.manage">
-                        <Button asChild>
-                            <Link href={route('master-data.drugs.create')}>
-                                <Plus className="size-4" />
-                                Tambah Obat
-                            </Link>
-                        </Button>
-                    </Can>
-                }
-            />
+        <div className="space-y-4">
+            <Head title="Master Obat & Farmasi — SIMRS" />
 
             <DataTable
                 columns={columns}
@@ -206,6 +191,22 @@ export default function DrugIndex({ drugs, categories, filters }: Props) {
                         categories={categories}
                         current={drugs.data.length}
                         total={drugs.total}
+                        actions={
+                            <Can permission="master-data.drug.manage">
+                                <Button
+                                    asChild
+                                    size="sm"
+                                    className="h-8 gap-1.5 text-xs font-medium"
+                                >
+                                    <Link
+                                        href={route('master-data.drugs.create')}
+                                    >
+                                        <Plus className="size-3.5" />
+                                        Tambah Obat
+                                    </Link>
+                                </Button>
+                            </Can>
+                        }
                     />
                 }
                 footer={
@@ -217,6 +218,6 @@ export default function DrugIndex({ drugs, categories, filters }: Props) {
                     />
                 }
             />
-        </>
+        </div>
     );
 }

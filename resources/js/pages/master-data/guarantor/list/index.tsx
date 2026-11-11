@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Edit2, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Edit2, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 
 import { usePermissions } from '@/shared/hooks/use-permissions';
 import { Can } from '@/shared/components/can';
@@ -7,7 +7,6 @@ import {
     DataTable,
     type DataTableColumn,
 } from '@/shared/components/data-table';
-import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
@@ -146,21 +145,8 @@ export default function GuarantorIndex({ guarantors, filters }: Props) {
     ];
 
     return (
-        <>
-            <Head title="Master Data Penjamin" />
-            <PageHeader
-                title="Penjamin"
-                description="Kelola data penjamin pembayaran pasien (BPJS, Umum, Asuransi, Perusahaan)."
-                actions={
-                    <Can permission="master-data.guarantor.manage">
-                        <Button asChild>
-                            <Link href={route('master-data.guarantors.create')}>
-                                Tambah Penjamin
-                            </Link>
-                        </Button>
-                    </Can>
-                }
-            />
+        <div className="space-y-4">
+            <Head title="Master Data Penjamin — SIMRS" />
 
             <DataTable
                 columns={columns}
@@ -172,6 +158,24 @@ export default function GuarantorIndex({ guarantors, filters }: Props) {
                         filters={filters}
                         current={guarantors.data.length}
                         total={guarantors.total}
+                        actions={
+                            <Can permission="master-data.guarantor.manage">
+                                <Button
+                                    asChild
+                                    size="sm"
+                                    className="h-8 gap-1.5 text-xs font-medium"
+                                >
+                                    <Link
+                                        href={route(
+                                            'master-data.guarantors.create',
+                                        )}
+                                    >
+                                        <Plus className="size-3.5" />
+                                        Tambah Penjamin
+                                    </Link>
+                                </Button>
+                            </Can>
+                        }
                     />
                 }
                 footer={
@@ -183,6 +187,6 @@ export default function GuarantorIndex({ guarantors, filters }: Props) {
                     />
                 }
             />
-        </>
+        </div>
     );
 }

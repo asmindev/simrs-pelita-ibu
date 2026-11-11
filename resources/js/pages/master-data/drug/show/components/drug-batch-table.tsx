@@ -1,21 +1,21 @@
-import { Boxes, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Boxes, Search } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 import {
     DataTable,
     type DataTableColumn,
-} from "@/shared/components/data-table";
-import { TableToolbar } from "@/shared/components/table-toolbar";
-import { formatCurrency, formatDate } from "@/shared/lib/format";
-import { Badge } from "@/shared/ui/badge";
-import { Input } from "@/shared/ui/input";
+} from '@/shared/components/data-table';
+import { TableToolbar } from '@/shared/components/table-toolbar';
+import { formatCurrency, formatDate } from '@/shared/lib/format';
+import { Badge } from '@/shared/ui/badge';
+import { Input } from '@/shared/ui/input';
 
-import type { Drug } from "../../types/drug";
+import type { Drug } from '../../types/drug';
 
-type NonNullableBatch = NonNullable<Drug["batches"]>[number];
+type NonNullableBatch = NonNullable<Drug['batches']>[number];
 
 interface DrugBatchTableProps {
-    batches?: Drug["batches"];
+    batches?: Drug['batches'];
     unitOfMeasure: string;
 }
 
@@ -59,7 +59,7 @@ export function DrugBatchTable({
     batches = [],
     unitOfMeasure,
 }: DrugBatchTableProps) {
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState('');
 
     const filteredBatches = useMemo(() => {
         if (!search.trim()) return batches;
@@ -70,9 +70,9 @@ export function DrugBatchTable({
     const columns = useMemo<DataTableColumn<NonNullableBatch>[]>(
         () => [
             {
-                key: "index",
-                header: "No.",
-                className: "w-12 text-center",
+                key: 'index',
+                header: 'No.',
+                className: 'w-12 text-center',
                 render: (_, index) => (
                     <span className="font-mono text-xs text-muted-foreground">
                         {(index ?? 0) + 1}
@@ -80,8 +80,8 @@ export function DrugBatchTable({
                 ),
             },
             {
-                key: "batch_number",
-                header: "Nomor Batch",
+                key: 'batch_number',
+                header: 'Nomor Batch',
                 render: (batch) => (
                     <span className="font-mono text-xs font-bold text-foreground">
                         {batch.batch_number}
@@ -89,14 +89,14 @@ export function DrugBatchTable({
                 ),
             },
             {
-                key: "expiry_date",
-                header: "Tanggal Kedaluwarsa",
+                key: 'expiry_date',
+                header: 'Tanggal Kedaluwarsa',
                 render: (batch) => getExpiryBadge(batch.expiry_date),
             },
             {
-                key: "buy_price",
-                header: "Harga Beli",
-                className: "text-right",
+                key: 'buy_price',
+                header: 'Harga Beli',
+                className: 'text-right',
                 render: (batch) => (
                     <span className="font-mono text-xs text-muted-foreground tabular-nums">
                         {formatCurrency(batch.buy_price)}
@@ -104,38 +104,38 @@ export function DrugBatchTable({
                 ),
             },
             {
-                key: "initial_quantity",
-                header: "Stok Awal",
-                className: "text-right",
+                key: 'initial_quantity',
+                header: 'Stok Awal',
+                className: 'text-right',
                 render: (batch) => (
                     <span className="font-mono text-xs text-muted-foreground tabular-nums">
-                        {batch.initial_quantity.toLocaleString("id-ID")}{" "}
+                        {batch.initial_quantity.toLocaleString('id-ID')}{' '}
                         {unitOfMeasure}
                     </span>
                 ),
             },
             {
-                key: "current_quantity",
-                header: "Sisa Stok Fisik",
-                className: "text-right",
+                key: 'current_quantity',
+                header: 'Sisa Stok Fisik',
+                className: 'text-right',
                 render: (batch) => (
                     <span className="font-mono text-xs font-bold text-foreground tabular-nums">
-                        {batch.current_quantity.toLocaleString("id-ID")}{" "}
+                        {batch.current_quantity.toLocaleString('id-ID')}{' '}
                         {unitOfMeasure}
                     </span>
                 ),
             },
             {
-                key: "status",
-                header: "Status",
+                key: 'status',
+                header: 'Status',
                 render: (batch) => (
                     <Badge
                         variant={
-                            batch.current_quantity > 0 ? "default" : "secondary"
+                            batch.current_quantity > 0 ? 'default' : 'secondary'
                         }
                         className="text-[10px]"
                     >
-                        {batch.current_quantity > 0 ? "Tersedia" : "Habis"}
+                        {batch.current_quantity > 0 ? 'Tersedia' : 'Habis'}
                     </Badge>
                 ),
             },

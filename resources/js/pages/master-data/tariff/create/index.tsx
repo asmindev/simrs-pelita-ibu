@@ -1,6 +1,5 @@
 import { Head } from '@inertiajs/react';
 
-import { PageHeader } from '@/shared/components/page-header';
 import { Card, CardContent } from '@/shared/ui/card';
 
 import { TariffForm } from '../components/tariff-form';
@@ -12,18 +11,14 @@ type Props = {
 
 export default function TariffCreate({ units }: Props) {
     return (
-        <>
-            <Head title="Tambah Tarif" />
-            <PageHeader
-                title="Tambah Tarif"
-                description="Daftarkan tarif layanan atau tindakan medis baru ke dalam sistem."
-            />
+        <div className="space-y-4">
+            <Head title="Tambah Tarif — SIMRS" />
 
             <Card>
                 <CardContent className="pt-6">
                     <TariffForm units={units} />
                 </CardContent>
             </Card>
-        </>
+        </div>
     );
 }

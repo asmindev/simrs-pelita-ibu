@@ -4,7 +4,6 @@ import { useMemo } from 'react';
 
 import { Can } from '@/shared/components/can';
 import { DataTable } from '@/shared/components/data-table';
-import { PageHeader } from '@/shared/components/page-header';
 import { Pagination } from '@/shared/components/pagination';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
@@ -27,50 +26,49 @@ export default function EncounterList({ encounters, units, filters }: Props) {
     const columns = useMemo(() => getEncounterColumns(), []);
 
     return (
-        <>
-            <Head title="Daftar Kunjungan Pasien" />
+        <div className="space-y-4">
+            <Head title="Daftar Kunjungan Pasien — SIMRS" />
 
-            <div className="space-y-6">
-                <PageHeader
-                    title="Pendaftaran Kunjungan Pasien"
-                    description="Kelola kunjungan pasien rawat jalan, IGD, dan antrean poli."
-                    actions={
-                        <Can permission="registration.visit.create">
-                            <Button asChild size="sm">
-                                <Link
-                                    href={route('registration.visits.create')}
+            <DataTable<Encounter>
+                columns={columns}
+                rows={encounters.data}
+                rowKey={(e) => e.id}
+                empty="Tidak ada data kunjungan yang cocok dengan filter."
+                toolbar={
+                    <EncounterFiltersComponent
+                        filters={filters}
+                        units={units}
+                        current={encounters.data.length}
+                        total={encounters.total}
+                        actions={
+                            <Can permission="registration.visit.create">
+                                <Button
+                                    asChild
+                                    size="sm"
+                                    className="h-8 gap-1.5 text-xs font-medium"
                                 >
-                                    <Plus className="mr-1.5 size-4" />
-                                    Daftarkan Pasien
-                                </Link>
-                            </Button>
-                        </Can>
-                    }
-                />
-
-                <DataTable<Encounter>
-                    columns={columns}
-                    rows={encounters.data}
-                    rowKey={(e) => e.id}
-                    empty="Tidak ada data kunjungan yang cocok dengan filter."
-                    toolbar={
-                        <EncounterFiltersComponent
-                            filters={filters}
-                            units={units}
-                            current={encounters.data.length}
-                            total={encounters.total}
-                        />
-                    }
-                    footer={
-                        <Pagination
-                            links={encounters.links}
-                            from={encounters.from}
-                            to={encounters.to}
-                            total={encounters.total}
-                        />
-                    }
-                />
-            </div>
-        </>
+                                    <Link
+                                        href={route(
+                                            'registration.visits.create',
+                                        )}
+                                    >
+                                        <Plus className="size-3.5" />
+                                        Daftarkan Pasien
+                                    </Link>
+                                </Button>
+                            </Can>
+                        }
+                    />
+                }
+                footer={
+                    <Pagination
+                        links={encounters.links}
+                        from={encounters.from}
+                        to={encounters.to}
+                        total={encounters.total}
+                    />
+                }
+            />
+        </div>
     );
 }

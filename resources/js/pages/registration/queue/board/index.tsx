@@ -13,7 +13,6 @@ import {
 
 import { Can } from '@/shared/components/can';
 import { EmptyState } from '@/shared/components/empty-state';
-import { PageHeader } from '@/shared/components/page-header';
 import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
@@ -131,44 +130,50 @@ export default function QueueBoard({ units, selectedUnitId, queues }: Props) {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Head
                 title={`Papan Antrean Internal — ${activeUnit?.name ?? ''}`}
             />
 
-            <PageHeader
-                title="Papan Antrean Unit"
-                description="Monitoring antrean internal klinik & poliklinik secara langsung tanpa perangkat eksternal."
-                actions={
-                    <div className="flex items-center gap-2">
-                        <Select
-                            value={String(selectedUnitId)}
-                            onValueChange={switchUnit}
-                        >
-                            <SelectTrigger className="h-9 w-60 text-xs">
-                                <SelectValue placeholder="Pilih Poliklinik / Unit" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {units.map((unit) => (
-                                    <SelectItem
-                                        key={unit.id}
-                                        value={String(unit.id)}
-                                    >
-                                        {unit.name} ({unit.code})
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-xs text-muted-foreground">
+                    Monitoring antrean klinik & poliklinik secara langsung (
+                    {activeUnit?.name}).
+                </div>
 
-                        <Button asChild variant="outline" size="sm">
-                            <Link href={route('registration.visits.index')}>
-                                <ArrowLeft className="mr-1.5 size-3.5" />
-                                Daftar Kunjungan
-                            </Link>
-                        </Button>
-                    </div>
-                }
-            />
+                <div className="flex items-center gap-2">
+                    <Select
+                        value={String(selectedUnitId)}
+                        onValueChange={switchUnit}
+                    >
+                        <SelectTrigger className="h-8 w-60 bg-background text-xs">
+                            <SelectValue placeholder="Pilih Poliklinik / Unit" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {units.map((unit) => (
+                                <SelectItem
+                                    key={unit.id}
+                                    value={String(unit.id)}
+                                >
+                                    {unit.name} ({unit.code})
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+
+                    <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs font-medium"
+                    >
+                        <Link href={route('registration.visits.index')}>
+                            <ArrowLeft className="mr-1.5 size-3.5" />
+                            Daftar Kunjungan
+                        </Link>
+                    </Button>
+                </div>
+            </div>
 
             {/* Kartu Ringkasan Status Antrean Internal */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
