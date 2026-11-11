@@ -17,6 +17,7 @@ return [
         'diagnostics.*',
         'inpatient.*',
         'rbac.*',
+        'settings.*',
         'audit.*',
     ],
 ];
