@@ -435,3 +435,33 @@ test('pharmacy stock index returns paginated movements, valuation layers, quants
             ->where('statistics.total_valuation', 100000)
         );
 });
+
+test('pharmacist can view stock batch detail page with quants, movements, and valuation layers', function () {
+    $pharmacistUser = User::factory()->create();
+    $pharmacistUser->assignRole(RoleName::Pharmacist->value);
+
+    $product = Product::factory()->create();
+
+    $this->actingAs($pharmacistUser)->post(route('inventory.stock.batches.store'), [
+        'product_id' => $product->id,
+        'batch_number' => 'BATCH-SHOW-01',
+        'expiry_date' => Carbon::today()->addMonths(6)->toDateString(),
+        'initial_quantity' => 30,
+        'buy_price' => 2500,
+    ])->assertSessionHasNoErrors();
+
+    $batch = ProductBatch::where('batch_number', 'BATCH-SHOW-01')->firstOrFail();
+
+    $response = $this->actingAs($pharmacistUser)->get(route('inventory.stock.batches.show', $batch));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('inventory/stock/show/index')
+            ->where('batch.id', $batch->id)
+            ->where('batch.batch_number', 'BATCH-SHOW-01')
+            ->has('batch.stock_quants', 1)
+            ->has('movements', 1)
+            ->has('valuationLayers', 1)
+            ->has('locations', 7)
+        );
+});

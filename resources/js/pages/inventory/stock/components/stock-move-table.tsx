@@ -145,57 +145,82 @@ export function StockMoveTable({
     const columns: DataTableColumn<StockMovement>[] = [
         {
             key: 'reference',
-            header: 'Referensi & Waktu',
+            header: 'Referensi',
+            className: 'py-1.5',
             render: (move) => (
-                <div className="space-y-0.5">
-                    <div className="font-mono text-xs font-semibold text-foreground">
-                        {move.reference_number ?? `MOV-${move.id}`}
-                    </div>
-                    {move.origin && (
-                        <div className="font-mono text-[10px] text-primary">
-                            Dok: {move.origin}
-                        </div>
-                    )}
-                    <div className="text-[11px] text-muted-foreground">
-                        {formatDateTime(move.created_at)}
-                    </div>
-                </div>
+                <span className="font-mono text-xs font-semibold text-foreground">
+                    {move.reference_number ?? `MOV-${move.id}`}
+                </span>
+            ),
+        },
+        {
+            key: 'origin',
+            header: 'Dokumen',
+            className: 'py-1.5',
+            render: (move) =>
+                move.origin ? (
+                    <span className="font-mono text-xs text-primary">
+                        {move.origin}
+                    </span>
+                ) : (
+                    <span className="text-xs text-muted-foreground">-</span>
+                ),
+        },
+        {
+            key: 'created_at',
+            header: 'Waktu',
+            className: 'py-1.5',
+            render: (move) => (
+                <span className="text-xs text-muted-foreground">
+                    {formatDateTime(move.created_at)}
+                </span>
             ),
         },
         {
             key: 'type',
             header: 'Operasi',
+            className: 'py-1.5',
             render: (move) => getMovementTypeBadge(move.type),
         },
         {
-            key: 'product_batch',
-            header: 'Produk & Batch',
+            key: 'product',
+            header: 'Produk',
+            className: 'max-w-48 py-1.5',
             render: (move) => (
-                <div className="space-y-0.5">
-                    <div className="text-xs font-medium text-foreground">
-                        {move.product?.name ?? '-'}
-                    </div>
-                    <div className="font-mono text-[11px] text-muted-foreground">
-                        {move.product_batch?.batch_number ?? '-'}
-                    </div>
-                </div>
+                <span
+                    className="block truncate text-xs font-medium text-foreground"
+                    title={move.product?.name ?? undefined}
+                >
+                    {move.product?.name ?? '-'}
+                </span>
+            ),
+        },
+        {
+            key: 'batch',
+            header: 'No. Batch',
+            className: 'py-1.5',
+            render: (move) => (
+                <span className="font-mono text-xs text-muted-foreground">
+                    {move.product_batch?.batch_number ?? '-'}
+                </span>
             ),
         },
         {
             key: 'locations',
-            header: 'Perpindahan Lokasi',
+            header: 'Lokasi',
+            className: 'py-1.5',
             render: (move) => (
-                <div className="flex flex-wrap items-center gap-1 text-xs">
+                <div className="flex items-center gap-1 text-xs">
                     <Badge
                         variant="outline"
-                        className="font-mono text-[10px] font-normal"
+                        className="px-1.5 py-0 font-mono text-[10px] font-normal"
                     >
                         {move.source_location?.code ?? 'EXT'}
                     </Badge>
-                    <ArrowRight className="size-3 text-muted-foreground" />
+                    <ArrowRight className="size-3 shrink-0 text-muted-foreground" />
                     <Badge
                         variant="outline"
-                        className="font-mono text-[10px] font-normal"
+                        className="px-1.5 py-0 font-mono text-[10px] font-normal"
                     >
                         {move.destination_location?.code ?? 'EXT'}
                     </Badge>
@@ -204,66 +229,83 @@ export function StockMoveTable({
         },
         {
             key: 'quantity',
-            header: 'Kuantitas & Saldo',
-            className: 'text-right',
+            header: 'Kuantitas',
+            className: 'py-1.5 text-right',
             render: (move) => {
                 const isPositive = move.quantity > 0;
                 const isTransfer = move.type === 'transfer';
 
                 return (
-                    <div className="space-y-0.5">
-                        <div
-                            className={`font-mono text-xs font-bold tabular-nums ${
-                                isTransfer
-                                    ? 'text-foreground'
-                                    : isPositive
-                                      ? 'text-primary'
-                                      : 'text-destructive'
-                            }`}
-                        >
-                            {isTransfer
-                                ? move.quantity
+                    <span
+                        className={`font-mono text-xs font-bold tabular-nums ${
+                            isTransfer
+                                ? 'text-foreground'
                                 : isPositive
-                                  ? `+${move.quantity}`
-                                  : move.quantity}{' '}
-                            {move.product?.unit_of_measure ?? ''}
-                        </div>
-                        <div className="font-mono text-[10px] text-muted-foreground tabular-nums">
-                            {move.balance_before} &rarr; {move.balance_after}
-                        </div>
-                    </div>
+                                  ? 'text-primary'
+                                  : 'text-destructive'
+                        }`}
+                    >
+                        {isTransfer
+                            ? move.quantity
+                            : isPositive
+                              ? `+${move.quantity}`
+                              : move.quantity}{' '}
+                        {move.product?.unit_of_measure ?? ''}
+                    </span>
                 );
             },
         },
         {
-            key: 'value',
-            header: 'Nilai Valuasi',
-            className: 'text-right',
+            key: 'balance',
+            header: 'Saldo',
+            className: 'py-1.5 text-right',
             render: (move) => (
-                <div className="space-y-0.5">
-                    <div className="font-mono text-xs font-semibold text-foreground tabular-nums">
-                        {formatCurrency(move.total_value)}
-                    </div>
-                    <div className="font-mono text-[10px] text-muted-foreground tabular-nums">
-                        @ {formatCurrency(move.unit_cost)}
-                    </div>
-                </div>
+                <span className="font-mono text-xs text-muted-foreground tabular-nums">
+                    {move.balance_before} &rarr; {move.balance_after}
+                </span>
+            ),
+        },
+        {
+            key: 'unit_cost',
+            header: 'Biaya/Unit',
+            className: 'py-1.5 text-right',
+            render: (move) => (
+                <span className="font-mono text-xs text-muted-foreground tabular-nums">
+                    {formatCurrency(move.unit_cost)}
+                </span>
+            ),
+        },
+        {
+            key: 'value',
+            header: 'Nilai',
+            className: 'py-1.5 text-right',
+            render: (move) => (
+                <span className="font-mono text-xs font-semibold text-foreground tabular-nums">
+                    {formatCurrency(move.total_value)}
+                </span>
+            ),
+        },
+        {
+            key: 'user',
+            header: 'Petugas',
+            className: 'py-1.5',
+            render: (move) => (
+                <span className="text-xs font-medium text-foreground">
+                    {move.user?.name ?? 'Sistem'}
+                </span>
             ),
         },
         {
             key: 'reason',
-            header: 'Petugas & Keterangan',
+            header: 'Keterangan',
+            className: 'max-w-44 py-1.5',
             render: (move) => (
-                <div className="max-w-56 space-y-0.5">
-                    <div className="text-xs font-medium text-foreground">
-                        {move.user?.name ?? 'Sistem'}
-                    </div>
-                    {move.reason && (
-                        <div className="truncate text-[11px] text-muted-foreground">
-                            {move.reason}
-                        </div>
-                    )}
-                </div>
+                <span
+                    className="block truncate text-xs text-muted-foreground"
+                    title={move.reason ?? undefined}
+                >
+                    {move.reason ?? '-'}
+                </span>
             ),
         },
     ];

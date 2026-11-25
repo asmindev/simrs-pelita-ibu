@@ -388,6 +388,10 @@ Route::middleware(['auth', 'verified'])
                 ->middleware('permission:pharmacy.stock.view')
                 ->name('index');
 
+            Route::get('batches/{batch}', [PharmacyStockController::class, 'showBatch'])
+                ->middleware('permission:pharmacy.stock.view')
+                ->name('batches.show');
+
             Route::post('batches', [PharmacyStockController::class, 'storeBatch'])
                 ->middleware('permission:pharmacy.stock.adjust')
                 ->name('batches.store');

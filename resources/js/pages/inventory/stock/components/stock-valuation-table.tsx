@@ -12,7 +12,6 @@ import { Pagination } from '@/shared/components/pagination';
 import { TableToolbar } from '@/shared/components/table-toolbar';
 import { formatCurrency, formatDateTime } from '@/shared/lib/format';
 import { route } from '@/shared/lib/route';
-import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
@@ -70,48 +69,66 @@ export function StockValuationTable({ layers, filters }: Props) {
     const columns: DataTableColumn<StockValuationLayer>[] = [
         {
             key: 'reference',
-            header: 'Referensi & Waktu',
+            header: 'Referensi',
+            className: 'py-1.5',
             render: (layer) => (
-                <div className="space-y-0.5">
-                    <div className="font-mono text-xs font-semibold text-foreground">
-                        {layer.reference ??
-                            layer.stock_movement?.reference_number ??
-                            `SVL-${layer.id}`}
-                    </div>
-                    <div className="text-[11px] text-muted-foreground">
-                        {formatDateTime(layer.created_at)}
-                    </div>
-                </div>
+                <span className="font-mono text-xs font-semibold text-foreground">
+                    {layer.reference ??
+                        layer.stock_movement?.reference_number ??
+                        `SVL-${layer.id}`}
+                </span>
             ),
         },
         {
-            key: 'product_batch',
-            header: 'Produk & Batch',
+            key: 'created_at',
+            header: 'Waktu',
+            className: 'py-1.5',
             render: (layer) => (
-                <div className="space-y-0.5">
-                    <div className="text-xs font-medium text-foreground">
-                        {layer.product?.name ?? '-'}
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                        <span className="font-mono">
-                            {layer.product_batch?.batch_number ?? '-'}
-                        </span>
-                        {layer.location && (
-                            <Badge
-                                variant="outline"
-                                className="px-1 py-0 font-mono text-[10px]"
-                            >
-                                {layer.location.code}
-                            </Badge>
-                        )}
-                    </div>
-                </div>
+                <span className="text-xs text-muted-foreground">
+                    {formatDateTime(layer.created_at)}
+                </span>
             ),
+        },
+        {
+            key: 'product',
+            header: 'Produk',
+            className: 'max-w-48 py-1.5',
+            render: (layer) => (
+                <span
+                    className="block truncate text-xs font-medium text-foreground"
+                    title={layer.product?.name ?? undefined}
+                >
+                    {layer.product?.name ?? '-'}
+                </span>
+            ),
+        },
+        {
+            key: 'batch',
+            header: 'No. Batch',
+            className: 'py-1.5',
+            render: (layer) => (
+                <span className="font-mono text-xs text-muted-foreground">
+                    {layer.product_batch?.batch_number ?? '-'}
+                </span>
+            ),
+        },
+        {
+            key: 'location',
+            header: 'Lokasi',
+            className: 'py-1.5',
+            render: (layer) =>
+                layer.location ? (
+                    <span className="text-xs text-foreground">
+                        {layer.location.name}
+                    </span>
+                ) : (
+                    <span className="text-xs text-muted-foreground">-</span>
+                ),
         },
         {
             key: 'quantity',
             header: 'Qty Layer',
-            className: 'text-right',
+            className: 'py-1.5 text-right',
             render: (layer) => {
                 const isPositive = layer.quantity > 0;
                 return (
@@ -129,7 +146,7 @@ export function StockValuationTable({ layers, filters }: Props) {
         {
             key: 'remaining_qty',
             header: 'Sisa Layer',
-            className: 'text-right',
+            className: 'py-1.5 text-right',
             render: (layer) => (
                 <span className="font-mono text-xs font-medium text-foreground tabular-nums">
                     {layer.remaining_qty.toLocaleString('id-ID')}{' '}
@@ -140,7 +157,7 @@ export function StockValuationTable({ layers, filters }: Props) {
         {
             key: 'unit_cost',
             header: 'Unit Cost',
-            className: 'text-right',
+            className: 'py-1.5 text-right',
             render: (layer) => (
                 <span className="font-mono text-xs text-muted-foreground tabular-nums">
                     {formatCurrency(layer.unit_cost)}
@@ -150,7 +167,7 @@ export function StockValuationTable({ layers, filters }: Props) {
         {
             key: 'value',
             header: 'Nilai Layer',
-            className: 'text-right',
+            className: 'py-1.5 text-right',
             render: (layer) => {
                 const isPositive = layer.value >= 0;
                 return (
@@ -167,7 +184,7 @@ export function StockValuationTable({ layers, filters }: Props) {
         {
             key: 'remaining_value',
             header: 'Nilai Tersisa',
-            className: 'text-right',
+            className: 'py-1.5 text-right',
             render: (layer) => (
                 <span className="font-mono text-xs font-semibold text-primary tabular-nums">
                     {formatCurrency(layer.remaining_value)}
@@ -175,17 +192,26 @@ export function StockValuationTable({ layers, filters }: Props) {
             ),
         },
         {
+            key: 'pic',
+            header: 'Petugas',
+            className: 'py-1.5',
+            render: (layer) => (
+                <span className="text-xs text-foreground">
+                    {layer.user?.name ?? 'Sistem'}
+                </span>
+            ),
+        },
+        {
             key: 'description',
             header: 'Keterangan',
+            className: 'max-w-44 py-1.5',
             render: (layer) => (
-                <div className="max-w-48 space-y-0.5">
-                    <div className="truncate text-xs text-muted-foreground">
-                        {layer.description ?? '-'}
-                    </div>
-                    <div className="text-[10px] text-muted-foreground">
-                        PIC: {layer.user?.name ?? 'Sistem'}
-                    </div>
-                </div>
+                <span
+                    className="block truncate text-xs text-muted-foreground"
+                    title={layer.description ?? undefined}
+                >
+                    {layer.description ?? '-'}
+                </span>
             ),
         },
     ];

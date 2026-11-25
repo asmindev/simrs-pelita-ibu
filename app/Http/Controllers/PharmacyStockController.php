@@ -15,6 +15,7 @@ use App\Models\StockValuationLayer;
 use App\Services\PharmacyStockService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -140,13 +141,7 @@ class PharmacyStockController extends Controller
             ->orderBy('name')
             ->get(['id', 'code', 'name', 'product_type', 'form', 'unit_of_measure', 'price']);
 
-        $locations = StockLocation::query()
-            ->active()
-            ->orderByDesc('is_default_warehouse')
-            ->orderBy('id')
-            ->get(['id', 'code', 'name', 'usage', 'is_default_warehouse'])
-            ->sortBy(fn (StockLocation $loc): int => $loc->usage === StockLocationUsage::Internal ? 0 : 1)
-            ->values();
+        $locations = $this->activeLocations();
 
         return Inertia::render('inventory/stock/index', [
             'activeTab' => $tab,
@@ -182,6 +177,60 @@ class PharmacyStockController extends Controller
                 'total_valuation' => (int) StockValuationLayer::query()->sum('value'),
                 'today_moves' => StockMovement::query()->whereDate('created_at', Carbon::today())->count(),
             ],
+        ]);
+    }
+
+    public function showBatch(ProductBatch $batch): Response
+    {
+        Gate::authorize('view', $batch);
+
+        $this->stockService->ensureDefaultLocations();
+
+        $batch->load([
+            'product.category:id,name',
+            'stockQuants' => fn ($q) => $q
+                ->with('location:id,code,name,usage')
+                ->where('quantity', '>', 0)
+                ->orderByDesc('quantity'),
+        ]);
+
+        $movements = StockMovement::query()
+            ->with([
+                'product:id,name,code,unit_of_measure',
+                'productBatch:id,batch_number',
+                'sourceLocation:id,code,name,usage',
+                'destinationLocation:id,code,name,usage',
+                'user:id,name',
+            ])
+            ->where('product_batch_id', $batch->id)
+            ->latest('id')
+            ->limit(50)
+            ->get();
+
+        $valuationLayers = StockValuationLayer::query()
+            ->with([
+                'product:id,name,code,unit_of_measure',
+                'productBatch:id,batch_number',
+                'location:id,code,name',
+                'stockMovement:id,reference_number,type',
+                'user:id,name',
+            ])
+            ->where('product_batch_id', $batch->id)
+            ->latest('id')
+            ->limit(50)
+            ->get();
+
+        $products = Product::query()
+            ->with(['batches' => fn ($q) => $q->where('is_active', true)->orderBy('expiry_date')])
+            ->where('id', $batch->product_id)
+            ->get(['id', 'code', 'name', 'product_type', 'form', 'unit_of_measure', 'price']);
+
+        return Inertia::render('inventory/stock/show/index', [
+            'batch' => $batch,
+            'movements' => $movements,
+            'valuationLayers' => $valuationLayers,
+            'products' => $products,
+            'locations' => $this->activeLocations(),
         ]);
     }
 
@@ -228,5 +277,19 @@ class PharmacyStockController extends Controller
         $firstRef = $movements->first()?->reference_number ?? 'Stock Move';
 
         return back()->with('success', "Pergerakan stok {$firstRef} berhasil dicatat ({$count} baris mutasi).");
+    }
+
+    /**
+     * @return Collection<int, StockLocation>
+     */
+    private function activeLocations(): Collection
+    {
+        return StockLocation::query()
+            ->active()
+            ->orderByDesc('is_default_warehouse')
+            ->orderBy('id')
+            ->get(['id', 'code', 'name', 'usage', 'is_default_warehouse'])
+            ->sortBy(fn (StockLocation $loc): int => $loc->usage === StockLocationUsage::Internal ? 0 : 1)
+            ->values();
     }
 }

@@ -18,7 +18,6 @@ import type {
     StockValuationLayer,
 } from './types/stock';
 import { NewBatchDialog } from './components/new-batch-dialog';
-import { StockAdjustDialog } from './components/stock-adjust-dialog';
 import { createStockBatchColumns } from './components/stock-batch-columns';
 import { StockFilters } from './components/stock-filters';
 import {
@@ -73,29 +72,8 @@ export default function PharmacyStockIndex({
     const [isAddBatchOpen, setIsAddBatchOpen] = useState(false);
     const [isMoveOpen, setIsMoveOpen] = useState(false);
     const [movePreset, setMovePreset] = useState<StockMovePreset | null>(null);
-    const [adjustingBatch, setAdjustingBatch] = useState<ProductBatch | null>(
-        null,
-    );
 
-    const columns = useMemo(
-        () =>
-            createStockBatchColumns({
-                onAdjust: (batch) => setAdjustingBatch(batch),
-                onTransfer: (batch) => {
-                    const firstQuant = (batch.stock_quants ?? []).find(
-                        (q) => q.quantity > 0,
-                    );
-                    setMovePreset({
-                        type: 'transfer',
-                        productId: batch.product_id,
-                        batchId: batch.id,
-                        sourceLocationId: firstQuant?.stock_location_id,
-                    });
-                    setIsMoveOpen(true);
-                },
-            }),
-        [],
-    );
+    const columns = useMemo(() => createStockBatchColumns(), []);
 
     function handleTabChange(nextTab: string) {
         router.get(
@@ -172,6 +150,11 @@ export default function PharmacyStockIndex({
                         columns={columns}
                         rows={batches.data}
                         rowKey={(batch) => batch.id}
+                        onRowClick={(batch) =>
+                            router.visit(
+                                route('inventory.stock.batches.show', batch.id),
+                            )
+                        }
                         empty="Tidak ada batch produk yang sesuai dengan pencarian."
                         toolbar={
                             <StockFilters
@@ -239,13 +222,6 @@ export default function PharmacyStockIndex({
                 products={products}
                 locations={locations}
                 preset={movePreset}
-            />
-
-            <StockAdjustDialog
-                batch={adjustingBatch}
-                locations={locations}
-                open={adjustingBatch !== null}
-                onOpenChange={(open) => !open && setAdjustingBatch(null)}
             />
         </div>
     );

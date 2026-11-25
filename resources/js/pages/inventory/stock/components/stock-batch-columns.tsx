@@ -1,20 +1,6 @@
-import {
-    ArrowLeftRight,
-    MoreHorizontal,
-    SlidersHorizontal,
-} from 'lucide-react';
-
-import { Can } from '@/shared/components/can';
 import type { DataTableColumn } from '@/shared/components/data-table';
 import { formatCurrency, formatDate } from '@/shared/lib/format';
 import { Badge } from '@/shared/ui/badge';
-import { Button } from '@/shared/ui/button';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/shared/ui/dropdown-menu';
 
 import type { ProductBatch } from '../types/stock';
 
@@ -30,7 +16,10 @@ export function getExpiryBadge(expiryDate: string) {
 
     if (diffDays < 0) {
         return (
-            <Badge variant="destructive" className="text-xs">
+            <Badge
+                variant="destructive"
+                className="px-1.5 py-0 text-[11px] leading-5"
+            >
                 Kadaluwarsa ({formatDate(expiryDate)})
             </Badge>
         );
@@ -40,9 +29,9 @@ export function getExpiryBadge(expiryDate: string) {
         return (
             <Badge
                 variant="outline"
-                className="border-destructive/50 text-xs text-destructive"
+                className="border-destructive/50 px-1.5 py-0 text-[11px] leading-5 text-destructive"
             >
-                Mendekati ED: {diffDays} hr ({formatDate(expiryDate)})
+                ED {diffDays} hr ({formatDate(expiryDate)})
             </Badge>
         );
     }
@@ -54,157 +43,134 @@ export function getExpiryBadge(expiryDate: string) {
     );
 }
 
-export function createStockBatchColumns(options: {
-    onAdjust: (batch: ProductBatch) => void;
-    onTransfer: (batch: ProductBatch) => void;
-}): DataTableColumn<ProductBatch>[] {
+export function getBatchStatusBadge(batch: ProductBatch) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const exp = new Date(batch.expiry_date);
+    exp.setHours(0, 0, 0, 0);
+
+    if (exp < today) {
+        return (
+            <Badge
+                variant="destructive"
+                className="px-1.5 py-0 text-[11px] leading-5"
+            >
+                Expired
+            </Badge>
+        );
+    }
+
+    if (batch.current_quantity <= 0) {
+        return (
+            <Badge
+                variant="secondary"
+                className="px-1.5 py-0 text-[11px] leading-5"
+            >
+                Habis
+            </Badge>
+        );
+    }
+
+    return (
+        <Badge variant="default" className="px-1.5 py-0 text-[11px] leading-5">
+            Aktif / FEFO
+        </Badge>
+    );
+}
+
+export function createStockBatchColumns(): DataTableColumn<ProductBatch>[] {
     return [
         {
-            key: 'batch_product',
-            header: 'No. Batch & Produk',
-            render: (batch) => (
-                <div className="space-y-0.5">
-                    <span className="font-mono text-xs font-semibold text-foreground">
-                        {batch.batch_number}
-                    </span>
-                    <div className="text-xs font-medium text-foreground">
-                        {batch.product?.name}
-                    </div>
-                    <div className="text-[11px] text-muted-foreground">
-                        {batch.product?.code}
-                        {batch.product?.form ? ` • ${batch.product.form}` : ''}
-                    </div>
-                </div>
-            ),
-        },
-        {
-            key: 'expiry_date',
-            header: 'Kedaluwarsa (FEFO)',
-            render: (batch) => getExpiryBadge(batch.expiry_date),
-        },
-        {
-            key: 'current_quantity',
-            header: 'Sisa Stok',
+            key: 'locations',
+            header: 'WH',
+            className: 'py-1.5',
             render: (batch) => {
                 const activeQuants = (batch.stock_quants ?? []).filter(
                     (q) => q.quantity > 0,
                 );
 
+                if (activeQuants.length === 0) {
+                    return (
+                        <span className="text-xs text-muted-foreground">-</span>
+                    );
+                }
+
                 return (
-                    <div className="space-y-1">
-                        <div className="text-xs font-bold text-foreground tabular-nums">
-                            {batch.current_quantity}{' '}
-                            <span className="font-normal text-muted-foreground">
-                                {batch.product?.unit_of_measure}
-                            </span>
-                        </div>
-                        <div className="text-[11px] text-muted-foreground">
-                            Awal: {batch.initial_quantity}
-                        </div>
-                        {activeQuants.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                                {activeQuants.map((quant) => (
-                                    <Badge
-                                        key={quant.id}
-                                        variant="outline"
-                                        className="px-1.5 py-0 font-mono text-[10px] font-normal"
-                                    >
-                                        {quant.location?.code ?? 'LOC'}:{' '}
-                                        {quant.quantity}
-                                    </Badge>
-                                ))}
-                            </div>
-                        )}
+                    <div className="flex items-center gap-1">
+                        {activeQuants.map((quant) => (
+                            <Badge
+                                key={quant.id}
+                                variant="outline"
+                                className="px-1.5 py-0 text-[11px] font-normal"
+                                title={`${quant.location?.code ?? 'LOC'}: ${quant.quantity}`}
+                            >
+                                {quant.location?.name ??
+                                    quant.location?.code ??
+                                    '-'}
+                            </Badge>
+                        ))}
                     </div>
                 );
             },
+        },
+        {
+            key: 'product_name',
+            header: 'Produk',
+            className: 'max-w-52 py-1.5',
+            render: (batch) => (
+                <span
+                    className="block truncate text-xs font-medium text-foreground"
+                    title={
+                        batch.product?.form
+                            ? `${batch.product.name} (${batch.product.form})`
+                            : batch.product?.name
+                    }
+                >
+                    {batch.product?.name ?? '-'}
+                </span>
+            ),
         },
         {
             key: 'buy_price',
             header: 'Harga Beli',
+            className: 'py-1.5 text-right',
             render: (batch) => (
-                <div className="space-y-0.5">
-                    <span className="font-mono text-xs text-foreground tabular-nums">
-                        {formatCurrency(batch.buy_price)}
-                    </span>
-                    <div className="font-mono text-[10px] text-muted-foreground tabular-nums">
-                        Nilai:{' '}
-                        {formatCurrency(
-                            batch.current_quantity * batch.buy_price,
-                        )}
-                    </div>
-                </div>
+                <span className="font-mono text-xs text-foreground tabular-nums">
+                    {formatCurrency(batch.buy_price)}
+                </span>
             ),
         },
         {
-            key: 'status',
-            header: 'Status',
-            render: (batch) => {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const exp = new Date(batch.expiry_date);
-                exp.setHours(0, 0, 0, 0);
-                const isExpired = exp < today;
-
-                if (isExpired) {
-                    return (
-                        <Badge variant="destructive" className="text-xs">
-                            Expired
-                        </Badge>
-                    );
-                }
-                if (batch.current_quantity <= 0) {
-                    return (
-                        <Badge variant="secondary" className="text-xs">
-                            Habis
-                        </Badge>
-                    );
-                }
-                return (
-                    <Badge variant="default" className="text-xs">
-                        Aktif / FEFO
-                    </Badge>
-                );
-            },
+            key: 'current_quantity',
+            header: 'Sisa Stok',
+            className: 'py-1.5 text-right',
+            render: (batch) => (
+                <span className="font-mono text-xs font-bold text-foreground tabular-nums">
+                    {batch.current_quantity.toLocaleString('id-ID')}{' '}
+                    <span className="font-normal text-muted-foreground">
+                        {batch.product?.unit_of_measure ?? ''}
+                    </span>
+                </span>
+            ),
         },
         {
-            key: 'actions',
-            header: '',
-            className: 'w-12 text-right',
+            key: 'stock_value',
+            header: 'Nilai Stok',
+            className: 'py-1.5 text-right',
             render: (batch) => (
-                <Can permission="pharmacy.stock.adjust">
-                    <div className="flex justify-end">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="size-8 p-0"
-                                >
-                                    <MoreHorizontal className="size-4" />
-                                    <span className="sr-only">
-                                        Buka menu aksi
-                                    </span>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuItem
-                                    onClick={() => options.onTransfer(batch)}
-                                    disabled={batch.current_quantity <= 0}
-                                >
-                                    <ArrowLeftRight className="mr-2 size-3.5" />
-                                    Transfer / Stock Move
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    onClick={() => options.onAdjust(batch)}
-                                >
-                                    <SlidersHorizontal className="mr-2 size-3.5" />
-                                    Penyesuaian Stok (Opname)
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                </Can>
+                <span className="font-mono text-xs font-medium text-foreground tabular-nums">
+                    {formatCurrency(batch.current_quantity * batch.buy_price)}
+                </span>
+            ),
+        },
+        {
+            key: 'batch_number',
+            header: 'No. Batch',
+            className: 'py-1.5',
+            render: (batch) => (
+                <span className="font-mono text-xs font-semibold text-foreground">
+                    {batch.batch_number}
+                </span>
             ),
         },
     ];

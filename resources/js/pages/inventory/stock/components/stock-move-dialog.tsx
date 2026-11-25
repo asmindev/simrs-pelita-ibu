@@ -250,7 +250,7 @@ export function StockMoveDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-lg">
+            <DialogContent className="sm:max-w-lg sm:min-w-4xl">
                 <DialogHeader>
                     <DialogTitle>
                         Catat Pergerakan Stok (Stock Move)

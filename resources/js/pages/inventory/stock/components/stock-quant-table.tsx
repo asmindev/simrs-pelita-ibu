@@ -80,36 +80,55 @@ export function StockQuantTable({
 
     const columns: DataTableColumn<StockQuant>[] = [
         {
-            key: 'location',
-            header: 'Lokasi Simpan',
+            key: 'location_code',
+            header: 'Kode Lokasi',
+            className: 'py-1.5',
             render: (quant) => (
-                <div className="space-y-0.5">
-                    <Badge variant="outline" className="font-mono text-[10px]">
-                        {quant.location?.code ?? '-'}
-                    </Badge>
-                    <div className="text-xs font-medium text-foreground">
-                        {quant.location?.name ?? '-'}
-                    </div>
-                </div>
+                <Badge
+                    variant="outline"
+                    className="px-1.5 py-0 font-mono text-[10px]"
+                >
+                    {quant.location?.code ?? '-'}
+                </Badge>
             ),
         },
         {
-            key: 'product_batch',
-            header: 'Produk & No. Batch',
+            key: 'location_name',
+            header: 'Lokasi Simpan',
+            className: 'py-1.5',
             render: (quant) => (
-                <div className="space-y-0.5">
-                    <div className="text-xs font-medium text-foreground">
-                        {quant.product?.name ?? '-'}
-                    </div>
-                    <div className="font-mono text-[11px] text-muted-foreground">
-                        {quant.product_batch?.batch_number ?? '-'}
-                    </div>
-                </div>
+                <span className="text-xs font-medium text-foreground">
+                    {quant.location?.name ?? '-'}
+                </span>
+            ),
+        },
+        {
+            key: 'product',
+            header: 'Produk',
+            className: 'max-w-52 py-1.5',
+            render: (quant) => (
+                <span
+                    className="block truncate text-xs font-medium text-foreground"
+                    title={quant.product?.name ?? undefined}
+                >
+                    {quant.product?.name ?? '-'}
+                </span>
+            ),
+        },
+        {
+            key: 'batch',
+            header: 'No. Batch',
+            className: 'py-1.5',
+            render: (quant) => (
+                <span className="font-mono text-xs text-muted-foreground">
+                    {quant.product_batch?.batch_number ?? '-'}
+                </span>
             ),
         },
         {
             key: 'expiry',
             header: 'Kedaluwarsa',
+            className: 'py-1.5',
             render: (quant) =>
                 quant.product_batch?.expiry_date ? (
                     getExpiryBadge(quant.product_batch.expiry_date)
@@ -120,7 +139,7 @@ export function StockQuantTable({
         {
             key: 'quantity',
             header: 'Stok On-Hand',
-            className: 'text-right',
+            className: 'py-1.5 text-right',
             render: (quant) => (
                 <span className="font-mono text-xs font-bold text-foreground tabular-nums">
                     {quant.quantity.toLocaleString('id-ID')}{' '}
@@ -133,7 +152,7 @@ export function StockQuantTable({
         {
             key: 'valuation',
             header: 'Nilai Lokasi',
-            className: 'text-right',
+            className: 'py-1.5 text-right',
             render: (quant) => {
                 const buyPrice = quant.product_batch?.buy_price ?? 0;
                 return (
@@ -146,14 +165,14 @@ export function StockQuantTable({
         {
             key: 'actions',
             header: '',
-            className: 'w-28 text-right',
+            className: 'w-24 py-1.5 text-right',
             render: (quant) => (
                 <Can permission="pharmacy.stock.adjust">
                     <Button
                         size="sm"
                         variant="outline"
                         onClick={() => onTransferQuant(quant)}
-                        className="h-7 gap-1 bg-background text-xs"
+                        className="h-6 gap-1 bg-background px-2 text-[11px]"
                     >
                         <ArrowLeftRight className="size-3" />
                         Transfer
