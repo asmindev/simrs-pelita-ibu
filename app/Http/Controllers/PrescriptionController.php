@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\EncounterStatus;
+use App\Enums\Permissions\PharmacyPermission;
 use App\Http\Requests\CancelPrescriptionRequest;
 use App\Http\Requests\DispensePrescriptionRequest;
 use App\Http\Requests\ReturnDispensedRequest;
 use App\Http\Requests\StorePrescriptionRequest;
 use App\Http\Requests\VerifyPrescriptionRequest;
 use App\Models\Dispensing;
+use App\Models\Encounter;
 use App\Models\Prescription;
 use App\Models\Unit;
 use App\Services\PharmacyStockService;
@@ -56,9 +59,34 @@ class PrescriptionController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'code']);
 
+        $canCreate = $request->user()?->can(PharmacyPermission::PrescriptionCreate->value) ?? false;
+
+        $drugs = $canCreate
+            ? $this->prescriptionService->getPrescribableDrugs()
+            : [];
+
+        $activeEncounters = $canCreate
+            ? Encounter::query()
+                ->where('status', EncounterStatus::InConsultation)
+                ->where(function (Builder $query): void {
+                    $query->today()
+                        ->orWhereHas('admissions', fn (Builder $admissionQuery) => $admissionQuery->active());
+                })
+                ->with([
+                    'patient:id,name,medical_record_number',
+                    'unit:id,name,code',
+                    'doctor:id,name',
+                ])
+                ->latest('arrived_at')
+                ->limit(100)
+                ->get(['id', 'encounter_number', 'patient_id', 'unit_id', 'doctor_id', 'status', 'arrived_at'])
+            : [];
+
         return Inertia::render('pharmacy/prescription/list/index', [
             'prescriptions' => $prescriptions,
             'units' => $units,
+            'drugs' => $drugs,
+            'activeEncounters' => $activeEncounters,
             'filters' => [
                 'search' => $search,
                 'status' => $status,

@@ -14,6 +14,7 @@ export interface ComboboxOption {
 }
 
 interface ComboboxProps {
+    id?: string;
     options: ComboboxOption[];
     value?: string;
     onValueChange: (value: string) => void;
@@ -23,9 +24,11 @@ interface ComboboxProps {
     disabled?: boolean;
     className?: string;
     clearable?: boolean;
+    modal?: boolean;
 }
 
 export function Combobox({
+    id,
     options,
     value,
     onValueChange,
@@ -35,9 +38,17 @@ export function Combobox({
     disabled = false,
     className,
     clearable = false,
+    modal = false,
 }: ComboboxProps) {
     const [open, setOpen] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState('');
+
+    function handleOpenChange(nextOpen: boolean) {
+        setOpen(nextOpen);
+        if (!nextOpen) {
+            setSearchQuery('');
+        }
+    }
 
     const selectedOption = React.useMemo(
         () => options.find((opt) => opt.value === value),
@@ -57,9 +68,10 @@ export function Combobox({
     }, [options, searchQuery]);
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={handleOpenChange} modal={modal}>
             <PopoverTrigger asChild>
                 <Button
+                    id={id}
                     type="button"
                     variant="outline"
                     role="combobox"
@@ -78,7 +90,7 @@ export function Combobox({
                 </Button>
             </PopoverTrigger>
             <PopoverContent
-                className="w-[var(--radix-popover-trigger-width)] min-w-[280px] p-2"
+                className="pointer-events-auto w-[var(--radix-popover-trigger-width)] min-w-[280px] p-2"
                 align="start"
             >
                 <div className="relative mb-2 flex items-center">
@@ -101,13 +113,16 @@ export function Combobox({
                     )}
                 </div>
 
-                <div className="max-h-60 space-y-1 overflow-y-auto">
+                <div
+                    className="max-h-60 space-y-1 overflow-y-auto"
+                    onWheel={(e) => e.stopPropagation()}
+                >
                     {clearable && value && (
                         <button
                             type="button"
                             onClick={() => {
                                 onValueChange('');
-                                setOpen(false);
+                                handleOpenChange(false);
                             }}
                             className="flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs text-muted-foreground hover:bg-muted"
                         >
@@ -128,7 +143,7 @@ export function Combobox({
                                     type="button"
                                     onClick={() => {
                                         onValueChange(option.value);
-                                        setOpen(false);
+                                        handleOpenChange(false);
                                     }}
                                     className={cn(
                                         'flex w-full items-center justify-between rounded-md px-2.5 py-2 text-left text-xs transition-colors',

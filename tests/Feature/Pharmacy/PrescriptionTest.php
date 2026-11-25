@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\EncounterStatus;
+use App\Enums\ProductType;
 use App\Enums\RoleName;
 use App\Models\Dispensing;
 use App\Models\Doctor;
@@ -26,7 +28,7 @@ test('doctor can create an electronic prescription with items', function () {
     $doctor = Doctor::factory()->create();
     $patient = Patient::factory()->create();
     $unit = Unit::factory()->create();
-    $encounter = Encounter::factory()->create([
+    $encounter = Encounter::factory()->inConsultation()->create([
         'patient_id' => $patient->id,
         'doctor_id' => $doctor->id,
         'unit_id' => $unit->id,
@@ -274,4 +276,121 @@ test('pharmacist can return dispensed medication and restore batch quantity', fu
         'balance_before' => 10,
         'balance_after' => 15,
     ]);
+});
+
+test('emr encounter show provides prescribable drugs and encounter prescriptions to doctor only', function () {
+    $doctorUser = User::factory()->create();
+    $doctorUser->assignRole(RoleName::Doctor->value);
+
+    $nurseUser = User::factory()->create();
+    $nurseUser->assignRole(RoleName::Nurse->value);
+
+    $encounter = Encounter::factory()->inConsultation()->create();
+    $drug = Product::factory()->create([
+        'name' => 'Amoxicillin 500mg',
+        'product_type' => ProductType::Drug,
+        'is_active' => true,
+    ]);
+    Product::factory()->create([
+        'name' => 'Spuit 3cc',
+        'product_type' => ProductType::MedicalSupply,
+        'is_active' => true,
+    ]);
+    Prescription::factory()->create([
+        'encounter_id' => $encounter->id,
+        'patient_id' => $encounter->patient_id,
+    ]);
+
+    $this->actingAs($doctorUser)
+        ->get(route('medical-record.encounters.show', $encounter->id))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('medical-record/encounter/show/index')
+            ->has('encounter.prescriptions', 1)
+            ->has('drugs', 1)
+            ->where('drugs.0.id', $drug->id)
+        );
+
+    $this->actingAs($nurseUser)
+        ->get(route('medical-record.encounters.show', $encounter->id))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('medical-record/encounter/show/index')
+            ->has('drugs', 0)
+        );
+});
+
+test('pharmacy prescriptions index provides drugs and active encounters for creating e-prescriptions', function () {
+    $pharmacistUser = User::factory()->create();
+    $pharmacistUser->assignRole(RoleName::Pharmacist->value);
+
+    $activeEncounter = Encounter::factory()->create([
+        'status' => EncounterStatus::InConsultation,
+        'arrived_at' => now(),
+    ]);
+    Encounter::factory()->create([
+        'status' => EncounterStatus::InConsultation,
+        'arrived_at' => now()->subDays(5),
+    ]);
+    Encounter::factory()->create([
+        'status' => EncounterStatus::Arrived,
+        'arrived_at' => now(),
+    ]);
+    Encounter::factory()->create([
+        'status' => EncounterStatus::Finished,
+        'arrived_at' => now(),
+    ]);
+    $drug = Product::factory()->create([
+        'name' => 'Paracetamol 500mg',
+        'product_type' => ProductType::Drug,
+        'is_active' => true,
+    ]);
+
+    $this->actingAs($pharmacistUser)
+        ->get(route('pharmacy.prescriptions.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('pharmacy/prescription/list/index')
+            ->has('drugs', 1)
+            ->where('drugs.0.id', $drug->id)
+            ->has('activeEncounters', 1)
+            ->where('activeEncounters.0.id', $activeEncounter->id)
+        );
+});
+
+test('prescription cannot be created for arrived, finished, or cancelled encounters', function () {
+    $doctorUser = User::factory()->create();
+    $doctorUser->assignRole(RoleName::Doctor->value);
+
+    $arrivedEncounter = Encounter::factory()->create();
+    $finishedEncounter = Encounter::factory()->finished()->create();
+    $cancelledEncounter = Encounter::factory()->cancelled()->create();
+    $drug = Product::factory()->create([
+        'product_type' => ProductType::Drug,
+        'is_active' => true,
+    ]);
+
+    foreach ([$arrivedEncounter, $finishedEncounter, $cancelledEncounter] as $encounter) {
+        $this->actingAs($doctorUser)
+            ->post(route('pharmacy.prescriptions.store'), [
+                'encounter_id' => $encounter->id,
+                'items' => [
+                    [
+                        'product_id' => $drug->id,
+                        'dosage' => '500mg',
+                        'frequency' => '3x1',
+                        'quantity' => 10,
+                    ],
+                ],
+            ])
+            ->assertSessionHasErrors('encounter_id');
+    }
+
+    $this->actingAs($doctorUser)
+        ->get(route('medical-record.encounters.show', $arrivedEncounter->id))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('medical-record/encounter/show/index')
+            ->has('drugs', 0)
+        );
 });

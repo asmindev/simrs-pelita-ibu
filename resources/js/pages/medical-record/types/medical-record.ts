@@ -10,6 +10,50 @@ export type SensitiveCategory =
     | 'other';
 export type ClinicalReportType = 'surgery' | 'birth' | 'death';
 
+export type EncounterPrescriptionStatus =
+    | 'submitted'
+    | 'verified'
+    | 'dispensed'
+    | 'cancelled';
+
+export type EncounterPrescriptionItem = {
+    id: number;
+    prescription_id: number;
+    product_id: number;
+    dosage: string;
+    frequency: string;
+    route: string | null;
+    duration_days: number | null;
+    quantity: number;
+    dispensed_quantity: number;
+    instructions: string | null;
+    status: string;
+    product?: {
+        id: number;
+        code: string;
+        name: string;
+        form: string | null;
+        strength: string | null;
+        unit_of_measure: string;
+    } | null;
+};
+
+export type EncounterPrescription = {
+    id: number;
+    prescription_number: string;
+    encounter_id: number;
+    status: EncounterPrescriptionStatus;
+    notes: string | null;
+    verification_notes: string | null;
+    cancel_reason: string | null;
+    created_at: string;
+    verified_at: string | null;
+    dispensed_at: string | null;
+    doctor?: { id: number; name: string } | null;
+    pharmacist?: { id: number; name: string } | null;
+    items?: EncounterPrescriptionItem[];
+};
+
 export type VitalSigns = {
     systolic?: number | string | null;
     diastolic?: number | string | null;
@@ -165,6 +209,7 @@ export type EncounterWithEmr = {
     assessments?: Assessment[];
     diagnoses?: Diagnosis[];
     procedures?: Procedure[];
+    prescriptions?: EncounterPrescription[];
     sensitive_notes?: SensitiveNote[];
     clinical_reports?: ClinicalReport[];
 };

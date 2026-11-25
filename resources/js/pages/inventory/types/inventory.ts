@@ -19,6 +19,12 @@ export type ProductBatchSummary = {
     expiry_date: string;
     current_quantity: number;
     buy_price: number;
+    stock_quants?: Array<{
+        id: number;
+        product_batch_id: number;
+        stock_location_id: number;
+        quantity: number;
+    }>;
 };
 
 export type ProductInfo = {

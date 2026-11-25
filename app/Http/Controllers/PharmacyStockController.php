@@ -200,7 +200,12 @@ class PharmacyStockController extends Controller
             ->get();
 
         $products = Product::query()
-            ->with(['batches' => fn ($q) => $q->where('is_active', true)->orderBy('expiry_date')])
+            ->with([
+                'batches' => fn ($q) => $q
+                    ->with('stockQuants:id,product_batch_id,stock_location_id,quantity')
+                    ->where('is_active', true)
+                    ->orderBy('expiry_date'),
+            ])
             ->where('id', $product->id)
             ->get(['id', 'code', 'name', 'product_type', 'form', 'unit_of_measure', 'price']);
 
@@ -370,7 +375,12 @@ class PharmacyStockController extends Controller
     private function activeProducts(): Collection
     {
         return Product::query()
-            ->with(['batches' => fn ($q) => $q->where('is_active', true)->orderBy('expiry_date')])
+            ->with([
+                'batches' => fn ($q) => $q
+                    ->with('stockQuants:id,product_batch_id,stock_location_id,quantity')
+                    ->where('is_active', true)
+                    ->orderBy('expiry_date'),
+            ])
             ->where('is_active', true)
             ->orderBy('name')
             ->get(['id', 'code', 'name', 'product_type', 'form', 'unit_of_measure', 'price']);

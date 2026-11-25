@@ -2,10 +2,14 @@
 
 namespace App\Services;
 
+use App\Enums\EncounterStatus;
+use App\Enums\ProductType;
 use App\Models\Encounter;
 use App\Models\Prescription;
 use App\Models\PrescriptionItem;
+use App\Models\Product;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -40,6 +44,12 @@ class PrescriptionService
         return DB::transaction(function () use ($data) {
             /** @var Encounter $encounter */
             $encounter = Encounter::query()->with(['patient', 'doctor', 'unit'])->findOrFail($data['encounter_id']);
+
+            if ($encounter->status !== EncounterStatus::InConsultation) {
+                throw ValidationException::withMessages([
+                    'encounter_id' => 'E-resep hanya dapat dibuat untuk kunjungan pasien yang sedang dilayani.',
+                ]);
+            }
 
             $prescriptionNumber = $this->generatePrescriptionNumber();
 
@@ -176,6 +186,44 @@ class PrescriptionService
         $prescription->items()->update(['status' => 'cancelled']);
 
         return $prescription->fresh();
+    }
+
+    /**
+     * Get active drug products along with FEFO-available stock across internal warehouses.
+     *
+     * @return list<array{
+     *     id: int,
+     *     code: string,
+     *     name: string,
+     *     form: string|null,
+     *     strength: string|null,
+     *     unit_of_measure: string,
+     *     price: int,
+     *     available_stock: int
+     * }>
+     */
+    public function getPrescribableDrugs(): array
+    {
+        return Product::query()
+            ->where('is_active', true)
+            ->ofType(ProductType::Drug)
+            ->withSum([
+                'stockQuants as available_stock' => fn (Builder $query) => $query->fefoAvailable(),
+            ], 'quantity')
+            ->orderBy('name')
+            ->get(['id', 'code', 'name', 'form', 'strength', 'unit_of_measure', 'price'])
+            ->map(fn (Product $product): array => [
+                'id' => $product->id,
+                'code' => $product->code,
+                'name' => $product->name,
+                'form' => $product->form,
+                'strength' => $product->strength,
+                'unit_of_measure' => $product->unit_of_measure,
+                'price' => $product->price,
+                'available_stock' => (int) ($product->getAttribute('available_stock') ?? 0),
+            ])
+            ->values()
+            ->all();
     }
 
     private function generatePrescriptionNumber(): string

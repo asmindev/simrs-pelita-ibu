@@ -1,6 +1,10 @@
 import { useForm } from '@inertiajs/react';
+import { Loader2 } from 'lucide-react';
 import type { FormEvent } from 'react';
+import { useMemo } from 'react';
 
+import { Combobox, type ComboboxOption } from '@/shared/components/combobox';
+import { DatePicker } from '@/shared/components/date-picker';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
 import {
@@ -13,13 +17,6 @@ import {
 } from '@/shared/ui/dialog';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/shared/ui/select';
 
 import type { ProductInfo, StockLocation } from '../../types/inventory';
 
@@ -36,10 +33,40 @@ export function NewStockDialog({
     products,
     locations,
 }: Props) {
-    const internalLocations = locations.filter((l) => l.usage === 'internal');
+    const internalLocations = useMemo(
+        () => locations.filter((l) => l.usage === 'internal'),
+        [locations],
+    );
+
     const defaultWarehouse =
         internalLocations.find((l) => l.is_default_warehouse) ??
         internalLocations[0];
+
+    const productOptions: ComboboxOption[] = useMemo(
+        () =>
+            products.map((d) => ({
+                value: String(d.id),
+                label: d.form ? `${d.name} (${d.form})` : d.name,
+                badge: d.code,
+                description: `Satuan: ${d.unit_of_measure}`,
+            })),
+        [products],
+    );
+
+    const locationOptions: ComboboxOption[] = useMemo(
+        () =>
+            internalLocations.map((loc) => ({
+                value: String(loc.id),
+                label: loc.name,
+                badge: loc.code,
+                description: loc.is_default_warehouse
+                    ? 'Gudang default'
+                    : undefined,
+            })),
+        [internalLocations],
+    );
+
+    const currentYear = new Date().getFullYear();
 
     const { data, setData, post, processing, errors, reset } = useForm({
         product_id: '',
@@ -49,6 +76,21 @@ export function NewStockDialog({
         stock_location_id: defaultWarehouse ? String(defaultWarehouse.id) : '',
         origin: '',
     });
+
+    const selectedProduct = useMemo(
+        () => products.find((p) => String(p.id) === data.product_id),
+        [products, data.product_id],
+    );
+
+    function disablePastAndToday(date: Date): boolean {
+        const now = new Date();
+        const todayEnd = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate(),
+        );
+        return date <= todayEnd;
+    }
 
     function handleSubmit(event: FormEvent) {
         event.preventDefault();
@@ -62,7 +104,7 @@ export function NewStockDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>Tambah Stok Masuk</DialogTitle>
                     <DialogDescription>
@@ -71,32 +113,22 @@ export function NewStockDialog({
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-3.5">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-1.5">
                         <Label htmlFor="stock-product-select">
                             Pilih Produk{' '}
                             <span className="text-destructive">*</span>
                         </Label>
-                        <Select
+                        <Combobox
+                            id="stock-product-select"
+                            modal
+                            options={productOptions}
                             value={data.product_id}
                             onValueChange={(val) => setData('product_id', val)}
-                        >
-                            <SelectTrigger
-                                id="stock-product-select"
-                                className="bg-background"
-                            >
-                                <SelectValue placeholder="Pilih produk dari master..." />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-60">
-                                {products.map((d) => (
-                                    <SelectItem key={d.id} value={String(d.id)}>
-                                        {d.name}
-                                        {d.form ? ` (${d.form})` : ''} — Satuan:{' '}
-                                        {d.unit_of_measure}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                            placeholder="Pilih produk dari master..."
+                            searchPlaceholder="Cari nama, bentuk, atau kode produk..."
+                            emptyText="Produk tidak ditemukan."
+                        />
                         {errors.product_id && (
                             <p className="text-xs text-destructive">
                                 {errors.product_id}
@@ -104,34 +136,28 @@ export function NewStockDialog({
                         )}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div className="space-y-1.5">
                             <Label htmlFor="stock-location">
                                 Gudang Tujuan
                             </Label>
-                            <Select
+                            <Combobox
+                                id="stock-location"
+                                modal
+                                options={locationOptions}
                                 value={data.stock_location_id}
                                 onValueChange={(val) =>
                                     setData('stock_location_id', val)
                                 }
-                            >
-                                <SelectTrigger
-                                    id="stock-location"
-                                    className="bg-background"
-                                >
-                                    <SelectValue placeholder="Gudang Utama" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {internalLocations.map((loc) => (
-                                        <SelectItem
-                                            key={loc.id}
-                                            value={String(loc.id)}
-                                        >
-                                            {loc.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                                placeholder="Pilih gudang tujuan..."
+                                searchPlaceholder="Cari nama atau kode gudang..."
+                                emptyText="Gudang tidak ditemukan."
+                            />
+                            {errors.stock_location_id && (
+                                <p className="text-xs text-destructive">
+                                    {errors.stock_location_id}
+                                </p>
+                            )}
                         </div>
 
                         <div className="space-y-1.5">
@@ -145,26 +171,33 @@ export function NewStockDialog({
                                     setData('origin', e.target.value)
                                 }
                                 placeholder="PO-2026-001"
-                                className="bg-background"
+                                className="h-9 bg-background text-xs"
                             />
+                            {errors.origin && (
+                                <p className="text-xs text-destructive">
+                                    {errors.origin}
+                                </p>
+                            )}
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div className="space-y-1.5">
                             <Label htmlFor="stock-expiry">
                                 Tanggal Kedaluwarsa{' '}
                                 <span className="text-destructive">*</span>
                             </Label>
-                            <Input
+                            <DatePicker
                                 id="stock-expiry"
-                                type="date"
+                                modal
                                 value={data.expiry_date}
-                                onChange={(e) =>
-                                    setData('expiry_date', e.target.value)
+                                onValueChange={(val) =>
+                                    setData('expiry_date', val)
                                 }
-                                className="bg-background"
-                                required
+                                placeholder="Pilih tanggal kedaluwarsa..."
+                                fromYear={currentYear}
+                                toYear={currentYear + 15}
+                                disabledDate={disablePastAndToday}
                             />
                             {errors.expiry_date && (
                                 <p className="text-xs text-destructive">
@@ -178,18 +211,28 @@ export function NewStockDialog({
                                 Jumlah Masuk{' '}
                                 <span className="text-destructive">*</span>
                             </Label>
-                            <Input
-                                id="stock-initial-qty"
-                                type="number"
-                                min={1}
-                                value={data.initial_quantity}
-                                onChange={(e) =>
-                                    setData('initial_quantity', e.target.value)
-                                }
-                                placeholder="0"
-                                className="bg-background"
-                                required
-                            />
+                            <div className="relative">
+                                <Input
+                                    id="stock-initial-qty"
+                                    type="number"
+                                    min={1}
+                                    value={data.initial_quantity}
+                                    onChange={(e) =>
+                                        setData(
+                                            'initial_quantity',
+                                            e.target.value,
+                                        )
+                                    }
+                                    placeholder="0"
+                                    className="h-9 bg-background pr-16 text-xs tabular-nums"
+                                    required
+                                />
+                                {selectedProduct && (
+                                    <span className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-[11px] text-muted-foreground">
+                                        {selectedProduct.unit_of_measure}
+                                    </span>
+                                )}
+                            </div>
                             {errors.initial_quantity && (
                                 <p className="text-xs text-destructive">
                                     {errors.initial_quantity}
@@ -211,7 +254,7 @@ export function NewStockDialog({
                                 setData('buy_price', e.target.value)
                             }
                             placeholder="0"
-                            className="bg-background"
+                            className="h-9 bg-background text-xs tabular-nums"
                         />
                         {errors.buy_price && (
                             <p className="text-xs text-destructive">
@@ -229,6 +272,9 @@ export function NewStockDialog({
                             Batal
                         </Button>
                         <Button type="submit" disabled={processing}>
+                            {processing && (
+                                <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+                            )}
                             {processing ? 'Menyimpan...' : 'Simpan Stok'}
                         </Button>
                     </DialogFooter>

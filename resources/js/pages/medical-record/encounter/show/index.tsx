@@ -4,9 +4,11 @@ import {
     CheckSquare,
     FileText,
     Lock,
+    Pill,
     Stethoscope,
 } from 'lucide-react';
 
+import type { PrescribableDrug } from '@/shared/components/prescription-items-editor';
 import { Badge } from '@/shared/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 
@@ -14,6 +16,7 @@ import type { EncounterWithEmr } from '../../types/medical-record';
 import { AssessmentForm } from '../components/assessment-form';
 import { DiagnosisEditor } from '../components/diagnosis-editor';
 import { PatientContextBar } from '../components/patient-context-bar';
+import { PrescriptionEditor } from '../components/prescription-editor';
 import { ProcedureEditor } from '../components/procedure-editor';
 import { ReportListTab } from '../components/report-list-tab';
 import { SensitiveNoteBox } from '../components/sensitive-note-box';
@@ -21,11 +24,13 @@ import { SensitiveNoteBox } from '../components/sensitive-note-box';
 type Props = {
     encounter: EncounterWithEmr;
     doctors: Array<{ id: number; name: string }>;
+    drugs: PrescribableDrug[];
 };
 
-export default function EncounterEmrShow({ encounter, doctors }: Props) {
+export default function EncounterEmrShow({ encounter, doctors, drugs }: Props) {
     const diagnosisCount = encounter.diagnoses?.length || 0;
     const procedureCount = encounter.procedures?.length || 0;
+    const prescriptionCount = encounter.prescriptions?.length || 0;
     const sensitiveCount = encounter.sensitive_notes?.length || 0;
     const reportCount = encounter.clinical_reports?.length || 0;
 
@@ -78,6 +83,22 @@ export default function EncounterEmrShow({ encounter, doctors }: Props) {
                                     className="px-1.5 py-0 font-mono text-[10px]"
                                 >
                                     {procedureCount}
+                                </Badge>
+                            )}
+                        </TabsTrigger>
+
+                        <TabsTrigger
+                            value="prescriptions"
+                            className="gap-2 px-3.5 py-1.5 text-xs font-medium data-[state=active]:bg-background data-[state=active]:font-semibold data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+                        >
+                            <Pill className="size-3.5" />
+                            <span>E-Resep</span>
+                            {prescriptionCount > 0 && (
+                                <Badge
+                                    variant="secondary"
+                                    className="px-1.5 py-0 font-mono text-[10px]"
+                                >
+                                    {prescriptionCount}
                                 </Badge>
                             )}
                         </TabsTrigger>
@@ -136,6 +157,13 @@ export default function EncounterEmrShow({ encounter, doctors }: Props) {
                     className="m-0 focus-visible:outline-none"
                 >
                     <ProcedureEditor encounter={encounter} doctors={doctors} />
+                </TabsContent>
+
+                <TabsContent
+                    value="prescriptions"
+                    className="m-0 focus-visible:outline-none"
+                >
+                    <PrescriptionEditor encounter={encounter} drugs={drugs} />
                 </TabsContent>
 
                 <TabsContent

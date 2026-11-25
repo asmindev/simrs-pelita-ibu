@@ -43,6 +43,11 @@ class MedicalRecordService
             'diagnoses.createdBy',
             'procedures.performedBy',
             'procedures.createdBy',
+            'prescriptions' => fn ($query) => $query->latest('id')->with([
+                'doctor',
+                'pharmacist',
+                'items.product',
+            ]),
             'clinicalReports.doctor',
             'clinicalReports.createdBy',
         ];
