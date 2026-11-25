@@ -1,3 +1,5 @@
+import { Package } from 'lucide-react';
+
 import type { DataTableColumn } from '@/shared/components/data-table';
 import { formatCurrency } from '@/shared/lib/format';
 import { Badge } from '@/shared/ui/badge';
@@ -19,9 +21,22 @@ export function createProductColumns(): DataTableColumn<Product>[] {
             key: 'name',
             header: 'Nama Produk',
             render: (product) => (
-                <span className="font-medium text-foreground">
-                    {product.name}
-                </span>
+                <div className="flex items-center gap-2.5">
+                    {product.image_url ? (
+                        <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="size-9 shrink-0 rounded-md border border-border object-cover"
+                        />
+                    ) : (
+                        <div className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border/80 bg-primary/10 text-primary">
+                            <Package className="size-4" />
+                        </div>
+                    )}
+                    <span className="font-medium text-foreground">
+                        {product.name}
+                    </span>
+                </div>
             ),
         },
         {

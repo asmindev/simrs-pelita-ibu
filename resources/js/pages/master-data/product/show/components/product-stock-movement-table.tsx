@@ -89,8 +89,8 @@ export function ProductStockMovementTable({
         const q = search.toLowerCase();
         return movements.filter(
             (m) =>
-                (m.drug_batch?.batch_number &&
-                    m.drug_batch.batch_number.toLowerCase().includes(q)) ||
+                (m.product_batch?.batch_number &&
+                    m.product_batch.batch_number.toLowerCase().includes(q)) ||
                 (m.reference_number &&
                     m.reference_number.toLowerCase().includes(q)) ||
                 (m.reason && m.reason.toLowerCase().includes(q)) ||
@@ -131,7 +131,7 @@ export function ProductStockMovementTable({
                 render: (move) => (
                     <div className="space-y-0.5">
                         <span className="font-mono text-xs text-foreground">
-                            {move.drug_batch?.batch_number ?? '-'}
+                            {move.product_batch?.batch_number ?? '-'}
                         </span>
                         {move.reference_number && (
                             <div className="font-mono text-[10px] text-muted-foreground">

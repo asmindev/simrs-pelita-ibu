@@ -1,5 +1,6 @@
 import { Link, useForm } from '@inertiajs/react';
-import type { FormEvent } from 'react';
+import { Package, Trash2, Upload } from 'lucide-react';
+import { type ChangeEvent, type FormEvent, useRef, useState } from 'react';
 
 import { FormField } from '@/shared/components/form-field';
 import { route } from '@/shared/lib/route';
@@ -34,22 +35,55 @@ type Props = {
 };
 
 export function ProductForm({ product, categories, productTypes }: Props) {
-    const { data, setData, post, put, processing, errors } =
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(
+        product?.image_url ?? null,
+    );
+
+    const { data, setData, post, transform, processing, errors } =
         useForm<ProductInput>({
             code: product?.code ?? '',
             name: product?.name ?? '',
             product_type: product?.product_type ?? 'drug',
-            drug_category_id: product?.drug_category_id ?? '',
+            product_category_id: product?.product_category_id ?? '',
             form: product?.form ?? 'Tablet',
             strength: product?.strength ?? '',
             unit_of_measure: product?.unit_of_measure ?? 'Pcs',
             price: product?.price ?? '',
             manufacturer: product?.manufacturer ?? '',
             description: product?.description ?? '',
+            image: null,
+            remove_image: false,
             is_active: product?.is_active ?? true,
         });
 
     const isDrug = data.product_type === 'drug';
+
+    function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
+        const file = event.target.files?.[0];
+        if (!file) {
+            return;
+        }
+
+        setData((prev) => ({
+            ...prev,
+            image: file,
+            remove_image: false,
+        }));
+        setImagePreview(URL.createObjectURL(file));
+    }
+
+    function handleRemoveImage() {
+        setData((prev) => ({
+            ...prev,
+            image: null,
+            remove_image: true,
+        }));
+        setImagePreview(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    }
 
     function handleTypeChange(value: string) {
         const nextType = value as ProductType;
@@ -71,14 +105,86 @@ export function ProductForm({ product, categories, productTypes }: Props) {
         event.preventDefault();
 
         if (product) {
-            put(route('master-data.products.update', product.id));
+            transform((values) => ({
+                ...values,
+                _method: 'put',
+            }));
+            post(route('master-data.products.update', product.id), {
+                forceFormData: true,
+            });
         } else {
-            post(route('master-data.products.store'));
+            transform((values) => values);
+            post(route('master-data.products.store'), {
+                forceFormData: true,
+            });
         }
     }
 
     return (
         <form onSubmit={submit} className="max-w-2xl space-y-4">
+            <div className="flex flex-col gap-4 rounded-xl border border-border bg-muted/20 p-4 sm:flex-row sm:items-center">
+                <div className="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-card text-primary shadow-xs">
+                    {imagePreview ? (
+                        <img
+                            src={imagePreview}
+                            alt={data.name || 'Preview Produk'}
+                            className="size-full object-cover"
+                        />
+                    ) : (
+                        <Package className="size-10 stroke-[1.5] text-muted-foreground" />
+                    )}
+                </div>
+
+                <div className="space-y-2">
+                    <div className="space-y-0.5">
+                        <Label htmlFor="product-image">
+                            Foto Produk (Opsional)
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                            Format PNG, JPG, atau WEBP maksimal 2 MB.
+                        </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                        <input
+                            ref={fileInputRef}
+                            id="product-image"
+                            type="file"
+                            accept="image/png,image/jpeg,image/webp"
+                            onChange={handleImageChange}
+                            className="hidden"
+                        />
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="h-8 gap-1.5 text-xs"
+                        >
+                            <Upload className="size-3.5" />
+                            {imagePreview ? 'Ganti Gambar' : 'Pilih Gambar'}
+                        </Button>
+                        {imagePreview && (
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant="ghost"
+                                onClick={handleRemoveImage}
+                                className="h-8 gap-1.5 text-xs text-destructive hover:text-destructive"
+                            >
+                                <Trash2 className="size-3.5" />
+                                Hapus
+                            </Button>
+                        )}
+                    </div>
+
+                    {errors.image && (
+                        <p className="text-xs text-destructive">
+                            {errors.image}
+                        </p>
+                    )}
+                </div>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
                 <FormField
                     label="Kode Produk / SKU"
@@ -147,12 +253,12 @@ export function ProductForm({ product, categories, productTypes }: Props) {
                     </div>
                     <Select
                         value={
-                            data.drug_category_id
-                                ? String(data.drug_category_id)
+                            data.product_category_id
+                                ? String(data.product_category_id)
                                 : ''
                         }
                         onValueChange={(value) =>
-                            setData('drug_category_id', Number(value))
+                            setData('product_category_id', Number(value))
                         }
                     >
                         <SelectTrigger id="category" className="w-full">
@@ -169,9 +275,9 @@ export function ProductForm({ product, categories, productTypes }: Props) {
                             ))}
                         </SelectContent>
                     </Select>
-                    {errors.drug_category_id && (
+                    {errors.product_category_id && (
                         <p className="text-xs text-destructive">
-                            {errors.drug_category_id}
+                            {errors.product_category_id}
                         </p>
                     )}
                 </div>

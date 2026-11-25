@@ -31,8 +31,8 @@ export function ProductQuantTable({ quants = [], unitOfMeasure }: Props) {
                     item.location.name.toLowerCase().includes(q)) ||
                 (item.location?.code &&
                     item.location.code.toLowerCase().includes(q)) ||
-                (item.drug_batch?.batch_number &&
-                    item.drug_batch.batch_number.toLowerCase().includes(q)),
+                (item.product_batch?.batch_number &&
+                    item.product_batch.batch_number.toLowerCase().includes(q)),
         );
     }, [quants, search]);
 
@@ -60,7 +60,7 @@ export function ProductQuantTable({ quants = [], unitOfMeasure }: Props) {
                 header: 'Nomor Batch / Lot',
                 render: (quant) => (
                     <span className="font-mono text-xs font-semibold text-foreground">
-                        {quant.drug_batch?.batch_number ?? '-'}
+                        {quant.product_batch?.batch_number ?? '-'}
                     </span>
                 ),
             },
@@ -69,8 +69,8 @@ export function ProductQuantTable({ quants = [], unitOfMeasure }: Props) {
                 header: 'Kedaluwarsa',
                 render: (quant) => (
                     <span className="font-mono text-xs text-muted-foreground">
-                        {quant.drug_batch?.expiry_date
-                            ? formatDate(quant.drug_batch.expiry_date)
+                        {quant.product_batch?.expiry_date
+                            ? formatDate(quant.product_batch.expiry_date)
                             : '-'}
                     </span>
                 ),
@@ -93,7 +93,7 @@ export function ProductQuantTable({ quants = [], unitOfMeasure }: Props) {
                 header: 'Nilai Lokasi',
                 className: 'text-right',
                 render: (quant) => {
-                    const price = Number(quant.drug_batch?.buy_price ?? 0);
+                    const price = Number(quant.product_batch?.buy_price ?? 0);
                     const qty = Number(quant.quantity ?? 0);
                     return (
                         <span className="font-mono text-xs font-semibold text-primary tabular-nums">

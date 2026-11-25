@@ -23,13 +23,15 @@ export type Product = {
     code: string;
     name: string;
     product_type: ProductType;
-    drug_category_id: number;
+    product_category_id: number;
     form: string | null;
     strength: string | null;
     unit_of_measure: string;
     price: number;
     manufacturer: string | null;
     description: string | null;
+    image_path?: string | null;
+    image_url?: string | null;
     is_active: boolean;
     created_at: string;
     updated_at: string;
@@ -40,7 +42,7 @@ export type Product = {
     };
     batches?: Array<{
         id: number;
-        drug_id: number;
+        product_id: number;
         batch_number: string;
         expiry_date: string;
         initial_quantity: number;
@@ -62,8 +64,8 @@ export type Product = {
     stock_quants?: Array<{
         id: number;
         stock_location_id: number;
-        drug_id: number;
-        drug_batch_id: number;
+        product_id: number;
+        product_batch_id: number;
         quantity: number;
         location?: {
             id: number;
@@ -71,7 +73,7 @@ export type Product = {
             name: string;
             usage: string;
         } | null;
-        drug_batch?: {
+        product_batch?: {
             id: number;
             batch_number: string;
             expiry_date: string;
@@ -80,8 +82,8 @@ export type Product = {
     }>;
     valuation_layers?: Array<{
         id: number;
-        drug_id: number;
-        drug_batch_id: number | null;
+        product_id: number;
+        product_batch_id: number | null;
         stock_movement_id: number;
         stock_location_id: number | null;
         quantity: number;
@@ -92,7 +94,7 @@ export type Product = {
         reference: string | null;
         description: string | null;
         created_at: string;
-        drug_batch?: {
+        product_batch?: {
             id: number;
             batch_number: string;
         } | null;
@@ -114,8 +116,8 @@ export type Product = {
     stock_movements?: Array<{
         id: number;
         reference_number?: string | null;
-        drug_id: number;
-        drug_batch_id: number | null;
+        product_id: number;
+        product_batch_id: number | null;
         type:
             | 'in'
             | 'out'
@@ -132,7 +134,7 @@ export type Product = {
         origin?: string | null;
         reason: string | null;
         created_at: string;
-        drug_batch?: {
+        product_batch?: {
             id: number;
             batch_number: string;
         };
@@ -164,13 +166,15 @@ export type ProductInput = {
     code: string;
     name: string;
     product_type: ProductType;
-    drug_category_id: number | '';
+    product_category_id: number | '';
     form: string;
     strength: string;
     unit_of_measure: string;
     price: number | '';
     manufacturer: string;
     description: string;
+    image: File | null;
+    remove_image: boolean;
     is_active: boolean;
 };
 

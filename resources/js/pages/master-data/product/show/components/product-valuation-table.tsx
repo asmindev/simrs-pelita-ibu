@@ -28,8 +28,10 @@ export function ProductValuationTable({ layers = [], unitOfMeasure }: Props) {
         return layers.filter(
             (item) =>
                 (item.reference && item.reference.toLowerCase().includes(q)) ||
-                (item.drug_batch?.batch_number &&
-                    item.drug_batch.batch_number.toLowerCase().includes(q)) ||
+                (item.product_batch?.batch_number &&
+                    item.product_batch.batch_number
+                        .toLowerCase()
+                        .includes(q)) ||
                 (item.description &&
                     item.description.toLowerCase().includes(q)),
         );
@@ -59,7 +61,7 @@ export function ProductValuationTable({ layers = [], unitOfMeasure }: Props) {
                 render: (layer) => (
                     <div className="flex flex-wrap items-center gap-1.5">
                         <span className="font-mono text-xs text-foreground">
-                            {layer.drug_batch?.batch_number ?? '-'}
+                            {layer.product_batch?.batch_number ?? '-'}
                         </span>
                         {layer.location && (
                             <Badge

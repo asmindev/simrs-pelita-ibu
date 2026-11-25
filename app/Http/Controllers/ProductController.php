@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use App\Enums\ProductType;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
-use App\Models\Drug;
-use App\Models\DrugCategory;
+use App\Models\Product;
+use App\Models\ProductCategory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,25 +19,25 @@ class ProductController extends Controller
 {
     public function index(Request $request): Response
     {
-        Gate::authorize('viewAny', Drug::class);
+        Gate::authorize('viewAny', Product::class);
 
         $search = $request->string('search')->trim()->toString();
         $productType = $request->string('product_type')->toString();
         $categoryId = $request->string('category_id')->toString();
         $status = $request->string('status')->toString();
 
-        $products = Drug::query()
+        $products = Product::query()
             ->with(['category:id,name'])
             ->when($search !== '', fn (Builder $query) => $query->search($search))
             ->when($productType !== '' && $productType !== 'all', fn (Builder $query) => $query->ofType($productType))
-            ->when($categoryId !== '', fn (Builder $query) => $query->where('drug_category_id', (int) $categoryId))
+            ->when($categoryId !== '', fn (Builder $query) => $query->where('product_category_id', (int) $categoryId))
             ->when($status === 'active', fn (Builder $query) => $query->where('is_active', true))
             ->when($status === 'inactive', fn (Builder $query) => $query->where('is_active', false))
             ->orderBy('name')
             ->paginate(15)
             ->withQueryString();
 
-        $categories = DrugCategory::query()
+        $categories = ProductCategory::query()
             ->orderBy('name')
             ->get(['id', 'name', 'description']);
 
@@ -55,9 +56,9 @@ class ProductController extends Controller
 
     public function create(): Response
     {
-        Gate::authorize('create', Drug::class);
+        Gate::authorize('create', Product::class);
 
-        $categories = DrugCategory::query()
+        $categories = ProductCategory::query()
             ->orderBy('name')
             ->get(['id', 'name', 'description']);
 
@@ -69,14 +70,20 @@ class ProductController extends Controller
 
     public function store(StoreProductRequest $request): RedirectResponse
     {
-        Drug::create($request->validated());
+        $data = $request->safe()->except(['image']);
+
+        if ($request->hasFile('image')) {
+            $data['image_path'] = $request->file('image')->store('products', 'public');
+        }
+
+        Product::create($data);
 
         return redirect()
             ->route('master-data.products.index')
             ->with('success', 'Produk berhasil ditambahkan.');
     }
 
-    public function show(Drug $product): Response
+    public function show(Product $product): Response
     {
         Gate::authorize('view', $product);
 
@@ -84,18 +91,18 @@ class ProductController extends Controller
             'category:id,name,description',
             'batches' => fn ($query) => $query->with('stockQuants.location:id,code,name')->orderBy('expiry_date'),
             'stockQuants' => fn ($query) => $query
-                ->with(['location:id,code,name,usage', 'drugBatch:id,batch_number,expiry_date,buy_price'])
+                ->with(['location:id,code,name,usage', 'productBatch:id,batch_number,expiry_date,buy_price'])
                 ->where('quantity', '>', 0)
                 ->orderBy('stock_location_id')
                 ->orderByDesc('quantity'),
             'stockMovements' => fn ($query) => $query->with([
-                'drugBatch:id,batch_number',
+                'productBatch:id,batch_number',
                 'sourceLocation:id,code,name',
                 'destinationLocation:id,code,name',
                 'user:id,name',
             ])->latest('id')->limit(50),
             'valuationLayers' => fn ($query) => $query->with([
-                'drugBatch:id,batch_number',
+                'productBatch:id,batch_number',
                 'location:id,code,name',
                 'stockMovement:id,reference_number,type',
                 'user:id,name',
@@ -109,8 +116,14 @@ class ProductController extends Controller
             ? (int) round($totalValuation / $totalStock)
             : (int) ($product->batches->first()?->buy_price ?? 0);
 
+        $categories = ProductCategory::query()
+            ->orderBy('name')
+            ->get(['id', 'name', 'description']);
+
         return Inertia::render('master-data/product/show/index', [
             'product' => $product,
+            'categories' => $categories,
+            'productTypes' => $this->productTypeOptions(),
             'statistics' => [
                 'total_stock' => $totalStock,
                 'active_batches' => $activeBatchesCount,
@@ -123,11 +136,11 @@ class ProductController extends Controller
         ]);
     }
 
-    public function edit(Drug $product): Response
+    public function edit(Product $product): Response
     {
         Gate::authorize('update', $product);
 
-        $categories = DrugCategory::query()
+        $categories = ProductCategory::query()
             ->orderBy('name')
             ->get(['id', 'name', 'description']);
 
@@ -138,24 +151,50 @@ class ProductController extends Controller
         ]);
     }
 
-    public function update(UpdateProductRequest $request, Drug $product): RedirectResponse
+    public function update(UpdateProductRequest $request, Product $product): RedirectResponse
     {
-        $product->update($request->validated());
+        $data = $request->safe()->except(['image', 'remove_image', 'inline']);
+
+        if ($request->boolean('remove_image')) {
+            $this->deleteStoredImage($product);
+            $data['image_path'] = null;
+        }
+
+        if ($request->hasFile('image')) {
+            $this->deleteStoredImage($product);
+            $data['image_path'] = $request->file('image')->store('products', 'public');
+        }
+
+        $product->update($data);
+
+        if ($request->boolean('inline')) {
+            return redirect()
+                ->route('master-data.products.show', $product)
+                ->with('success', 'Produk berhasil diperbarui.');
+        }
 
         return redirect()
             ->route('master-data.products.index')
             ->with('success', 'Produk berhasil diperbarui.');
     }
 
-    public function destroy(Drug $product): RedirectResponse
+    public function destroy(Product $product): RedirectResponse
     {
         Gate::authorize('delete', $product);
 
+        $this->deleteStoredImage($product);
         $product->delete();
 
         return redirect()
             ->route('master-data.products.index')
             ->with('success', 'Produk berhasil dihapus.');
+    }
+
+    private function deleteStoredImage(Product $product): void
+    {
+        if ($product->image_path && Storage::disk('public')->exists($product->image_path)) {
+            Storage::disk('public')->delete($product->image_path);
+        }
     }
 
     /**
