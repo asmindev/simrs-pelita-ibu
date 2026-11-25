@@ -23,7 +23,7 @@ class PrescriptionService
      *     encounter_id: int,
      *     notes?: string|null,
      *     items: array<int, array{
-     *         drug_id: int,
+     *         product_id: int,
      *         dosage: string,
      *         frequency: string,
      *         route?: string|null,
@@ -56,7 +56,7 @@ class PrescriptionService
             foreach ($data['items'] as $itemData) {
                 PrescriptionItem::create([
                     'prescription_id' => $prescription->id,
-                    'drug_id' => $itemData['drug_id'],
+                    'product_id' => $itemData['product_id'],
                     'dosage' => $itemData['dosage'],
                     'frequency' => $itemData['frequency'],
                     'route' => $itemData['route'] ?? 'Oral',
@@ -68,7 +68,7 @@ class PrescriptionService
                 ]);
             }
 
-            return $prescription->load(['items.drug', 'patient', 'doctor', 'unit']);
+            return $prescription->load(['items.product', 'patient', 'doctor', 'unit']);
         });
     }
 
@@ -98,7 +98,7 @@ class PrescriptionService
             'verification_notes' => $notes ?? 'Resep telah ditelaah apoteker.',
         ]);
 
-        return $prescription->fresh(['items.drug', 'patient', 'doctor', 'pharmacist']);
+        return $prescription->fresh(['items.product', 'patient', 'doctor', 'pharmacist']);
     }
 
     /**
@@ -121,7 +121,7 @@ class PrescriptionService
         }
 
         return DB::transaction(function () use ($prescription, $pharmacist, $dispensingNotes) {
-            $prescription->loadMissing('items.drug');
+            $prescription->loadMissing('items.product');
 
             foreach ($prescription->items as $item) {
                 if ($item->status !== 'dispensed') {
@@ -144,7 +144,7 @@ class PrescriptionService
                 }
             }
 
-            return $prescription->fresh(['items.drug', 'items.dispensings.drugBatch', 'patient', 'doctor', 'pharmacist']);
+            return $prescription->fresh(['items.product', 'items.dispensings.productBatch', 'patient', 'doctor', 'pharmacist']);
         });
     }
 

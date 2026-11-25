@@ -2,13 +2,13 @@
 
 namespace Database\Factories;
 
-use App\Models\DrugCategory;
+use App\Models\ProductCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<DrugCategory>
+ * @extends Factory<ProductCategory>
  */
-class DrugCategoryFactory extends Factory
+class ProductCategoryFactory extends Factory
 {
     /**
      * Define the model's default state.

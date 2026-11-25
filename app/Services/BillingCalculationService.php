@@ -142,20 +142,20 @@ class BillingCalculationService
         // 4. Obat-obatan yang telah di-dispensing oleh Farmasi
         $dispensedPrescriptions = $encounter->prescriptions()
             ->where('status', 'dispensed')
-            ->with(['items.drug'])
+            ->with(['items.product'])
             ->get();
 
         foreach ($dispensedPrescriptions as $prescription) {
             foreach ($prescription->items as $pItem) {
-                if ($pItem->dispensed_quantity > 0 && $pItem->drug) {
-                    $price = (float) ($pItem->drug->price ?? 0);
+                if ($pItem->dispensed_quantity > 0 && $pItem->product) {
+                    $price = (float) ($pItem->product->price ?? 0);
                     $itemSubtotal = $price * $pItem->dispensed_quantity;
 
                     InvoiceItem::create([
                         'invoice_id' => $invoice->id,
                         'item_type' => 'drug',
-                        'reference_id' => $pItem->drug_id,
-                        'name' => "{$pItem->drug->name} ({$pItem->dosage})",
+                        'reference_id' => $pItem->product_id,
+                        'name' => "{$pItem->product->name} ({$pItem->dosage})",
                         'unit_price' => $price,
                         'quantity' => $pItem->dispensed_quantity,
                         'subtotal' => $itemSubtotal,

@@ -76,7 +76,7 @@ export function getPrescriptionColumns(): DataTableColumn<Prescription>[] {
                                 variant="outline"
                                 className="text-[11px] font-normal"
                             >
-                                {item.drug?.name} ({item.quantity})
+                                {item.product?.name} ({item.quantity})
                             </Badge>
                         ))}
                         {items.length > 3 && (

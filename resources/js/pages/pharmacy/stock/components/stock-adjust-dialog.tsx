@@ -23,10 +23,10 @@ import {
 } from '@/shared/ui/select';
 import { Textarea } from '@/shared/ui/textarea';
 
-import type { DrugBatch, StockLocation } from '../../types/pharmacy';
+import type { ProductBatch, StockLocation } from '../../types/pharmacy';
 
 type Props = {
-    batch: DrugBatch | null;
+    batch: ProductBatch | null;
     locations: StockLocation[];
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -126,9 +126,9 @@ export function StockAdjustDialog({
 
                 <div className="space-y-1 rounded-md border border-border bg-muted/40 p-3 text-xs">
                     <div className="flex justify-between">
-                        <span className="text-muted-foreground">Obat:</span>
+                        <span className="text-muted-foreground">Produk:</span>
                         <span className="font-semibold">
-                            {batch.drug?.name}
+                            {batch.product?.name}
                         </span>
                     </div>
                     <div className="flex justify-between">
@@ -144,7 +144,7 @@ export function StockAdjustDialog({
                             Stok Lokasi Saat Ini:
                         </span>
                         <span className="font-bold text-foreground">
-                            {currentQty} {batch.drug?.unit_of_measure}
+                            {currentQty} {batch.product?.unit_of_measure}
                         </span>
                     </div>
                 </div>
@@ -209,7 +209,7 @@ export function StockAdjustDialog({
                                     }
                                 >
                                     {diff > 0 ? `+${diff}` : diff}{' '}
-                                    {batch.drug?.unit_of_measure}
+                                    {batch.product?.unit_of_measure}
                                 </span>
                             </p>
                         )}

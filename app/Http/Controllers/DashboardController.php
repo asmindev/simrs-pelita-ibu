@@ -11,11 +11,11 @@ use App\Models\BreakGlassGrant;
 use App\Models\DiagnosticOrder;
 use App\Models\Doctor;
 use App\Models\DoctorSchedule;
-use App\Models\DrugBatch;
 use App\Models\Encounter;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Prescription;
+use App\Models\ProductBatch;
 use App\Models\Queue;
 use App\Models\Unit;
 use App\Models\User;
@@ -284,30 +284,30 @@ class DashboardController extends Controller
                 'quota' => $s->quota,
             ]);
 
-        // Alerts (low stock, expiring drugs)
+        // Alerts (low stock, expiring products)
         $criticalAlerts = collect();
         if ($isPharmacist || $isExecutive) {
-            $expiringBatches = DrugBatch::where('is_active', true)
+            $expiringBatches = ProductBatch::where('is_active', true)
                 ->where('current_quantity', '>', 0)
                 ->whereDate('expiry_date', '<=', $today->copy()->addDays(30))
-                ->with('drug:id,name,code')
+                ->with('product:id,name,code')
                 ->limit(3)
                 ->get()
                 ->map(fn ($b) => [
                     'id' => 'exp-'.$b->id,
                     'type' => 'warning',
-                    'message' => 'Batch '.$b->batch_number.' ('.$b->drug->name.') kedaluwarsa '.$b->expiry_date->format('d/m/Y'),
+                    'message' => 'Batch '.$b->batch_number.' ('.$b->product->name.') kedaluwarsa '.$b->expiry_date->format('d/m/Y'),
                 ]);
 
-            $lowStock = DrugBatch::where('is_active', true)
+            $lowStock = ProductBatch::where('is_active', true)
                 ->where('current_quantity', '<=', 10)
-                ->with('drug:id,name,code,unit_of_measure')
+                ->with('product:id,name,code,unit_of_measure')
                 ->limit(3)
                 ->get()
                 ->map(fn ($b) => [
                     'id' => 'low-'.$b->id,
                     'type' => 'critical',
-                    'message' => 'Stok kritis '.$b->drug->name.' tersisa '.$b->current_quantity.' '.$b->drug->unit_of_measure,
+                    'message' => 'Stok kritis '.$b->product->name.' tersisa '.$b->current_quantity.' '.$b->product->unit_of_measure,
                 ]);
 
             $criticalAlerts = $criticalAlerts->concat($expiringBatches)->concat($lowStock);

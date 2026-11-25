@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Drug;
-use App\Models\DrugBatch;
+use App\Models\Product;
+use App\Models\ProductBatch;
 use App\Models\StockLocation;
 use App\Models\StockMovement;
 use App\Models\StockValuationLayer;
@@ -26,8 +26,8 @@ class StockValuationLayerFactory extends Factory
         $unitCost = fake()->numberBetween(500, 10000);
 
         return [
-            'drug_id' => Drug::factory(),
-            'drug_batch_id' => DrugBatch::factory(),
+            'product_id' => Product::factory(),
+            'product_batch_id' => ProductBatch::factory(),
             'stock_movement_id' => StockMovement::factory(),
             'stock_location_id' => StockLocation::factory(),
             'quantity' => $qty,

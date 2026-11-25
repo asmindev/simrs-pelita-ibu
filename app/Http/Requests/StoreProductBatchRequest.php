@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\Permissions\PharmacyPermission;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreDrugBatchRequest extends FormRequest
+class StoreProductBatchRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -18,7 +18,7 @@ class StoreDrugBatchRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'drug_id' => ['required', 'exists:drugs,id'],
+            'product_id' => ['required', 'exists:products,id'],
             'batch_number' => ['required', 'string', 'max:50'],
             'expiry_date' => ['required', 'date', 'after:today'],
             'initial_quantity' => ['required', 'integer', 'min:1'],

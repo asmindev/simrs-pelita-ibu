@@ -19,9 +19,6 @@ use App\Models\DiagnosticOrder;
 use App\Models\DiagnosticOrderItem;
 use App\Models\Doctor;
 use App\Models\DoctorSchedule;
-use App\Models\Drug;
-use App\Models\DrugBatch;
-use App\Models\DrugCategory;
 use App\Models\Encounter;
 use App\Models\Guarantor;
 use App\Models\Invoice;
@@ -31,6 +28,9 @@ use App\Models\Payment;
 use App\Models\Prescription;
 use App\Models\PrescriptionItem;
 use App\Models\Procedure;
+use App\Models\Product;
+use App\Models\ProductBatch;
+use App\Models\ProductCategory;
 use App\Models\Queue;
 use App\Models\StockLocation;
 use App\Models\StockMovement;
@@ -125,17 +125,17 @@ class DemoHospitalSeeder extends Seeder
             Tariff::firstOrCreate(['code' => $t['code']], [...$t, 'is_active' => true]);
         }
 
-        // 4. KATEGORI OBAT & OBAT (FARMASI)
-        $catAntibiotik = DrugCategory::firstOrCreate(['name' => 'Antibiotik'], ['description' => 'Obat infeksi bakteri']);
-        $catAnalgesik = DrugCategory::firstOrCreate(['name' => 'Analgesik & Antipiretik'], ['description' => 'Pereda nyeri dan demam']);
-        $catSaluranNapas = DrugCategory::firstOrCreate(['name' => 'Obat Saluran Napas'], ['description' => 'Batuk, pilek, dan bronkodilator']);
-        $catGastro = DrugCategory::firstOrCreate(['name' => 'Saluran Cerna'], ['description' => 'Antasida dan penurun asam lambung']);
+        // 4. KATEGORI PRODUK & PRODUK (FARMASI)
+        $catAntibiotik = ProductCategory::firstOrCreate(['name' => 'Antibiotik'], ['description' => 'Obat infeksi bakteri']);
+        $catAnalgesik = ProductCategory::firstOrCreate(['name' => 'Analgesik & Antipiretik'], ['description' => 'Pereda nyeri dan demam']);
+        $catSaluranNapas = ProductCategory::firstOrCreate(['name' => 'Obat Saluran Napas'], ['description' => 'Batuk, pilek, dan bronkodilator']);
+        $catGastro = ProductCategory::firstOrCreate(['name' => 'Saluran Cerna'], ['description' => 'Antasida dan penurun asam lambung']);
 
-        $drugParacetamol = Drug::firstOrCreate(
+        $drugParacetamol = Product::firstOrCreate(
             ['code' => 'OBT-PCT-500'],
             [
                 'name' => 'Paracetamol 500mg',
-                'drug_category_id' => $catAnalgesik->id,
+                'product_category_id' => $catAnalgesik->id,
                 'form' => 'Tablet',
                 'strength' => '500 mg',
                 'unit_of_measure' => 'Tablet',
@@ -145,11 +145,11 @@ class DemoHospitalSeeder extends Seeder
             ]
         );
 
-        $drugAmoxicillin = Drug::firstOrCreate(
+        $drugAmoxicillin = Product::firstOrCreate(
             ['code' => 'OBT-AMX-500'],
             [
                 'name' => 'Amoxicillin 500mg',
-                'drug_category_id' => $catAntibiotik->id,
+                'product_category_id' => $catAntibiotik->id,
                 'form' => 'Kapsul',
                 'strength' => '500 mg',
                 'unit_of_measure' => 'Kapsul',
@@ -159,11 +159,11 @@ class DemoHospitalSeeder extends Seeder
             ]
         );
 
-        $drugOmeprazole = Drug::firstOrCreate(
+        $drugOmeprazole = Product::firstOrCreate(
             ['code' => 'OBT-OMZ-20'],
             [
                 'name' => 'Omeprazole 20mg',
-                'drug_category_id' => $catGastro->id,
+                'product_category_id' => $catGastro->id,
                 'form' => 'Kapsul',
                 'strength' => '20 mg',
                 'unit_of_measure' => 'Kapsul',
@@ -173,11 +173,11 @@ class DemoHospitalSeeder extends Seeder
             ]
         );
 
-        $drugCetirizine = Drug::firstOrCreate(
+        $drugCetirizine = Product::firstOrCreate(
             ['code' => 'OBT-CTZ-10'],
             [
                 'name' => 'Cetirizine 10mg',
-                'drug_category_id' => $catSaluranNapas->id,
+                'product_category_id' => $catSaluranNapas->id,
                 'form' => 'Tablet',
                 'strength' => '10 mg',
                 'unit_of_measure' => 'Tablet',
@@ -187,11 +187,11 @@ class DemoHospitalSeeder extends Seeder
             ]
         );
 
-        // Batches Obat (FEFO)
-        $batchPct = DrugBatch::firstOrCreate(
+        // Batches Produk (FEFO)
+        $batchPct = ProductBatch::firstOrCreate(
             ['batch_number' => 'BATCH-PCT-2026A'],
             [
-                'drug_id' => $drugParacetamol->id,
+                'product_id' => $drugParacetamol->id,
                 'initial_quantity' => 1000,
                 'current_quantity' => 850,
                 'buy_price' => 900,
@@ -200,10 +200,10 @@ class DemoHospitalSeeder extends Seeder
             ]
         );
 
-        $batchAmx = DrugBatch::firstOrCreate(
+        $batchAmx = ProductBatch::firstOrCreate(
             ['batch_number' => 'BATCH-AMX-2026A'],
             [
-                'drug_id' => $drugAmoxicillin->id,
+                'product_id' => $drugAmoxicillin->id,
                 'initial_quantity' => 500,
                 'current_quantity' => 420,
                 'buy_price' => 2200,
@@ -212,10 +212,10 @@ class DemoHospitalSeeder extends Seeder
             ]
         );
 
-        $batchOmz = DrugBatch::firstOrCreate(
+        $batchOmz = ProductBatch::firstOrCreate(
             ['batch_number' => 'BATCH-OMZ-2026A'],
             [
-                'drug_id' => $drugOmeprazole->id,
+                'product_id' => $drugOmeprazole->id,
                 'initial_quantity' => 400,
                 'current_quantity' => 310,
                 'buy_price' => 2800,
@@ -233,19 +233,19 @@ class DemoHospitalSeeder extends Seeder
             StockQuant::firstOrCreate(
                 [
                     'stock_location_id' => $whStock->id,
-                    'drug_id' => $demoBatch->drug_id,
-                    'drug_batch_id' => $demoBatch->id,
+                    'product_id' => $demoBatch->product_id,
+                    'product_batch_id' => $demoBatch->id,
                 ],
                 ['quantity' => $demoBatch->current_quantity]
             );
 
-            if ($demoStockUser && ! StockMovement::where('drug_batch_id', $demoBatch->id)->exists()) {
+            if ($demoStockUser && ! StockMovement::where('product_batch_id', $demoBatch->id)->exists()) {
                 $val = $demoBatch->current_quantity * $demoBatch->buy_price;
                 $ref = 'WH/IN/'.$today->format('Ymd').'-'.str_pad((string) $demoBatch->id, 4, '0', STR_PAD_LEFT);
                 $move = StockMovement::create([
                     'reference_number' => $ref,
-                    'drug_id' => $demoBatch->drug_id,
-                    'drug_batch_id' => $demoBatch->id,
+                    'product_id' => $demoBatch->product_id,
+                    'product_batch_id' => $demoBatch->id,
                     'source_location_id' => $vendorsLoc->id,
                     'destination_location_id' => $whStock->id,
                     'type' => 'in',
@@ -261,8 +261,8 @@ class DemoHospitalSeeder extends Seeder
                 ]);
 
                 StockValuationLayer::create([
-                    'drug_id' => $demoBatch->drug_id,
-                    'drug_batch_id' => $demoBatch->id,
+                    'product_id' => $demoBatch->product_id,
+                    'product_batch_id' => $demoBatch->id,
                     'stock_movement_id' => $move->id,
                     'stock_location_id' => $whStock->id,
                     'quantity' => $demoBatch->current_quantity,
@@ -561,7 +561,7 @@ class DemoHospitalSeeder extends Seeder
         );
 
         PrescriptionItem::firstOrCreate(
-            ['prescription_id' => $rx->id, 'drug_id' => $drugParacetamol->id],
+            ['prescription_id' => $rx->id, 'product_id' => $drugParacetamol->id],
             [
                 'quantity' => 10,
                 'dosage' => '500 mg',

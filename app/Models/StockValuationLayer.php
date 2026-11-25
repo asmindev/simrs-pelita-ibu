@@ -11,8 +11,8 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
- * @property int $drug_id
- * @property int|null $drug_batch_id
+ * @property int $product_id
+ * @property int|null $product_batch_id
  * @property int $stock_movement_id
  * @property int|null $stock_location_id
  * @property int $quantity
@@ -25,15 +25,15 @@ use Illuminate\Support\Carbon;
  * @property int $user_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property Drug $drug
- * @property DrugBatch|null $drugBatch
+ * @property Product $product
+ * @property ProductBatch|null $productBatch
  * @property StockMovement $stockMovement
  * @property StockLocation|null $location
  * @property User $user
  */
 #[Fillable([
-    'drug_id',
-    'drug_batch_id',
+    'product_id',
+    'product_batch_id',
     'stock_movement_id',
     'stock_location_id',
     'quantity',
@@ -56,8 +56,8 @@ class StockValuationLayer extends Model
     protected function casts(): array
     {
         return [
-            'drug_id' => 'integer',
-            'drug_batch_id' => 'integer',
+            'product_id' => 'integer',
+            'product_batch_id' => 'integer',
             'stock_movement_id' => 'integer',
             'stock_location_id' => 'integer',
             'quantity' => 'integer',
@@ -70,19 +70,19 @@ class StockValuationLayer extends Model
     }
 
     /**
-     * @return BelongsTo<Drug, $this>
+     * @return BelongsTo<Product, $this>
      */
-    public function drug(): BelongsTo
+    public function product(): BelongsTo
     {
-        return $this->belongsTo(Drug::class);
+        return $this->belongsTo(Product::class);
     }
 
     /**
-     * @return BelongsTo<DrugBatch, $this>
+     * @return BelongsTo<ProductBatch, $this>
      */
-    public function drugBatch(): BelongsTo
+    public function productBatch(): BelongsTo
     {
-        return $this->belongsTo(DrugBatch::class);
+        return $this->belongsTo(ProductBatch::class);
     }
 
     /**

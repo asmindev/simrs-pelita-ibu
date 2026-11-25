@@ -3,14 +3,14 @@
 namespace Database\Factories;
 
 use App\Enums\ProductType;
-use App\Models\Drug;
-use App\Models\DrugCategory;
+use App\Models\Product;
+use App\Models\ProductCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Drug>
+ * @extends Factory<Product>
  */
-class DrugFactory extends Factory
+class ProductFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -23,13 +23,14 @@ class DrugFactory extends Factory
             'code' => strtoupper(fake()->unique()->bothify('PRD-####')),
             'name' => fake()->words(2, true).' '.fake()->randomElement(['500mg', '250mg', '100mg', '10ml']),
             'product_type' => ProductType::Drug->value,
-            'drug_category_id' => DrugCategory::factory(),
+            'product_category_id' => ProductCategory::factory(),
             'form' => fake()->randomElement(['Tablet', 'Kapsul', 'Sirup', 'Salep', 'Injeksi', 'Tetes Mata', 'Kaplet']),
             'strength' => fake()->randomElement(['500 mg', '250 mg', '100 mg', '5 mg', '10 mg', '125 mg/5 ml']),
             'unit_of_measure' => fake()->randomElement(['Tablet', 'Kapsul', 'Botol', 'Tube', 'Ampul', 'Vial', 'Strip']),
             'price' => fake()->numberBetween(5, 200) * 1000,
             'manufacturer' => fake()->company().' Pharma',
             'description' => null,
+            'image_path' => null,
             'is_active' => true,
         ];
     }

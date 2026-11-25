@@ -21,8 +21,8 @@ class StoreStockMoveRequest extends FormRequest
     {
         return [
             'type' => ['required', Rule::in(['in', 'out', 'transfer', 'adjustment'])],
-            'drug_id' => ['required', 'exists:drugs,id'],
-            'drug_batch_id' => ['nullable', 'exists:drug_batches,id'],
+            'product_id' => ['required', 'exists:products,id'],
+            'product_batch_id' => ['nullable', 'exists:product_batches,id'],
             'source_location_id' => ['nullable', 'exists:stock_locations,id'],
             'destination_location_id' => ['nullable', 'exists:stock_locations,id'],
             'quantity' => ['required_unless:type,adjustment', 'nullable', 'integer', 'min:1'],

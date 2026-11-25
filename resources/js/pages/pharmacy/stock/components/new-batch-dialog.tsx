@@ -21,19 +21,19 @@ import {
     SelectValue,
 } from '@/shared/ui/select';
 
-import type { DrugInfo, StockLocation } from '../../types/pharmacy';
+import type { ProductInfo, StockLocation } from '../../types/pharmacy';
 
 type Props = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    drugs: DrugInfo[];
+    products: ProductInfo[];
     locations: StockLocation[];
 };
 
 export function NewBatchDialog({
     open,
     onOpenChange,
-    drugs,
+    products,
     locations,
 }: Props) {
     const internalLocations = locations.filter((l) => l.usage === 'internal');
@@ -42,7 +42,7 @@ export function NewBatchDialog({
         internalLocations[0];
 
     const { data, setData, post, processing, errors, reset } = useForm({
-        drug_id: '',
+        product_id: '',
         batch_number: '',
         expiry_date: '',
         initial_quantity: '',
@@ -74,22 +74,22 @@ export function NewBatchDialog({
 
                 <form onSubmit={handleSubmit} className="space-y-3.5">
                     <div className="space-y-1.5">
-                        <Label htmlFor="batch-drug-select">
+                        <Label htmlFor="batch-product-select">
                             Pilih Produk{' '}
                             <span className="text-destructive">*</span>
                         </Label>
                         <Select
-                            value={data.drug_id}
-                            onValueChange={(val) => setData('drug_id', val)}
+                            value={data.product_id}
+                            onValueChange={(val) => setData('product_id', val)}
                         >
                             <SelectTrigger
-                                id="batch-drug-select"
+                                id="batch-product-select"
                                 className="bg-background"
                             >
                                 <SelectValue placeholder="Pilih produk dari master..." />
                             </SelectTrigger>
                             <SelectContent className="max-h-60">
-                                {drugs.map((d) => (
+                                {products.map((d) => (
                                     <SelectItem key={d.id} value={String(d.id)}>
                                         {d.name}
                                         {d.form ? ` (${d.form})` : ''} — Satuan:{' '}
@@ -98,9 +98,9 @@ export function NewBatchDialog({
                                 ))}
                             </SelectContent>
                         </Select>
-                        {errors.drug_id && (
+                        {errors.product_id && (
                             <p className="text-xs text-destructive">
-                                {errors.drug_id}
+                                {errors.product_id}
                             </p>
                         )}
                     </div>

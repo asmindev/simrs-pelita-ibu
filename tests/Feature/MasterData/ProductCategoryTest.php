@@ -1,8 +1,8 @@
 <?php
 
 use App\Enums\RoleName;
-use App\Models\Drug;
-use App\Models\DrugCategory;
+use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
@@ -12,7 +12,7 @@ beforeEach(function () {
 });
 
 test('product category factory creates valid category', function () {
-    $category = DrugCategory::factory()->create([
+    $category = ProductCategory::factory()->create([
         'name' => 'Antibiotik',
         'description' => 'Obat pembasmi bakteri',
     ]);
@@ -22,14 +22,14 @@ test('product category factory creates valid category', function () {
 });
 
 test('product category records activity log on creation and update', function () {
-    $category = DrugCategory::factory()->create([
+    $category = ProductCategory::factory()->create([
         'name' => 'Analgesik',
     ]);
 
     $this->assertDatabaseHas('activity_log', [
         'log_name' => 'master-data',
         'event' => 'created',
-        'subject_type' => DrugCategory::class,
+        'subject_type' => ProductCategory::class,
         'subject_id' => $category->id,
     ]);
 
@@ -38,7 +38,7 @@ test('product category records activity log on creation and update', function ()
     $this->assertDatabaseHas('activity_log', [
         'log_name' => 'master-data',
         'event' => 'updated',
-        'subject_type' => DrugCategory::class,
+        'subject_type' => ProductCategory::class,
         'subject_id' => $category->id,
     ]);
 });
@@ -67,7 +67,7 @@ test('pharmacist can create product category', function () {
         ])
         ->assertSessionHas('success');
 
-    $this->assertDatabaseHas('drug_categories', [
+    $this->assertDatabaseHas('product_categories', [
         'name' => 'BMHP Steril',
         'description' => 'Bahan medis habis pakai',
     ]);
@@ -77,7 +77,7 @@ test('product category name must be unique', function () {
     $pharmacist = User::factory()->create();
     $pharmacist->assignRole(RoleName::Pharmacist->value);
 
-    DrugCategory::factory()->create(['name' => 'Vitamin']);
+    ProductCategory::factory()->create(['name' => 'Vitamin']);
 
     $this->actingAs($pharmacist)
         ->post(route('master-data.product-categories.store'), [
@@ -90,7 +90,7 @@ test('pharmacist can update product category', function () {
     $pharmacist = User::factory()->create();
     $pharmacist->assignRole(RoleName::Pharmacist->value);
 
-    $category = DrugCategory::factory()->create(['name' => 'Suplemen']);
+    $category = ProductCategory::factory()->create(['name' => 'Suplemen']);
 
     $this->actingAs($pharmacist)
         ->put(route('master-data.product-categories.update', $category), [
@@ -99,7 +99,7 @@ test('pharmacist can update product category', function () {
         ])
         ->assertSessionHas('success');
 
-    $this->assertDatabaseHas('drug_categories', [
+    $this->assertDatabaseHas('product_categories', [
         'id' => $category->id,
         'name' => 'Suplemen Makanan',
         'description' => 'Penambah nafsu makan',
@@ -110,25 +110,25 @@ test('pharmacist can delete empty product category', function () {
     $pharmacist = User::factory()->create();
     $pharmacist->assignRole(RoleName::Pharmacist->value);
 
-    $category = DrugCategory::factory()->create();
+    $category = ProductCategory::factory()->create();
 
     $this->actingAs($pharmacist)
         ->delete(route('master-data.product-categories.destroy', $category))
         ->assertSessionHas('success');
 
-    $this->assertDatabaseMissing('drug_categories', ['id' => $category->id]);
+    $this->assertDatabaseMissing('product_categories', ['id' => $category->id]);
 });
 
 test('pharmacist cannot delete product category that has products', function () {
     $pharmacist = User::factory()->create();
     $pharmacist->assignRole(RoleName::Pharmacist->value);
 
-    $category = DrugCategory::factory()->create();
-    Drug::factory()->create(['drug_category_id' => $category->id]);
+    $category = ProductCategory::factory()->create();
+    Product::factory()->create(['product_category_id' => $category->id]);
 
     $this->actingAs($pharmacist)
         ->delete(route('master-data.product-categories.destroy', $category))
         ->assertSessionHas('error');
 
-    $this->assertDatabaseHas('drug_categories', ['id' => $category->id]);
+    $this->assertDatabaseHas('product_categories', ['id' => $category->id]);
 });

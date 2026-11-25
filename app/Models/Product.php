@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ProductType;
-use Database\Factories\DrugFactory;
+use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -19,35 +20,45 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property string $code
  * @property string $name
  * @property ProductType $product_type
- * @property int $drug_category_id
+ * @property int $product_category_id
  * @property string|null $form
  * @property string|null $strength
  * @property string $unit_of_measure
  * @property int $price
  * @property string|null $manufacturer
  * @property string|null $description
+ * @property string|null $image_path
  * @property bool $is_active
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property DrugCategory $category
+ * @property-read string|null $image_url
+ * @property ProductCategory $category
  */
 #[Fillable([
     'code',
     'name',
     'product_type',
-    'drug_category_id',
+    'product_category_id',
     'form',
     'strength',
     'unit_of_measure',
     'price',
     'manufacturer',
     'description',
+    'image_path',
     'is_active',
 ])]
-class Drug extends Model
+class Product extends Model
 {
-    /** @use HasFactory<DrugFactory> */
+    /** @use HasFactory<ProductFactory> */
     use HasFactory, LogsActivity;
+
+    /**
+     * @var list<string>
+     */
+    protected $appends = [
+        'image_url',
+    ];
 
     /**
      * @return array<string, string>
@@ -56,10 +67,19 @@ class Drug extends Model
     {
         return [
             'product_type' => ProductType::class,
-            'drug_category_id' => 'integer',
+            'product_category_id' => 'integer',
             'price' => 'integer',
             'is_active' => 'boolean',
         ];
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (! $this->image_path) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->image_path);
     }
 
     public function getActivitylogOptions(): LogOptions
@@ -72,27 +92,19 @@ class Drug extends Model
     }
 
     /**
-     * @return BelongsTo<DrugCategory, $this>
+     * @return BelongsTo<ProductCategory, $this>
      */
     public function category(): BelongsTo
     {
-        return $this->belongsTo(DrugCategory::class, 'drug_category_id');
+        return $this->belongsTo(ProductCategory::class, 'product_category_id');
     }
 
     /**
-     * @return BelongsTo<DrugCategory, $this>
-     */
-    public function drugCategory(): BelongsTo
-    {
-        return $this->category();
-    }
-
-    /**
-     * @return HasMany<DrugBatch, $this>
+     * @return HasMany<ProductBatch, $this>
      */
     public function batches(): HasMany
     {
-        return $this->hasMany(DrugBatch::class);
+        return $this->hasMany(ProductBatch::class);
     }
 
     /**
@@ -120,35 +132,26 @@ class Drug extends Model
     }
 
     /**
-     * Scope to prescribable medication products only.
-     *
-     * @param  Builder<Drug>  $query
-     * @return Builder<Drug>
+     * @param  Builder<Product>  $query
+     * @return Builder<Product>
      */
-    public function scopeDrugs(Builder $query): Builder
+    public function scopeSearch(Builder $query, string $term): Builder
     {
-        return $query->where('product_type', ProductType::Drug->value);
-    }
-
-    /**
-     * @param  Builder<Drug>  $query
-     * @return Builder<Drug>
-     */
-    public function scopeOfType(Builder $query, string $type): Builder
-    {
-        return $query->where('product_type', $type);
-    }
-
-    /**
-     * @param  Builder<Drug>  $query
-     * @return Builder<Drug>
-     */
-    public function scopeSearch(Builder $query, string $search): Builder
-    {
-        return $query->where(function (Builder $builder) use ($search): void {
-            $builder->where('name', 'like', "%{$search}%")
-                ->orWhere('code', 'like', "%{$search}%")
-                ->orWhere('manufacturer', 'like', "%{$search}%");
+        return $query->where(function (Builder $q) use ($term): void {
+            $q->where('code', 'like', "%{$term}%")
+                ->orWhere('name', 'like', "%{$term}%")
+                ->orWhere('manufacturer', 'like', "%{$term}%");
         });
+    }
+
+    /**
+     * @param  Builder<Product>  $query
+     * @return Builder<Product>
+     */
+    public function scopeOfType(Builder $query, ProductType|string $type): Builder
+    {
+        $value = $type instanceof ProductType ? $type->value : $type;
+
+        return $query->where('product_type', $value);
     }
 }

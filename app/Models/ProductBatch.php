@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Database\Factories\DrugBatchFactory;
+use Database\Factories\ProductBatchFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +15,7 @@ use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * @property int $id
- * @property int $drug_id
+ * @property int $product_id
  * @property string $batch_number
  * @property Carbon $expiry_date
  * @property int $initial_quantity
@@ -24,10 +24,10 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property bool $is_active
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property Drug $drug
+ * @property Product $product
  */
 #[Fillable([
-    'drug_id',
+    'product_id',
     'batch_number',
     'expiry_date',
     'initial_quantity',
@@ -35,9 +35,9 @@ use Spatie\Activitylog\Support\LogOptions;
     'buy_price',
     'is_active',
 ])]
-class DrugBatch extends Model
+class ProductBatch extends Model
 {
-    /** @use HasFactory<DrugBatchFactory> */
+    /** @use HasFactory<ProductBatchFactory> */
     use HasFactory, LogsActivity;
 
     /**
@@ -46,6 +46,7 @@ class DrugBatch extends Model
     protected function casts(): array
     {
         return [
+            'product_id' => 'integer',
             'expiry_date' => 'date',
             'initial_quantity' => 'integer',
             'current_quantity' => 'integer',
@@ -64,11 +65,11 @@ class DrugBatch extends Model
     }
 
     /**
-     * @return BelongsTo<Drug, $this>
+     * @return BelongsTo<Product, $this>
      */
-    public function drug(): BelongsTo
+    public function product(): BelongsTo
     {
-        return $this->belongsTo(Drug::class);
+        return $this->belongsTo(Product::class);
     }
 
     /**
@@ -106,8 +107,8 @@ class DrugBatch extends Model
     /**
      * Scope FEFO: first expired first out, only available non-expired batches.
      *
-     * @param  Builder<DrugBatch>  $query
-     * @return Builder<DrugBatch>
+     * @param  Builder<ProductBatch>  $query
+     * @return Builder<ProductBatch>
      */
     public function scopeFefoAvailable(Builder $query): Builder
     {

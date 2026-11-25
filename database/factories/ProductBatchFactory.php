@@ -2,14 +2,14 @@
 
 namespace Database\Factories;
 
-use App\Models\Drug;
-use App\Models\DrugBatch;
+use App\Models\Product;
+use App\Models\ProductBatch;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<DrugBatch>
+ * @extends Factory<ProductBatch>
  */
-class DrugBatchFactory extends Factory
+class ProductBatchFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -21,7 +21,7 @@ class DrugBatchFactory extends Factory
         $initial = fake()->numberBetween(50, 500);
 
         return [
-            'drug_id' => Drug::factory(),
+            'product_id' => Product::factory(),
             'batch_number' => strtoupper(fake()->bothify('BATCH-####??')),
             'expiry_date' => fake()->dateTimeBetween('+3 months', '+2 years')->format('Y-m-d'),
             'initial_quantity' => $initial,

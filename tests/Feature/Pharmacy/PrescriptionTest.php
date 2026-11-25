@@ -3,12 +3,12 @@
 use App\Enums\RoleName;
 use App\Models\Dispensing;
 use App\Models\Doctor;
-use App\Models\Drug;
-use App\Models\DrugBatch;
 use App\Models\Encounter;
 use App\Models\Patient;
 use App\Models\Prescription;
 use App\Models\PrescriptionItem;
+use App\Models\Product;
+use App\Models\ProductBatch;
 use App\Models\Unit;
 use App\Models\User;
 use Carbon\Carbon;
@@ -31,8 +31,8 @@ test('doctor can create an electronic prescription with items', function () {
         'doctor_id' => $doctor->id,
         'unit_id' => $unit->id,
     ]);
-    $drug1 = Drug::factory()->create(['name' => 'Paracetamol 500mg']);
-    $drug2 = Drug::factory()->create(['name' => 'Amoxicillin 500mg']);
+    $product1 = Product::factory()->create(['name' => 'Paracetamol 500mg']);
+    $product2 = Product::factory()->create(['name' => 'Amoxicillin 500mg']);
 
     $response = $this->actingAs($doctorUser)->post(route('pharmacy.prescriptions.store'), [
         'encounter_id' => $encounter->id,
@@ -42,7 +42,7 @@ test('doctor can create an electronic prescription with items', function () {
         'notes' => 'Minum sesudah makan.',
         'items' => [
             [
-                'drug_id' => $drug1->id,
+                'product_id' => $product1->id,
                 'dosage' => '500mg',
                 'frequency' => '3x1',
                 'route' => 'Oral',
@@ -51,7 +51,7 @@ test('doctor can create an electronic prescription with items', function () {
                 'instructions' => 'Bila demam',
             ],
             [
-                'drug_id' => $drug2->id,
+                'product_id' => $product2->id,
                 'dosage' => '500mg',
                 'frequency' => '3x1',
                 'route' => 'Oral',
@@ -96,11 +96,11 @@ test('dispensing allocates batches using FEFO and updates stock balances', funct
     $pharmacistUser = User::factory()->create();
     $pharmacistUser->assignRole(RoleName::Pharmacist->value);
 
-    $drug = Drug::factory()->create(['name' => 'Cetirizine 10mg']);
+    $product = Product::factory()->create(['name' => 'Cetirizine 10mg']);
 
     // Batch 1: Expiring earlier (FEFO priority 1) - Stock 10
-    $batchEarlier = DrugBatch::factory()->create([
-        'drug_id' => $drug->id,
+    $batchEarlier = ProductBatch::factory()->create([
+        'product_id' => $product->id,
         'batch_number' => 'BATCH-EARLY',
         'expiry_date' => Carbon::today()->addDays(20),
         'initial_quantity' => 20,
@@ -109,8 +109,8 @@ test('dispensing allocates batches using FEFO and updates stock balances', funct
     ]);
 
     // Batch 2: Expiring later (FEFO priority 2) - Stock 20
-    $batchLater = DrugBatch::factory()->create([
-        'drug_id' => $drug->id,
+    $batchLater = ProductBatch::factory()->create([
+        'product_id' => $product->id,
         'batch_number' => 'BATCH-LATER',
         'expiry_date' => Carbon::today()->addDays(60),
         'initial_quantity' => 30,
@@ -122,7 +122,7 @@ test('dispensing allocates batches using FEFO and updates stock balances', funct
     // Requesting 15 tablets: Should consume 10 from Batch 1, and 5 from Batch 2
     $item = PrescriptionItem::factory()->create([
         'prescription_id' => $prescription->id,
-        'drug_id' => $drug->id,
+        'product_id' => $product->id,
         'quantity' => 15,
         'dispensed_quantity' => 0,
         'status' => 'pending',
@@ -148,19 +148,19 @@ test('dispensing allocates batches using FEFO and updates stock balances', funct
 
     $this->assertDatabaseHas('dispensings', [
         'prescription_id' => $prescription->id,
-        'drug_batch_id' => $batchEarlier->id,
+        'product_batch_id' => $batchEarlier->id,
         'quantity' => 10,
     ]);
 
     $this->assertDatabaseHas('dispensings', [
         'prescription_id' => $prescription->id,
-        'drug_batch_id' => $batchLater->id,
+        'product_batch_id' => $batchLater->id,
         'quantity' => 5,
     ]);
 
     $this->assertDatabaseHas('stock_movements', [
-        'drug_id' => $drug->id,
-        'drug_batch_id' => $batchEarlier->id,
+        'product_id' => $product->id,
+        'product_batch_id' => $batchEarlier->id,
         'type' => 'dispensing',
         'quantity' => -10,
         'balance_before' => 10,
@@ -172,9 +172,9 @@ test('dispensing fails gracefully when available stock is insufficient', functio
     $pharmacistUser = User::factory()->create();
     $pharmacistUser->assignRole(RoleName::Pharmacist->value);
 
-    $drug = Drug::factory()->create();
-    DrugBatch::factory()->create([
-        'drug_id' => $drug->id,
+    $product = Product::factory()->create();
+    ProductBatch::factory()->create([
+        'product_id' => $product->id,
         'current_quantity' => 5,
         'is_active' => true,
         'expiry_date' => Carbon::today()->addDays(30),
@@ -183,7 +183,7 @@ test('dispensing fails gracefully when available stock is insufficient', functio
     $prescription = Prescription::factory()->create(['status' => 'verified']);
     PrescriptionItem::factory()->create([
         'prescription_id' => $prescription->id,
-        'drug_id' => $drug->id,
+        'product_id' => $product->id,
         'quantity' => 20, // Requesting more than available 5
         'dispensed_quantity' => 0,
     ]);
@@ -220,16 +220,16 @@ test('pharmacist can return dispensed medication and restore batch quantity', fu
     $pharmacistUser = User::factory()->create();
     $pharmacistUser->assignRole(RoleName::Pharmacist->value);
 
-    $drug = Drug::factory()->create();
-    $batch = DrugBatch::factory()->create([
-        'drug_id' => $drug->id,
+    $product = Product::factory()->create();
+    $batch = ProductBatch::factory()->create([
+        'product_id' => $product->id,
         'current_quantity' => 10,
     ]);
 
     $prescription = Prescription::factory()->create(['status' => 'dispensed']);
     $item = PrescriptionItem::factory()->create([
         'prescription_id' => $prescription->id,
-        'drug_id' => $drug->id,
+        'product_id' => $product->id,
         'quantity' => 10,
         'dispensed_quantity' => 10,
         'status' => 'dispensed',
@@ -238,7 +238,7 @@ test('pharmacist can return dispensed medication and restore batch quantity', fu
     $dispensing = Dispensing::factory()->create([
         'prescription_id' => $prescription->id,
         'prescription_item_id' => $item->id,
-        'drug_batch_id' => $batch->id,
+        'product_batch_id' => $batch->id,
         'quantity' => 10,
     ]);
 
@@ -261,14 +261,14 @@ test('pharmacist can return dispensed medication and restore batch quantity', fu
     $this->assertDatabaseHas('stock_returns', [
         'prescription_id' => $prescription->id,
         'prescription_item_id' => $item->id,
-        'drug_batch_id' => $batch->id,
+        'product_batch_id' => $batch->id,
         'quantity' => 5,
         'return_reason' => 'Pasien ganti obat oleh dokter spesialis.',
     ]);
 
     $this->assertDatabaseHas('stock_movements', [
-        'drug_id' => $drug->id,
-        'drug_batch_id' => $batch->id,
+        'product_id' => $product->id,
+        'product_batch_id' => $batch->id,
         'type' => 'return',
         'quantity' => 5,
         'balance_before' => 10,

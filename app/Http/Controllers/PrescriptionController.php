@@ -41,7 +41,7 @@ class PrescriptionController extends Controller
                 'doctor:id,name',
                 'unit:id,name',
                 'pharmacist:id,name',
-                'items.drug:id,name,form,unit_of_measure',
+                'items.product:id,name,form,unit_of_measure',
             ])
             ->when($search !== '', fn (Builder $q) => $q->search($search))
             ->when($status !== '' && $status !== 'all', fn (Builder $q) => $q->where('status', $status))
@@ -84,10 +84,10 @@ class PrescriptionController extends Controller
             'doctor',
             'unit',
             'pharmacist',
-            'items.drug.batches' => fn ($q) => $q->fefoAvailable(),
-            'items.dispensings.drugBatch',
+            'items.product.batches' => fn ($q) => $q->fefoAvailable(),
+            'items.dispensings.productBatch',
             'items.dispensings.dispenser',
-            'returns.drugBatch',
+            'returns.productBatch',
             'returns.returnedBy',
         ]);
 

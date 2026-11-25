@@ -2,10 +2,10 @@
 
 use App\Enums\RoleName;
 use App\Models\Dispensing;
-use App\Models\Drug;
-use App\Models\DrugBatch;
 use App\Models\Prescription;
 use App\Models\PrescriptionItem;
+use App\Models\Product;
+use App\Models\ProductBatch;
 use App\Models\StockLocation;
 use App\Models\StockValuationLayer;
 use App\Models\User;
@@ -18,18 +18,18 @@ beforeEach(function () {
     $this->seed([PermissionSeeder::class, RoleSeeder::class, StockLocationSeeder::class]);
 });
 
-test('pharmacist can add a new drug batch with initial stock movement, quant, and valuation layer', function () {
+test('pharmacist can add a new product batch with initial stock movement, quant, and valuation layer', function () {
     $pharmacistUser = User::factory()->create();
     $pharmacistUser->assignRole(RoleName::Pharmacist->value);
 
-    $drug = Drug::factory()->create();
+    $product = Product::factory()->create();
     $whStock = StockLocation::where('code', StockLocation::CODE_DEFAULT_WAREHOUSE)->firstOrFail();
     $vendors = StockLocation::where('code', StockLocation::CODE_VENDORS)->firstOrFail();
 
     $response = $this->actingAs($pharmacistUser)->post(
         route('pharmacy.stock.batches.store'),
         [
-            'drug_id' => $drug->id,
+            'product_id' => $product->id,
             'batch_number' => 'BATCH-TEST-99',
             'expiry_date' => Carbon::today()->addMonths(6)->toDateString(),
             'initial_quantity' => 100,
@@ -40,8 +40,8 @@ test('pharmacist can add a new drug batch with initial stock movement, quant, an
 
     $response->assertSessionHasNoErrors();
 
-    $this->assertDatabaseHas('drug_batches', [
-        'drug_id' => $drug->id,
+    $this->assertDatabaseHas('product_batches', [
+        'product_id' => $product->id,
         'batch_number' => 'BATCH-TEST-99',
         'initial_quantity' => 100,
         'current_quantity' => 100,
@@ -49,11 +49,11 @@ test('pharmacist can add a new drug batch with initial stock movement, quant, an
         'is_active' => true,
     ]);
 
-    $batch = DrugBatch::where('batch_number', 'BATCH-TEST-99')->firstOrFail();
+    $batch = ProductBatch::where('batch_number', 'BATCH-TEST-99')->firstOrFail();
 
     $this->assertDatabaseHas('stock_movements', [
-        'drug_id' => $drug->id,
-        'drug_batch_id' => $batch->id,
+        'product_id' => $product->id,
+        'product_batch_id' => $batch->id,
         'source_location_id' => $vendors->id,
         'destination_location_id' => $whStock->id,
         'type' => 'in',
@@ -68,14 +68,14 @@ test('pharmacist can add a new drug batch with initial stock movement, quant, an
 
     $this->assertDatabaseHas('stock_quants', [
         'stock_location_id' => $whStock->id,
-        'drug_id' => $drug->id,
-        'drug_batch_id' => $batch->id,
+        'product_id' => $product->id,
+        'product_batch_id' => $batch->id,
         'quantity' => 100,
     ]);
 
     $this->assertDatabaseHas('stock_valuation_layers', [
-        'drug_id' => $drug->id,
-        'drug_batch_id' => $batch->id,
+        'product_id' => $product->id,
+        'product_batch_id' => $batch->id,
         'stock_location_id' => $whStock->id,
         'quantity' => 100,
         'remaining_qty' => 100,
@@ -89,9 +89,9 @@ test('pharmacist can adjust stock with a mandatory reason', function () {
     $pharmacistUser = User::factory()->create();
     $pharmacistUser->assignRole(RoleName::Pharmacist->value);
 
-    $drug = Drug::factory()->create();
-    $batch = DrugBatch::factory()->create([
-        'drug_id' => $drug->id,
+    $product = Product::factory()->create();
+    $batch = ProductBatch::factory()->create([
+        'product_id' => $product->id,
         'batch_number' => 'BATCH-ADJUST',
         'initial_quantity' => 50,
         'current_quantity' => 50,
@@ -112,8 +112,8 @@ test('pharmacist can adjust stock with a mandatory reason', function () {
     expect($batch->current_quantity)->toBe(45);
 
     $this->assertDatabaseHas('stock_movements', [
-        'drug_id' => $drug->id,
-        'drug_batch_id' => $batch->id,
+        'product_id' => $product->id,
+        'product_batch_id' => $batch->id,
         'type' => 'adjustment',
         'quantity' => -5,
         'balance_before' => 50,
@@ -123,8 +123,8 @@ test('pharmacist can adjust stock with a mandatory reason', function () {
     ]);
 
     $this->assertDatabaseHas('stock_valuation_layers', [
-        'drug_id' => $drug->id,
-        'drug_batch_id' => $batch->id,
+        'product_id' => $product->id,
+        'product_batch_id' => $batch->id,
         'quantity' => -5,
         'value' => -5000,
     ]);
@@ -134,7 +134,7 @@ test('stock adjustment validates and rejects negative quantity', function () {
     $pharmacistUser = User::factory()->create();
     $pharmacistUser->assignRole(RoleName::Pharmacist->value);
 
-    $batch = DrugBatch::factory()->create(['current_quantity' => 10]);
+    $batch = ProductBatch::factory()->create(['current_quantity' => 10]);
 
     $response = $this->actingAs($pharmacistUser)->post(
         route('pharmacy.stock.batches.adjust', $batch->id),
@@ -153,24 +153,24 @@ test('pharmacist can transfer stock between internal locations without altering 
     $pharmacistUser = User::factory()->create();
     $pharmacistUser->assignRole(RoleName::Pharmacist->value);
 
-    $drug = Drug::factory()->create();
+    $product = Product::factory()->create();
     $whStock = StockLocation::where('code', StockLocation::CODE_DEFAULT_WAREHOUSE)->firstOrFail();
     $opdDepo = StockLocation::where('code', StockLocation::CODE_OPD_DEPO)->firstOrFail();
 
     $this->actingAs($pharmacistUser)->post(route('pharmacy.stock.batches.store'), [
-        'drug_id' => $drug->id,
+        'product_id' => $product->id,
         'batch_number' => 'BATCH-TRANS-01',
         'expiry_date' => Carbon::today()->addMonths(8)->toDateString(),
         'initial_quantity' => 80,
         'buy_price' => 3000,
     ])->assertSessionHasNoErrors();
 
-    $batch = DrugBatch::where('batch_number', 'BATCH-TRANS-01')->firstOrFail();
+    $batch = ProductBatch::where('batch_number', 'BATCH-TRANS-01')->firstOrFail();
 
     $response = $this->actingAs($pharmacistUser)->post(route('pharmacy.stock.moves.store'), [
         'type' => 'transfer',
-        'drug_id' => $drug->id,
-        'drug_batch_id' => $batch->id,
+        'product_id' => $product->id,
+        'product_batch_id' => $batch->id,
         'source_location_id' => $whStock->id,
         'destination_location_id' => $opdDepo->id,
         'quantity' => 30,
@@ -185,19 +185,19 @@ test('pharmacist can transfer stock between internal locations without altering 
 
     $this->assertDatabaseHas('stock_quants', [
         'stock_location_id' => $whStock->id,
-        'drug_batch_id' => $batch->id,
+        'product_batch_id' => $batch->id,
         'quantity' => 50,
     ]);
 
     $this->assertDatabaseHas('stock_quants', [
         'stock_location_id' => $opdDepo->id,
-        'drug_batch_id' => $batch->id,
+        'product_batch_id' => $batch->id,
         'quantity' => 30,
     ]);
 
     $this->assertDatabaseHas('stock_movements', [
-        'drug_id' => $drug->id,
-        'drug_batch_id' => $batch->id,
+        'product_id' => $product->id,
+        'product_batch_id' => $batch->id,
         'source_location_id' => $whStock->id,
         'destination_location_id' => $opdDepo->id,
         'type' => 'transfer',
@@ -208,7 +208,7 @@ test('pharmacist can transfer stock between internal locations without altering 
     ]);
 
     // Total valuation remains 80 * 3000 = 240000 after internal transfer
-    $totalValuation = (int) StockValuationLayer::where('drug_id', $drug->id)->sum('value');
+    $totalValuation = (int) StockValuationLayer::where('product_id', $product->id)->sum('value');
     expect($totalValuation)->toBe(240000);
 });
 
@@ -216,12 +216,12 @@ test('outbound stock move allocates FEFO across batches and consumes valuation l
     $pharmacistUser = User::factory()->create();
     $pharmacistUser->assignRole(RoleName::Pharmacist->value);
 
-    $drug = Drug::factory()->create();
+    $product = Product::factory()->create();
     $whStock = StockLocation::where('code', StockLocation::CODE_DEFAULT_WAREHOUSE)->firstOrFail();
     $customers = StockLocation::where('code', StockLocation::CODE_CUSTOMERS)->firstOrFail();
 
     $this->actingAs($pharmacistUser)->post(route('pharmacy.stock.batches.store'), [
-        'drug_id' => $drug->id,
+        'product_id' => $product->id,
         'batch_number' => 'FEFO-EARLY',
         'expiry_date' => Carbon::today()->addDays(20)->toDateString(),
         'initial_quantity' => 10,
@@ -229,7 +229,7 @@ test('outbound stock move allocates FEFO across batches and consumes valuation l
     ])->assertSessionHasNoErrors();
 
     $this->actingAs($pharmacistUser)->post(route('pharmacy.stock.batches.store'), [
-        'drug_id' => $drug->id,
+        'product_id' => $product->id,
         'batch_number' => 'FEFO-LATE',
         'expiry_date' => Carbon::today()->addDays(90)->toDateString(),
         'initial_quantity' => 20,
@@ -239,8 +239,8 @@ test('outbound stock move allocates FEFO across batches and consumes valuation l
     // Request 15 outbound without batch specified -> FEFO takes 10 from FEFO-EARLY + 5 from FEFO-LATE
     $response = $this->actingAs($pharmacistUser)->post(route('pharmacy.stock.moves.store'), [
         'type' => 'out',
-        'drug_id' => $drug->id,
-        'drug_batch_id' => null,
+        'product_id' => $product->id,
+        'product_batch_id' => null,
         'source_location_id' => $whStock->id,
         'destination_location_id' => $customers->id,
         'quantity' => 15,
@@ -250,17 +250,17 @@ test('outbound stock move allocates FEFO across batches and consumes valuation l
 
     $response->assertSessionHasNoErrors();
 
-    $earlyBatch = DrugBatch::where('batch_number', 'FEFO-EARLY')->firstOrFail();
-    $lateBatch = DrugBatch::where('batch_number', 'FEFO-LATE')->firstOrFail();
+    $earlyBatch = ProductBatch::where('batch_number', 'FEFO-EARLY')->firstOrFail();
+    $lateBatch = ProductBatch::where('batch_number', 'FEFO-LATE')->firstOrFail();
 
     expect($earlyBatch->current_quantity)->toBe(0)
         ->and($lateBatch->current_quantity)->toBe(15);
 
     // Remaining SVL on early batch = 0, late batch = 15 * 1500 = 22500
-    $earlyRemaining = StockValuationLayer::where('drug_batch_id', $earlyBatch->id)
+    $earlyRemaining = StockValuationLayer::where('product_batch_id', $earlyBatch->id)
         ->where('quantity', '>', 0)
         ->firstOrFail();
-    $lateRemaining = StockValuationLayer::where('drug_batch_id', $lateBatch->id)
+    $lateRemaining = StockValuationLayer::where('product_batch_id', $lateBatch->id)
         ->where('quantity', '>', 0)
         ->firstOrFail();
 
@@ -269,7 +269,7 @@ test('outbound stock move allocates FEFO across batches and consumes valuation l
         ->and($lateRemaining->remaining_qty)->toBe(15)
         ->and($lateRemaining->remaining_value)->toBe(22500);
 
-    $totalValuation = (int) StockValuationLayer::where('drug_id', $drug->id)->sum('value');
+    $totalValuation = (int) StockValuationLayer::where('product_id', $product->id)->sum('value');
     expect($totalValuation)->toBe(22500);
 });
 
@@ -277,24 +277,24 @@ test('inbound stock move adds stock to existing batch and creates new valuation 
     $pharmacistUser = User::factory()->create();
     $pharmacistUser->assignRole(RoleName::Pharmacist->value);
 
-    $drug = Drug::factory()->create();
+    $product = Product::factory()->create();
     $whStock = StockLocation::where('code', StockLocation::CODE_DEFAULT_WAREHOUSE)->firstOrFail();
     $vendors = StockLocation::where('code', StockLocation::CODE_VENDORS)->firstOrFail();
 
     $this->actingAs($pharmacistUser)->post(route('pharmacy.stock.batches.store'), [
-        'drug_id' => $drug->id,
+        'product_id' => $product->id,
         'batch_number' => 'BATCH-ADD-01',
         'expiry_date' => Carbon::today()->addMonths(6)->toDateString(),
         'initial_quantity' => 20,
         'buy_price' => 2000,
     ])->assertSessionHasNoErrors();
 
-    $batch = DrugBatch::where('batch_number', 'BATCH-ADD-01')->firstOrFail();
+    $batch = ProductBatch::where('batch_number', 'BATCH-ADD-01')->firstOrFail();
 
     $response = $this->actingAs($pharmacistUser)->post(route('pharmacy.stock.moves.store'), [
         'type' => 'in',
-        'drug_id' => $drug->id,
-        'drug_batch_id' => $batch->id,
+        'product_id' => $product->id,
+        'product_batch_id' => $batch->id,
         'source_location_id' => $vendors->id,
         'destination_location_id' => $whStock->id,
         'quantity' => 30,
@@ -308,7 +308,7 @@ test('inbound stock move adds stock to existing batch and creates new valuation 
     $batch->refresh();
     expect($batch->current_quantity)->toBe(50);
 
-    $totalValuation = (int) StockValuationLayer::where('drug_id', $drug->id)->sum('value');
+    $totalValuation = (int) StockValuationLayer::where('product_id', $product->id)->sum('value');
     expect($totalValuation)->toBe((20 * 2000) + (30 * 2200));
 });
 
@@ -316,22 +316,22 @@ test('dispensing and return update quants and valuation layers accurately', func
     $pharmacistUser = User::factory()->create();
     $pharmacistUser->assignRole(RoleName::Pharmacist->value);
 
-    $drug = Drug::factory()->create();
+    $product = Product::factory()->create();
 
     $this->actingAs($pharmacistUser)->post(route('pharmacy.stock.batches.store'), [
-        'drug_id' => $drug->id,
+        'product_id' => $product->id,
         'batch_number' => 'BATCH-DISP-SVL',
         'expiry_date' => Carbon::today()->addMonths(6)->toDateString(),
         'initial_quantity' => 40,
         'buy_price' => 5000,
     ])->assertSessionHasNoErrors();
 
-    $batch = DrugBatch::where('batch_number', 'BATCH-DISP-SVL')->firstOrFail();
+    $batch = ProductBatch::where('batch_number', 'BATCH-DISP-SVL')->firstOrFail();
 
     $prescription = Prescription::factory()->create(['status' => 'verified']);
     PrescriptionItem::factory()->create([
         'prescription_id' => $prescription->id,
-        'drug_id' => $drug->id,
+        'product_id' => $product->id,
         'quantity' => 10,
         'dispensed_quantity' => 0,
         'status' => 'pending',
@@ -341,7 +341,7 @@ test('dispensing and return update quants and valuation layers accurately', func
         ->post(route('pharmacy.prescriptions.dispense', $prescription->id))
         ->assertSessionHasNoErrors();
 
-    expect((int) StockValuationLayer::where('drug_id', $drug->id)->sum('value'))->toBe(150000);
+    expect((int) StockValuationLayer::where('product_id', $product->id)->sum('value'))->toBe(150000);
 
     $dispensing = Dispensing::where('prescription_id', $prescription->id)->firstOrFail();
 
@@ -355,7 +355,7 @@ test('dispensing and return update quants and valuation layers accurately', func
 
     $batch->refresh();
     expect($batch->current_quantity)->toBe(34)
-        ->and((int) StockValuationLayer::where('drug_id', $drug->id)->sum('value'))->toBe(170000);
+        ->and((int) StockValuationLayer::where('product_id', $product->id)->sum('value'))->toBe(170000);
 });
 
 test('stock move rejects insufficient source stock, same-location transfer, and unauthorized users', function () {
@@ -365,12 +365,12 @@ test('stock move rejects insufficient source stock, same-location transfer, and 
     $registrationUser = User::factory()->create();
     $registrationUser->assignRole(RoleName::Registration->value);
 
-    $drug = Drug::factory()->create();
+    $product = Product::factory()->create();
     $whStock = StockLocation::where('code', StockLocation::CODE_DEFAULT_WAREHOUSE)->firstOrFail();
     $opdDepo = StockLocation::where('code', StockLocation::CODE_OPD_DEPO)->firstOrFail();
 
     $this->actingAs($pharmacistUser)->post(route('pharmacy.stock.batches.store'), [
-        'drug_id' => $drug->id,
+        'product_id' => $product->id,
         'batch_number' => 'BATCH-GUARD-01',
         'expiry_date' => Carbon::today()->addMonths(6)->toDateString(),
         'initial_quantity' => 10,
@@ -380,7 +380,7 @@ test('stock move rejects insufficient source stock, same-location transfer, and 
     // Insufficient stock in source
     $this->actingAs($pharmacistUser)->post(route('pharmacy.stock.moves.store'), [
         'type' => 'transfer',
-        'drug_id' => $drug->id,
+        'product_id' => $product->id,
         'source_location_id' => $whStock->id,
         'destination_location_id' => $opdDepo->id,
         'quantity' => 25,
@@ -390,7 +390,7 @@ test('stock move rejects insufficient source stock, same-location transfer, and 
     // Same source and destination
     $this->actingAs($pharmacistUser)->post(route('pharmacy.stock.moves.store'), [
         'type' => 'transfer',
-        'drug_id' => $drug->id,
+        'product_id' => $product->id,
         'source_location_id' => $whStock->id,
         'destination_location_id' => $whStock->id,
         'quantity' => 5,
@@ -400,7 +400,7 @@ test('stock move rejects insufficient source stock, same-location transfer, and 
     // Unauthorized role
     $this->actingAs($registrationUser)->post(route('pharmacy.stock.moves.store'), [
         'type' => 'transfer',
-        'drug_id' => $drug->id,
+        'product_id' => $product->id,
         'source_location_id' => $whStock->id,
         'destination_location_id' => $opdDepo->id,
         'quantity' => 5,
@@ -412,10 +412,10 @@ test('pharmacy stock index returns paginated movements, valuation layers, quants
     $pharmacistUser = User::factory()->create();
     $pharmacistUser->assignRole(RoleName::Pharmacist->value);
 
-    $drug = Drug::factory()->create();
+    $product = Product::factory()->create();
 
     $this->actingAs($pharmacistUser)->post(route('pharmacy.stock.batches.store'), [
-        'drug_id' => $drug->id,
+        'product_id' => $product->id,
         'batch_number' => 'BATCH-UI-01',
         'expiry_date' => Carbon::today()->addMonths(6)->toDateString(),
         'initial_quantity' => 25,

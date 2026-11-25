@@ -15,7 +15,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property int $id
  * @property int $prescription_id
  * @property int $prescription_item_id
- * @property int $drug_batch_id
+ * @property int $product_batch_id
  * @property int $quantity
  * @property string $return_reason
  * @property int $returned_by
@@ -24,13 +24,13 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property Carbon|null $updated_at
  * @property Prescription $prescription
  * @property PrescriptionItem $prescriptionItem
- * @property DrugBatch $drugBatch
+ * @property ProductBatch $productBatch
  * @property User $returnedBy
  */
 #[Fillable([
     'prescription_id',
     'prescription_item_id',
-    'drug_batch_id',
+    'product_batch_id',
     'quantity',
     'return_reason',
     'returned_by',
@@ -47,6 +47,7 @@ class StockReturn extends Model
     protected function casts(): array
     {
         return [
+            'product_batch_id' => 'integer',
             'quantity' => 'integer',
             'returned_at' => 'datetime',
         ];
@@ -78,11 +79,11 @@ class StockReturn extends Model
     }
 
     /**
-     * @return BelongsTo<DrugBatch, $this>
+     * @return BelongsTo<ProductBatch, $this>
      */
-    public function drugBatch(): BelongsTo
+    public function productBatch(): BelongsTo
     {
-        return $this->belongsTo(DrugBatch::class);
+        return $this->belongsTo(ProductBatch::class);
     }
 
     /**

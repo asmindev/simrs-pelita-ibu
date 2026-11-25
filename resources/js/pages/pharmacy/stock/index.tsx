@@ -9,9 +9,9 @@ import { Badge } from '@/shared/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 
 import type {
-    DrugBatch,
-    DrugInfo,
     PaginatedData,
+    ProductBatch,
+    ProductInfo,
     StockLocation,
     StockMovement,
     StockQuant,
@@ -32,11 +32,11 @@ import { StockValuationTable } from './components/stock-valuation-table';
 
 type Props = {
     activeTab: string;
-    batches: PaginatedData<DrugBatch>;
+    batches: PaginatedData<ProductBatch>;
     movements: PaginatedData<StockMovement>;
     valuationLayers: PaginatedData<StockValuationLayer>;
     quants: PaginatedData<StockQuant>;
-    drugs: DrugInfo[];
+    products: ProductInfo[];
     locations: StockLocation[];
     filters: {
         search: string;
@@ -65,7 +65,7 @@ export default function PharmacyStockIndex({
     movements,
     valuationLayers,
     quants,
-    drugs,
+    products,
     locations,
     filters,
     statistics,
@@ -73,7 +73,7 @@ export default function PharmacyStockIndex({
     const [isAddBatchOpen, setIsAddBatchOpen] = useState(false);
     const [isMoveOpen, setIsMoveOpen] = useState(false);
     const [movePreset, setMovePreset] = useState<StockMovePreset | null>(null);
-    const [adjustingBatch, setAdjustingBatch] = useState<DrugBatch | null>(
+    const [adjustingBatch, setAdjustingBatch] = useState<ProductBatch | null>(
         null,
     );
 
@@ -87,7 +87,7 @@ export default function PharmacyStockIndex({
                     );
                     setMovePreset({
                         type: 'transfer',
-                        drugId: batch.drug_id,
+                        productId: batch.product_id,
                         batchId: batch.id,
                         sourceLocationId: firstQuant?.stock_location_id,
                     });
@@ -168,11 +168,11 @@ export default function PharmacyStockIndex({
                 </TabsList>
 
                 <TabsContent value="batches" className="space-y-3 outline-none">
-                    <DataTable<DrugBatch>
+                    <DataTable<ProductBatch>
                         columns={columns}
                         rows={batches.data}
                         rowKey={(batch) => batch.id}
-                        empty="Tidak ada batch obat yang sesuai dengan pencarian."
+                        empty="Tidak ada batch produk yang sesuai dengan pencarian."
                         toolbar={
                             <StockFilters
                                 filters={filters}
@@ -217,8 +217,8 @@ export default function PharmacyStockIndex({
                         onTransferQuant={(quant) =>
                             openNewMoveDialog({
                                 type: 'transfer',
-                                drugId: quant.drug_id,
-                                batchId: quant.drug_batch_id,
+                                productId: quant.product_id,
+                                batchId: quant.product_batch_id,
                                 sourceLocationId: quant.stock_location_id,
                             })
                         }
@@ -229,14 +229,14 @@ export default function PharmacyStockIndex({
             <NewBatchDialog
                 open={isAddBatchOpen}
                 onOpenChange={setIsAddBatchOpen}
-                drugs={drugs}
+                products={products}
                 locations={locations}
             />
 
             <StockMoveDialog
                 open={isMoveOpen}
                 onOpenChange={setIsMoveOpen}
-                drugs={drugs}
+                products={products}
                 locations={locations}
                 preset={movePreset}
             />

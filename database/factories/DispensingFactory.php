@@ -3,9 +3,9 @@
 namespace Database\Factories;
 
 use App\Models\Dispensing;
-use App\Models\DrugBatch;
 use App\Models\Prescription;
 use App\Models\PrescriptionItem;
+use App\Models\ProductBatch;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -24,7 +24,7 @@ class DispensingFactory extends Factory
         return [
             'prescription_id' => Prescription::factory(),
             'prescription_item_id' => PrescriptionItem::factory(),
-            'drug_batch_id' => DrugBatch::factory(),
+            'product_batch_id' => ProductBatch::factory(),
             'quantity' => fake()->numberBetween(10, 30),
             'dispensed_by' => User::factory(),
             'dispensed_at' => now(),

@@ -91,7 +91,6 @@ declare module 'ziggy-js' {
             "binding": "id"
         }
     ],
-    "master-data.": [],
     "master-data.products.index": [],
     "master-data.products.create": [],
     "master-data.products.store": [],

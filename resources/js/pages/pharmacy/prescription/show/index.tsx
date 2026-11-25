@@ -299,7 +299,7 @@ export default function PrescriptionShow({ prescription }: Props) {
                         </TableHeader>
                         <TableBody>
                             {items.map((item, idx) => {
-                                const batches = item.drug?.batches || [];
+                                const batches = item.product?.batches || [];
                                 const totalAvailable = batches.reduce(
                                     (acc, b) => acc + b.current_quantity,
                                     0,
@@ -315,11 +315,11 @@ export default function PrescriptionShow({ prescription }: Props) {
                                         </TableCell>
                                         <TableCell>
                                             <div className="font-semibold text-foreground">
-                                                {item.drug?.name}
+                                                {item.product?.name}
                                             </div>
                                             <div className="text-xs text-muted-foreground">
-                                                {item.drug?.form} •{' '}
-                                                {item.drug?.unit_of_measure}
+                                                {item.product?.form} •{' '}
+                                                {item.product?.unit_of_measure}
                                             </div>
                                         </TableCell>
                                         <TableCell>
@@ -335,11 +335,11 @@ export default function PrescriptionShow({ prescription }: Props) {
                                         </TableCell>
                                         <TableCell className="text-center font-semibold">
                                             {item.quantity}{' '}
-                                            {item.drug?.unit_of_measure}
+                                            {item.product?.unit_of_measure}
                                         </TableCell>
                                         <TableCell className="text-center font-mono text-sm">
                                             {item.dispensed_quantity}{' '}
-                                            {item.drug?.unit_of_measure}
+                                            {item.product?.unit_of_measure}
                                         </TableCell>
                                         <TableCell>
                                             {batches.length === 0 ? (
@@ -438,16 +438,23 @@ export default function PrescriptionShow({ prescription }: Props) {
                                             className="transition-colors hover:bg-muted/30"
                                         >
                                             <TableCell className="font-semibold text-foreground">
-                                                {item.drug?.name}
+                                                {item.product?.name}
                                             </TableCell>
                                             <TableCell className="font-mono text-xs">
-                                                {disp.drug_batch?.batch_number}{' '}
+                                                {
+                                                    disp.product_batch
+                                                        ?.batch_number
+                                                }{' '}
                                                 (EXP:{' '}
-                                                {disp.drug_batch?.expiry_date})
+                                                {
+                                                    disp.product_batch
+                                                        ?.expiry_date
+                                                }
+                                                )
                                             </TableCell>
                                             <TableCell className="font-semibold">
                                                 {disp.quantity}{' '}
-                                                {item.drug?.unit_of_measure}
+                                                {item.product?.unit_of_measure}
                                             </TableCell>
                                             <TableCell className="text-xs text-muted-foreground">
                                                 {new Date(
@@ -504,7 +511,7 @@ export default function PrescriptionShow({ prescription }: Props) {
                                 {returns.map((ret) => (
                                     <TableRow key={ret.id}>
                                         <TableCell className="font-mono text-xs font-semibold">
-                                            {ret.drug_batch?.batch_number}
+                                            {ret.product_batch?.batch_number}
                                         </TableCell>
                                         <TableCell className="font-semibold text-foreground">
                                             {ret.quantity} unit

@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\DrugCategory;
+use App\Models\ProductCategory;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -10,7 +10,7 @@ class UpdateProductCategoryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        /** @var DrugCategory|null $productCategory */
+        /** @var ProductCategory|null $productCategory */
         $productCategory = $this->route('productCategory');
 
         return $productCategory !== null && ($this->user()?->can('update', $productCategory) ?? false);
@@ -21,7 +21,7 @@ class UpdateProductCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-        /** @var DrugCategory|null $productCategory */
+        /** @var ProductCategory|null $productCategory */
         $productCategory = $this->route('productCategory');
 
         return [
@@ -29,7 +29,7 @@ class UpdateProductCategoryRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique(DrugCategory::class)->ignore($productCategory),
+                Rule::unique(ProductCategory::class)->ignore($productCategory),
             ],
             'description' => ['nullable', 'string', 'max:1000'],
         ];

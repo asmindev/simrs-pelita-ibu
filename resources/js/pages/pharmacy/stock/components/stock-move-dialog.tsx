@@ -23,11 +23,11 @@ import {
 } from '@/shared/ui/select';
 import { Textarea } from '@/shared/ui/textarea';
 
-import type { DrugInfo, StockLocation } from '../../types/pharmacy';
+import type { ProductInfo, StockLocation } from '../../types/pharmacy';
 
 export type StockMovePreset = {
     type?: 'in' | 'out' | 'transfer' | 'adjustment';
-    drugId?: number;
+    productId?: number;
     batchId?: number;
     sourceLocationId?: number;
 };
@@ -35,7 +35,7 @@ export type StockMovePreset = {
 type Props = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    drugs: DrugInfo[];
+    products: ProductInfo[];
     locations: StockLocation[];
     preset?: StockMovePreset | null;
 };
@@ -43,7 +43,7 @@ type Props = {
 export function StockMoveDialog({
     open,
     onOpenChange,
-    drugs,
+    products,
     locations,
     preset,
 }: Props) {
@@ -88,8 +88,8 @@ export function StockMoveDialog({
     const { data, setData, transform, post, processing, errors, reset } =
         useForm({
             type: 'transfer' as 'in' | 'out' | 'transfer' | 'adjustment',
-            drug_id: '',
-            drug_batch_id: 'auto_fefo',
+            product_id: '',
+            product_batch_id: 'auto_fefo',
             source_location_id: defaultWarehouseId,
             destination_location_id: secondaryInternalId,
             quantity: '',
@@ -109,10 +109,10 @@ export function StockMoveDialog({
                 type: nextType,
                 source_location_id: defaultSupplierId,
                 destination_location_id: customSourceId ?? defaultWarehouseId,
-                drug_batch_id:
-                    prev.drug_batch_id === 'auto_fefo'
+                product_batch_id:
+                    prev.product_batch_id === 'auto_fefo'
                         ? ''
-                        : prev.drug_batch_id,
+                        : prev.product_batch_id,
             }));
             return;
         }
@@ -146,8 +146,10 @@ export function StockMoveDialog({
             type: nextType,
             source_location_id: defaultLossId,
             destination_location_id: customSourceId ?? defaultWarehouseId,
-            drug_batch_id:
-                prev.drug_batch_id === 'auto_fefo' ? '' : prev.drug_batch_id,
+            product_batch_id:
+                prev.product_batch_id === 'auto_fefo'
+                    ? ''
+                    : prev.product_batch_id,
         }));
     }
 
@@ -161,8 +163,8 @@ export function StockMoveDialog({
 
         setData({
             type: nextType,
-            drug_id: preset?.drugId ? String(preset.drugId) : '',
-            drug_batch_id: preset?.batchId
+            product_id: preset?.productId ? String(preset.productId) : '',
+            product_batch_id: preset?.batchId
                 ? String(preset.batchId)
                 : nextType === 'in' || nextType === 'adjustment'
                   ? ''
@@ -191,17 +193,17 @@ export function StockMoveDialog({
         });
     }, [open, preset]);
 
-    const selectedDrug = useMemo(
-        () => drugs.find((d) => String(d.id) === data.drug_id),
-        [drugs, data.drug_id],
+    const selectedProduct = useMemo(
+        () => products.find((d) => String(d.id) === data.product_id),
+        [products, data.product_id],
     );
-    const availableBatches = selectedDrug?.batches ?? [];
+    const availableBatches = selectedProduct?.batches ?? [];
 
-    function handleDrugChange(val: string) {
+    function handleProductChange(val: string) {
         setData((prev) => ({
             ...prev,
-            drug_id: val,
-            drug_batch_id:
+            product_id: val,
+            product_batch_id:
                 prev.type === 'in' || prev.type === 'adjustment'
                     ? ''
                     : 'auto_fefo',
@@ -213,11 +215,11 @@ export function StockMoveDialog({
 
         transform((formData) => ({
             ...formData,
-            drug_batch_id:
-                formData.drug_batch_id === '' ||
-                formData.drug_batch_id === 'auto_fefo'
+            product_batch_id:
+                formData.product_batch_id === '' ||
+                formData.product_batch_id === 'auto_fefo'
                     ? null
-                    : Number(formData.drug_batch_id),
+                    : Number(formData.product_batch_id),
             source_location_id: formData.source_location_id
                 ? Number(formData.source_location_id)
                 : null,
@@ -409,22 +411,22 @@ export function StockMoveDialog({
 
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div className="space-y-1.5">
-                            <Label htmlFor="move-drug">
+                            <Label htmlFor="move-product">
                                 Produk{' '}
                                 <span className="text-destructive">*</span>
                             </Label>
                             <Select
-                                value={data.drug_id}
-                                onValueChange={handleDrugChange}
+                                value={data.product_id}
+                                onValueChange={handleProductChange}
                             >
                                 <SelectTrigger
-                                    id="move-drug"
+                                    id="move-product"
                                     className="bg-background"
                                 >
                                     <SelectValue placeholder="Pilih produk..." />
                                 </SelectTrigger>
                                 <SelectContent className="max-h-60">
-                                    {drugs.map((d) => (
+                                    {products.map((d) => (
                                         <SelectItem
                                             key={d.id}
                                             value={String(d.id)}
@@ -434,9 +436,9 @@ export function StockMoveDialog({
                                     ))}
                                 </SelectContent>
                             </Select>
-                            {errors.drug_id && (
+                            {errors.product_id && (
                                 <p className="text-xs text-destructive">
-                                    {errors.drug_id}
+                                    {errors.product_id}
                                 </p>
                             )}
                         </div>
@@ -449,11 +451,11 @@ export function StockMoveDialog({
                                 )}
                             </Label>
                             <Select
-                                value={data.drug_batch_id}
+                                value={data.product_batch_id}
                                 onValueChange={(val) =>
-                                    setData('drug_batch_id', val)
+                                    setData('product_batch_id', val)
                                 }
-                                disabled={!data.drug_id}
+                                disabled={!data.product_id}
                             >
                                 <SelectTrigger
                                     id="move-batch"
@@ -478,9 +480,9 @@ export function StockMoveDialog({
                                     ))}
                                 </SelectContent>
                             </Select>
-                            {errors.drug_batch_id && (
+                            {errors.product_batch_id && (
                                 <p className="text-xs text-destructive">
-                                    {errors.drug_batch_id}
+                                    {errors.product_batch_id}
                                 </p>
                             )}
                         </div>

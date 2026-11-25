@@ -23,9 +23,9 @@ class StorePrescriptionRequest extends FormRequest
             'encounter_id' => ['required', 'exists:encounters,id'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'items' => ['required', 'array', 'min:1'],
-            'items.*.drug_id' => [
+            'items.*.product_id' => [
                 'required',
-                Rule::exists('drugs', 'id')->where('product_type', ProductType::Drug->value),
+                Rule::exists('products', 'id')->where('product_type', ProductType::Drug->value),
             ],
             'items.*.dosage' => ['required', 'string', 'max:100'],
             'items.*.frequency' => ['required', 'string', 'max:100'],

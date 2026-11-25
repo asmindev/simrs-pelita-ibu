@@ -13,19 +13,19 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property int $stock_location_id
- * @property int $drug_id
- * @property int $drug_batch_id
+ * @property int $product_id
+ * @property int $product_batch_id
  * @property int $quantity
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property StockLocation $location
- * @property Drug $drug
- * @property DrugBatch $drugBatch
+ * @property Product $product
+ * @property ProductBatch $productBatch
  */
 #[Fillable([
     'stock_location_id',
-    'drug_id',
-    'drug_batch_id',
+    'product_id',
+    'product_batch_id',
     'quantity',
 ])]
 class StockQuant extends Model
@@ -40,8 +40,8 @@ class StockQuant extends Model
     {
         return [
             'stock_location_id' => 'integer',
-            'drug_id' => 'integer',
-            'drug_batch_id' => 'integer',
+            'product_id' => 'integer',
+            'product_batch_id' => 'integer',
             'quantity' => 'integer',
         ];
     }
@@ -55,19 +55,19 @@ class StockQuant extends Model
     }
 
     /**
-     * @return BelongsTo<Drug, $this>
+     * @return BelongsTo<Product, $this>
      */
-    public function drug(): BelongsTo
+    public function product(): BelongsTo
     {
-        return $this->belongsTo(Drug::class);
+        return $this->belongsTo(Product::class);
     }
 
     /**
-     * @return BelongsTo<DrugBatch, $this>
+     * @return BelongsTo<ProductBatch, $this>
      */
-    public function drugBatch(): BelongsTo
+    public function productBatch(): BelongsTo
     {
-        return $this->belongsTo(DrugBatch::class);
+        return $this->belongsTo(ProductBatch::class);
     }
 
     /**
@@ -85,7 +85,7 @@ class StockQuant extends Model
                     $lq->internal()->where('code', '!=', StockLocation::CODE_QUARANTINE);
                 });
             })
-            ->whereHas('drugBatch', function (Builder $bq): void {
+            ->whereHas('productBatch', function (Builder $bq): void {
                 $bq->where('is_active', true)
                     ->whereDate('expiry_date', '>=', Carbon::today());
             });

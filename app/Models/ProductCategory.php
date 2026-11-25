@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Database\Factories\DrugCategoryFactory;
+use Database\Factories\ProductCategoryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,12 +18,12 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property string|null $description
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property Collection<int, Drug> $drugs
+ * @property Collection<int, Product> $products
  */
 #[Fillable(['name', 'description'])]
-class DrugCategory extends Model
+class ProductCategory extends Model
 {
-    /** @use HasFactory<DrugCategoryFactory> */
+    /** @use HasFactory<ProductCategoryFactory> */
     use HasFactory, LogsActivity;
 
     public function getActivitylogOptions(): LogOptions
@@ -36,10 +36,10 @@ class DrugCategory extends Model
     }
 
     /**
-     * @return HasMany<Drug, $this>
+     * @return HasMany<Product, $this>
      */
-    public function drugs(): HasMany
+    public function products(): HasMany
     {
-        return $this->hasMany(Drug::class);
+        return $this->hasMany(Product::class);
     }
 }

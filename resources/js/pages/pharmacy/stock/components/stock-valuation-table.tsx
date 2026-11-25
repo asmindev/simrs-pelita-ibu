@@ -85,16 +85,16 @@ export function StockValuationTable({ layers, filters }: Props) {
             ),
         },
         {
-            key: 'drug_batch',
-            header: 'Obat & Batch',
+            key: 'product_batch',
+            header: 'Produk & Batch',
             render: (layer) => (
                 <div className="space-y-0.5">
                     <div className="text-xs font-medium text-foreground">
-                        {layer.drug?.name ?? '-'}
+                        {layer.product?.name ?? '-'}
                     </div>
                     <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                         <span className="font-mono">
-                            {layer.drug_batch?.batch_number ?? '-'}
+                            {layer.product_batch?.batch_number ?? '-'}
                         </span>
                         {layer.location && (
                             <Badge
@@ -121,7 +121,7 @@ export function StockValuationTable({ layers, filters }: Props) {
                         }`}
                     >
                         {isPositive ? `+${layer.quantity}` : layer.quantity}{' '}
-                        {layer.drug?.unit_of_measure ?? ''}
+                        {layer.product?.unit_of_measure ?? ''}
                     </span>
                 );
             },
@@ -133,7 +133,7 @@ export function StockValuationTable({ layers, filters }: Props) {
             render: (layer) => (
                 <span className="font-mono text-xs font-medium text-foreground tabular-nums">
                     {layer.remaining_qty.toLocaleString('id-ID')}{' '}
-                    {layer.drug?.unit_of_measure ?? ''}
+                    {layer.product?.unit_of_measure ?? ''}
                 </span>
             ),
         },

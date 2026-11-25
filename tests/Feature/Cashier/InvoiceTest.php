@@ -2,13 +2,13 @@
 
 use App\Enums\RoleName;
 use App\Models\Doctor;
-use App\Models\Drug;
-use App\Models\DrugBatch;
 use App\Models\Encounter;
 use App\Models\Invoice;
 use App\Models\Patient;
 use App\Models\Prescription;
 use App\Models\PrescriptionItem;
+use App\Models\Product;
+use App\Models\ProductBatch;
 use App\Models\Tariff;
 use App\Models\Unit;
 use App\Models\User;
@@ -58,8 +58,8 @@ test('generating invoice from encounter calculates administrative, consultation 
     ]);
 
     // Setup dispensed prescription
-    $drug = Drug::factory()->create(['name' => 'Paracetamol', 'price' => 5000]);
-    $batch = DrugBatch::factory()->create(['drug_id' => $drug->id, 'current_quantity' => 100]);
+    $product = Product::factory()->create(['name' => 'Paracetamol', 'price' => 5000]);
+    ProductBatch::factory()->create(['product_id' => $product->id, 'current_quantity' => 100]);
 
     $prescription = Prescription::factory()->create([
         'encounter_id' => $encounter->id,
@@ -70,7 +70,7 @@ test('generating invoice from encounter calculates administrative, consultation 
     ]);
     PrescriptionItem::factory()->create([
         'prescription_id' => $prescription->id,
-        'drug_id' => $drug->id,
+        'product_id' => $product->id,
         'quantity' => 10,
         'dispensed_quantity' => 10,
         'status' => 'dispensed',

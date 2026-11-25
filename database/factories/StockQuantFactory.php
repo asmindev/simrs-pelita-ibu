@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Drug;
-use App\Models\DrugBatch;
+use App\Models\Product;
+use App\Models\ProductBatch;
 use App\Models\StockLocation;
 use App\Models\StockQuant;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,8 +22,8 @@ class StockQuantFactory extends Factory
     {
         return [
             'stock_location_id' => StockLocation::factory(),
-            'drug_id' => Drug::factory(),
-            'drug_batch_id' => DrugBatch::factory(),
+            'product_id' => Product::factory(),
+            'product_batch_id' => ProductBatch::factory(),
             'quantity' => fake()->numberBetween(10, 100),
         ];
     }

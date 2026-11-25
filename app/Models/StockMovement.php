@@ -16,8 +16,8 @@ use Spatie\Activitylog\Support\LogOptions;
 /**
  * @property int $id
  * @property string|null $reference_number
- * @property int $drug_id
- * @property int|null $drug_batch_id
+ * @property int $product_id
+ * @property int|null $product_batch_id
  * @property int|null $source_location_id
  * @property int|null $destination_location_id
  * @property string $type
@@ -34,16 +34,16 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property int $user_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property Drug $drug
- * @property DrugBatch|null $drugBatch
+ * @property Product $product
+ * @property ProductBatch|null $productBatch
  * @property StockLocation|null $sourceLocation
  * @property StockLocation|null $destinationLocation
  * @property User $user
  */
 #[Fillable([
     'reference_number',
-    'drug_id',
-    'drug_batch_id',
+    'product_id',
+    'product_batch_id',
     'source_location_id',
     'destination_location_id',
     'type',
@@ -70,6 +70,8 @@ class StockMovement extends Model
     protected function casts(): array
     {
         return [
+            'product_id' => 'integer',
+            'product_batch_id' => 'integer',
             'source_location_id' => 'integer',
             'destination_location_id' => 'integer',
             'quantity' => 'integer',
@@ -90,19 +92,19 @@ class StockMovement extends Model
     }
 
     /**
-     * @return BelongsTo<Drug, $this>
+     * @return BelongsTo<Product, $this>
      */
-    public function drug(): BelongsTo
+    public function product(): BelongsTo
     {
-        return $this->belongsTo(Drug::class);
+        return $this->belongsTo(Product::class);
     }
 
     /**
-     * @return BelongsTo<DrugBatch, $this>
+     * @return BelongsTo<ProductBatch, $this>
      */
-    public function drugBatch(): BelongsTo
+    public function productBatch(): BelongsTo
     {
-        return $this->belongsTo(DrugBatch::class);
+        return $this->belongsTo(ProductBatch::class);
     }
 
     /**

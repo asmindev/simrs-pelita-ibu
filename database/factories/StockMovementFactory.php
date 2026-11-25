@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Drug;
-use App\Models\DrugBatch;
+use App\Models\Product;
+use App\Models\ProductBatch;
 use App\Models\StockMovement;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -24,8 +24,8 @@ class StockMovementFactory extends Factory
         $before = fake()->numberBetween(50, 100);
 
         return [
-            'drug_id' => Drug::factory(),
-            'drug_batch_id' => DrugBatch::factory(),
+            'product_id' => Product::factory(),
+            'product_batch_id' => ProductBatch::factory(),
             'type' => 'in',
             'quantity' => $qty,
             'balance_before' => $before,

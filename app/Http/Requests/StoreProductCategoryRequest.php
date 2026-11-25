@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\DrugCategory;
+use App\Models\ProductCategory;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -10,7 +10,7 @@ class StoreProductCategoryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('create', DrugCategory::class) ?? false;
+        return $this->user()?->can('create', ProductCategory::class) ?? false;
     }
 
     /**
@@ -23,7 +23,7 @@ class StoreProductCategoryRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique(DrugCategory::class),
+                Rule::unique(ProductCategory::class),
             ],
             'description' => ['nullable', 'string', 'max:1000'],
         ];

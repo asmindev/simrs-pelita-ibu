@@ -15,7 +15,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property int $id
  * @property int $prescription_id
  * @property int $prescription_item_id
- * @property int $drug_batch_id
+ * @property int $product_batch_id
  * @property int $quantity
  * @property int $dispensed_by
  * @property Carbon $dispensed_at
@@ -24,13 +24,13 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property Carbon|null $updated_at
  * @property Prescription $prescription
  * @property PrescriptionItem $prescriptionItem
- * @property DrugBatch $drugBatch
+ * @property ProductBatch $productBatch
  * @property User $dispenser
  */
 #[Fillable([
     'prescription_id',
     'prescription_item_id',
-    'drug_batch_id',
+    'product_batch_id',
     'quantity',
     'dispensed_by',
     'dispensed_at',
@@ -47,6 +47,7 @@ class Dispensing extends Model
     protected function casts(): array
     {
         return [
+            'product_batch_id' => 'integer',
             'quantity' => 'integer',
             'dispensed_at' => 'datetime',
         ];
@@ -78,11 +79,11 @@ class Dispensing extends Model
     }
 
     /**
-     * @return BelongsTo<DrugBatch, $this>
+     * @return BelongsTo<ProductBatch, $this>
      */
-    public function drugBatch(): BelongsTo
+    public function productBatch(): BelongsTo
     {
-        return $this->belongsTo(DrugBatch::class);
+        return $this->belongsTo(ProductBatch::class);
     }
 
     /**

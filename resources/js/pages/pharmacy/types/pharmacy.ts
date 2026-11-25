@@ -12,16 +12,16 @@ export type StockLocation = {
     is_default_warehouse: boolean;
 };
 
-export type DrugBatchSummary = {
+export type ProductBatchSummary = {
     id: number;
-    drug_id: number;
+    product_id: number;
     batch_number: string;
     expiry_date: string;
     current_quantity: number;
     buy_price: number;
 };
 
-export type DrugInfo = {
+export type ProductInfo = {
     id: number;
     code: string;
     name: string;
@@ -33,23 +33,23 @@ export type DrugInfo = {
         id: number;
         name: string;
     };
-    batches?: DrugBatchSummary[];
+    batches?: ProductBatchSummary[];
 };
 
 export type StockQuant = {
     id: number;
     stock_location_id: number;
-    drug_id: number;
-    drug_batch_id: number;
+    product_id: number;
+    product_batch_id: number;
     quantity: number;
     location?: StockLocation;
-    drug?: DrugInfo;
-    drug_batch?: DrugBatch;
+    product?: ProductInfo;
+    product_batch?: ProductBatch;
 };
 
-export type DrugBatch = {
+export type ProductBatch = {
     id: number;
-    drug_id: number;
+    product_id: number;
     batch_number: string;
     expiry_date: string;
     initial_quantity: number;
@@ -57,7 +57,7 @@ export type DrugBatch = {
     buy_price: number;
     is_active: boolean;
     created_at: string;
-    drug?: DrugInfo;
+    product?: ProductInfo;
     stock_quants?: StockQuant[];
 };
 
@@ -65,12 +65,12 @@ export type DispensingRecord = {
     id: number;
     prescription_id: number;
     prescription_item_id: number;
-    drug_batch_id: number;
+    product_batch_id: number;
     quantity: number;
     dispensed_by: number;
     dispensed_at: string;
     notes: string | null;
-    drug_batch?: DrugBatch;
+    product_batch?: ProductBatch;
     dispenser?: {
         id: number;
         name: string;
@@ -81,12 +81,12 @@ export type StockReturnRecord = {
     id: number;
     prescription_id: number;
     prescription_item_id: number;
-    drug_batch_id: number;
+    product_batch_id: number;
     quantity: number;
     return_reason: string;
     returned_by: number;
     returned_at: string;
-    drug_batch?: DrugBatch;
+    product_batch?: ProductBatch;
     returned_by_user?: {
         id: number;
         name: string;
@@ -96,7 +96,7 @@ export type StockReturnRecord = {
 export type PrescriptionItem = {
     id: number;
     prescription_id: number;
-    drug_id: number;
+    product_id: number;
     dosage: string;
     frequency: string;
     route: string;
@@ -105,7 +105,7 @@ export type PrescriptionItem = {
     dispensed_quantity: number;
     instructions: string | null;
     status: 'pending' | 'dispensed' | 'cancelled';
-    drug?: DrugInfo;
+    product?: ProductInfo;
     dispensings?: DispensingRecord[];
 };
 
@@ -175,8 +175,8 @@ export type StockMovementType =
 export type StockMovement = {
     id: number;
     reference_number: string | null;
-    drug_id: number;
-    drug_batch_id: number | null;
+    product_id: number;
+    product_batch_id: number | null;
     source_location_id: number | null;
     destination_location_id: number | null;
     type: StockMovementType;
@@ -189,13 +189,13 @@ export type StockMovement = {
     state: string;
     reason: string | null;
     created_at: string;
-    drug?: {
+    product?: {
         id: number;
         name: string;
         code: string;
         unit_of_measure?: string;
     };
-    drug_batch?: {
+    product_batch?: {
         id: number;
         batch_number: string;
     };
@@ -219,8 +219,8 @@ export type StockMovement = {
 
 export type StockValuationLayer = {
     id: number;
-    drug_id: number;
-    drug_batch_id: number | null;
+    product_id: number;
+    product_batch_id: number | null;
     stock_movement_id: number;
     stock_location_id: number | null;
     quantity: number;
@@ -231,13 +231,13 @@ export type StockValuationLayer = {
     reference: string | null;
     description: string | null;
     created_at: string;
-    drug?: {
+    product?: {
         id: number;
         name: string;
         code: string;
         unit_of_measure?: string;
     };
-    drug_batch?: {
+    product_batch?: {
         id: number;
         batch_number: string;
     } | null;

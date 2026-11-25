@@ -3,8 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Enums\ProductType;
-use App\Models\Drug;
-use App\Models\DrugCategory;
+use App\Models\Product;
+use App\Models\ProductCategory;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -12,7 +12,7 @@ class StoreProductRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('create', Drug::class) ?? false;
+        return $this->user()?->can('create', Product::class) ?? false;
     }
 
     /**
@@ -25,14 +25,14 @@ class StoreProductRequest extends FormRequest
                 'required',
                 'string',
                 'max:50',
-                Rule::unique(Drug::class),
+                Rule::unique(Product::class),
             ],
             'name' => ['required', 'string', 'max:255'],
             'product_type' => ['required', Rule::enum(ProductType::class)],
-            'drug_category_id' => [
+            'product_category_id' => [
                 'required',
                 'integer',
-                Rule::exists(DrugCategory::class, 'id'),
+                Rule::exists(ProductCategory::class, 'id'),
             ],
             'form' => ['required_if:product_type,drug', 'nullable', 'string', 'max:100'],
             'strength' => ['required_if:product_type,drug', 'nullable', 'string', 'max:100'],
@@ -40,6 +40,7 @@ class StoreProductRequest extends FormRequest
             'price' => ['required', 'integer', 'min:0'],
             'manufacturer' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
+            'image' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }

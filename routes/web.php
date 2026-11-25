@@ -110,8 +110,6 @@ Route::middleware(['auth', 'verified'])
                 ->name('destroy');
         });
 
-        Route::redirect('drugs', '/master-data/products');
-
         Route::prefix('products')->name('products.')->group(function (): void {
             Route::get('/', [ProductController::class, 'index'])
                 ->middleware('permission:master-data.product.view')

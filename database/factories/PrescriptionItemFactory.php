@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Drug;
 use App\Models\Prescription;
 use App\Models\PrescriptionItem;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -23,7 +23,7 @@ class PrescriptionItemFactory extends Factory
 
         return [
             'prescription_id' => Prescription::factory(),
-            'drug_id' => Drug::factory(),
+            'product_id' => Product::factory(),
             'dosage' => fake()->randomElement(['500 mg', '250 mg', '1 tablet', '5 ml']),
             'frequency' => fake()->randomElement(['3x1', '2x1', '1x1']),
             'route' => 'Oral',

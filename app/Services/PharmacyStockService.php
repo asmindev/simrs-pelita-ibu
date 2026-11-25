@@ -5,9 +5,8 @@ namespace App\Services;
 use App\Enums\StockLocationUsage;
 use App\Enums\StockMoveType;
 use App\Models\Dispensing;
-use App\Models\Drug;
-use App\Models\DrugBatch;
 use App\Models\PrescriptionItem;
+use App\Models\ProductBatch;
 use App\Models\StockLocation;
 use App\Models\StockMovement;
 use App\Models\StockQuant;
@@ -34,10 +33,10 @@ class PharmacyStockService
     }
 
     /**
-     * Create a new drug batch with initial inbound stock move, quant, and valuation layer.
+     * Create a new product batch with initial inbound stock move, quant, and valuation layer.
      *
      * @param  array{
-     *     drug_id: int,
+     *     product_id: int,
      *     batch_number: string,
      *     expiry_date: string,
      *     initial_quantity: int,
@@ -47,9 +46,9 @@ class PharmacyStockService
      *     reason?: string|null
      * }  $data
      */
-    public function createBatchWithInboundMove(array $data, User $user): DrugBatch
+    public function createBatchWithInboundMove(array $data, User $user): ProductBatch
     {
-        return DB::transaction(function () use ($data, $user): DrugBatch {
+        return DB::transaction(function () use ($data, $user): ProductBatch {
             $locations = $this->ensureDefaultLocations();
             $vendorsLocation = $locations[StockLocation::CODE_VENDORS];
             $destination = $this->resolveInternalLocation($data['stock_location_id'] ?? null, $locations);
@@ -57,8 +56,8 @@ class PharmacyStockService
             $qty = (int) $data['initial_quantity'];
             $buyPrice = (int) ($data['buy_price'] ?? 0);
 
-            $batch = DrugBatch::create([
-                'drug_id' => (int) $data['drug_id'],
+            $batch = ProductBatch::create([
+                'product_id' => (int) $data['product_id'],
                 'batch_number' => $data['batch_number'],
                 'expiry_date' => $data['expiry_date'],
                 'initial_quantity' => $qty,
@@ -69,8 +68,8 @@ class PharmacyStockService
 
             StockQuant::query()->create([
                 'stock_location_id' => $destination->id,
-                'drug_id' => $batch->drug_id,
-                'drug_batch_id' => $batch->id,
+                'product_id' => $batch->product_id,
+                'product_batch_id' => $batch->id,
                 'quantity' => $qty,
             ]);
 
@@ -82,8 +81,8 @@ class PharmacyStockService
 
             $movement = StockMovement::create([
                 'reference_number' => $referenceNumber,
-                'drug_id' => $batch->drug_id,
-                'drug_batch_id' => $batch->id,
+                'product_id' => $batch->product_id,
+                'product_batch_id' => $batch->id,
                 'source_location_id' => $vendorsLocation->id,
                 'destination_location_id' => $destination->id,
                 'type' => StockMoveType::In->value,
@@ -99,8 +98,8 @@ class PharmacyStockService
             ]);
 
             StockValuationLayer::create([
-                'drug_id' => $batch->drug_id,
-                'drug_batch_id' => $batch->id,
+                'product_id' => $batch->product_id,
+                'product_batch_id' => $batch->id,
                 'stock_movement_id' => $movement->id,
                 'stock_location_id' => $destination->id,
                 'quantity' => $qty,
@@ -122,8 +121,8 @@ class PharmacyStockService
      *
      * @param  array{
      *     type: string,
-     *     drug_id: int,
-     *     drug_batch_id?: int|null,
+     *     product_id: int,
+     *     product_batch_id?: int|null,
      *     source_location_id?: int|null,
      *     destination_location_id?: int|null,
      *     quantity?: int|null,
@@ -172,7 +171,7 @@ class PharmacyStockService
 
             if ($remainingNeeded <= 0) {
                 throw ValidationException::withMessages([
-                    'quantity' => "Item obat {$item->drug->name} sudah selesai di-dispense.",
+                    'quantity' => "Item obat {$item->product->name} sudah selesai di-dispense.",
                 ]);
             }
 
@@ -180,21 +179,21 @@ class PharmacyStockService
             $defaultWarehouse = $locations[StockLocation::CODE_DEFAULT_WAREHOUSE];
             $customersLocation = $locations[StockLocation::CODE_CUSTOMERS];
 
-            $this->syncMissingQuantsForDrug($item->drug_id, $defaultWarehouse);
+            $this->syncMissingQuantsForProduct($item->product_id, $defaultWarehouse);
 
             /** @var EloquentCollection<int, StockQuant> $quants */
             $quants = StockQuant::query()
                 ->select('stock_quants.*')
-                ->join('drug_batches', 'drug_batches.id', '=', 'stock_quants.drug_batch_id')
+                ->join('product_batches', 'product_batches.id', '=', 'stock_quants.product_batch_id')
                 ->join('stock_locations', 'stock_locations.id', '=', 'stock_quants.stock_location_id')
-                ->where('stock_quants.drug_id', $item->drug_id)
+                ->where('stock_quants.product_id', $item->product_id)
                 ->where('stock_quants.quantity', '>', 0)
                 ->where('stock_locations.usage', StockLocationUsage::Internal->value)
                 ->where('stock_locations.is_active', true)
                 ->where('stock_locations.code', '!=', StockLocation::CODE_QUARANTINE)
-                ->where('drug_batches.is_active', true)
-                ->whereDate('drug_batches.expiry_date', '>=', Carbon::today())
-                ->orderBy('drug_batches.expiry_date', 'asc')
+                ->where('product_batches.is_active', true)
+                ->whereDate('product_batches.expiry_date', '>=', Carbon::today())
+                ->orderBy('product_batches.expiry_date', 'asc')
                 ->orderByDesc('stock_locations.is_default_warehouse')
                 ->orderBy('stock_quants.id', 'asc')
                 ->lockForUpdate()
@@ -204,7 +203,7 @@ class PharmacyStockService
 
             if ($totalAvailable < $remainingNeeded) {
                 throw ValidationException::withMessages([
-                    'stock' => "Stok obat {$item->drug->name} tidak mencukupi (tersedia: {$totalAvailable}, dibutuhkan: {$remainingNeeded}).",
+                    'stock' => "Stok obat {$item->product->name} tidak mencukupi (tersedia: {$totalAvailable}, dibutuhkan: {$remainingNeeded}).",
                 ]);
             }
 
@@ -217,8 +216,8 @@ class PharmacyStockService
                     break;
                 }
 
-                /** @var DrugBatch $batch */
-                $batch = DrugBatch::query()->where('id', $quant->drug_batch_id)->lockForUpdate()->firstOrFail();
+                /** @var ProductBatch $batch */
+                $batch = ProductBatch::query()->where('id', $quant->product_batch_id)->lockForUpdate()->firstOrFail();
 
                 $take = min($quant->quantity, $remainingNeeded);
                 $balanceBefore = $quant->quantity;
@@ -230,7 +229,7 @@ class PharmacyStockService
                 $dispensing = Dispensing::create([
                     'prescription_id' => $item->prescription_id,
                     'prescription_item_id' => $item->id,
-                    'drug_batch_id' => $batch->id,
+                    'product_batch_id' => $batch->id,
                     'quantity' => $take,
                     'dispensed_by' => $user->id,
                     'dispensed_at' => now(),
@@ -242,8 +241,8 @@ class PharmacyStockService
 
                 $movement = StockMovement::create([
                     'reference_number' => $referenceNumber,
-                    'drug_id' => $item->drug_id,
-                    'drug_batch_id' => $batch->id,
+                    'product_id' => $item->product_id,
+                    'product_batch_id' => $batch->id,
                     'source_location_id' => $quant->stock_location_id,
                     'destination_location_id' => $customersLocation->id,
                     'type' => StockMoveType::Dispensing->value,
@@ -290,7 +289,7 @@ class PharmacyStockService
      * @throws ValidationException
      */
     public function adjustStock(
-        DrugBatch $batch,
+        ProductBatch $batch,
         int $newQuantity,
         string $reason,
         User $user,
@@ -298,7 +297,7 @@ class PharmacyStockService
     ): StockMovement {
         if ($newQuantity < 0) {
             throw ValidationException::withMessages([
-                'quantity' => 'Stok obat tidak boleh bernilai negatif.',
+                'quantity' => 'Stok produk tidak boleh bernilai negatif.',
             ]);
         }
 
@@ -313,8 +312,8 @@ class PharmacyStockService
             $defaultWarehouse = $locations[StockLocation::CODE_DEFAULT_WAREHOUSE];
             $lossLocation = $locations[StockLocation::CODE_INVENTORY_LOSS];
 
-            /** @var DrugBatch $lockedBatch */
-            $lockedBatch = DrugBatch::query()->where('id', $batch->id)->lockForUpdate()->firstOrFail();
+            /** @var ProductBatch $lockedBatch */
+            $lockedBatch = ProductBatch::query()->where('id', $batch->id)->lockForUpdate()->firstOrFail();
 
             $this->syncMissingQuantsForBatch($lockedBatch, $defaultWarehouse);
 
@@ -323,14 +322,14 @@ class PharmacyStockService
             /** @var StockQuant $quant */
             $quant = StockQuant::query()
                 ->where('stock_location_id', $targetLocation->id)
-                ->where('drug_id', $lockedBatch->drug_id)
-                ->where('drug_batch_id', $lockedBatch->id)
+                ->where('product_id', $lockedBatch->product_id)
+                ->where('product_batch_id', $lockedBatch->id)
                 ->lockForUpdate()
                 ->firstOrCreate(
                     [
                         'stock_location_id' => $targetLocation->id,
-                        'drug_id' => $lockedBatch->drug_id,
-                        'drug_batch_id' => $lockedBatch->id,
+                        'product_id' => $lockedBatch->product_id,
+                        'product_batch_id' => $lockedBatch->id,
                     ],
                     ['quantity' => 0],
                 );
@@ -349,8 +348,8 @@ class PharmacyStockService
 
             $movement = StockMovement::create([
                 'reference_number' => $referenceNumber,
-                'drug_id' => $lockedBatch->drug_id,
-                'drug_batch_id' => $lockedBatch->id,
+                'product_id' => $lockedBatch->product_id,
+                'product_batch_id' => $lockedBatch->id,
                 'source_location_id' => $sourceLocationId,
                 'destination_location_id' => $destinationLocationId,
                 'type' => StockMoveType::Adjustment->value,
@@ -366,8 +365,8 @@ class PharmacyStockService
 
             if ($delta > 0) {
                 StockValuationLayer::create([
-                    'drug_id' => $lockedBatch->drug_id,
-                    'drug_batch_id' => $lockedBatch->id,
+                    'product_id' => $lockedBatch->product_id,
+                    'product_batch_id' => $lockedBatch->id,
                     'stock_movement_id' => $movement->id,
                     'stock_location_id' => $targetLocation->id,
                     'quantity' => $delta,
@@ -396,7 +395,7 @@ class PharmacyStockService
     }
 
     /**
-     * Return a dispensed drug back to batch stock with valuation restoration.
+     * Return a dispensed product back to batch stock with valuation restoration.
      *
      * @throws ValidationException
      */
@@ -419,8 +418,8 @@ class PharmacyStockService
             $defaultWarehouse = $locations[StockLocation::CODE_DEFAULT_WAREHOUSE];
             $customersLocation = $locations[StockLocation::CODE_CUSTOMERS];
 
-            /** @var DrugBatch $lockedBatch */
-            $lockedBatch = DrugBatch::query()->where('id', $dispensing->drug_batch_id)->lockForUpdate()->firstOrFail();
+            /** @var ProductBatch $lockedBatch */
+            $lockedBatch = ProductBatch::query()->where('id', $dispensing->product_batch_id)->lockForUpdate()->firstOrFail();
 
             $this->syncMissingQuantsForBatch($lockedBatch, $defaultWarehouse);
 
@@ -435,14 +434,14 @@ class PharmacyStockService
             /** @var StockQuant $quant */
             $quant = StockQuant::query()
                 ->where('stock_location_id', $returnLocationId)
-                ->where('drug_id', $lockedBatch->drug_id)
-                ->where('drug_batch_id', $lockedBatch->id)
+                ->where('product_id', $lockedBatch->product_id)
+                ->where('product_batch_id', $lockedBatch->id)
                 ->lockForUpdate()
                 ->firstOrCreate(
                     [
                         'stock_location_id' => $returnLocationId,
-                        'drug_id' => $lockedBatch->drug_id,
-                        'drug_batch_id' => $lockedBatch->id,
+                        'product_id' => $lockedBatch->product_id,
+                        'product_batch_id' => $lockedBatch->id,
                     ],
                     ['quantity' => 0],
                 );
@@ -456,7 +455,7 @@ class PharmacyStockService
             $stockReturn = StockReturn::create([
                 'prescription_id' => $dispensing->prescription_id,
                 'prescription_item_id' => $dispensing->prescription_item_id,
-                'drug_batch_id' => $lockedBatch->id,
+                'product_batch_id' => $lockedBatch->id,
                 'quantity' => $quantity,
                 'return_reason' => $reason,
                 'returned_by' => $user->id,
@@ -469,8 +468,8 @@ class PharmacyStockService
 
             $movement = StockMovement::create([
                 'reference_number' => $referenceNumber,
-                'drug_id' => $lockedBatch->drug_id,
-                'drug_batch_id' => $lockedBatch->id,
+                'product_id' => $lockedBatch->product_id,
+                'product_batch_id' => $lockedBatch->id,
                 'source_location_id' => $customersLocation->id,
                 'destination_location_id' => $returnLocationId,
                 'type' => StockMoveType::Return->value,
@@ -488,8 +487,8 @@ class PharmacyStockService
             ]);
 
             StockValuationLayer::create([
-                'drug_id' => $lockedBatch->drug_id,
-                'drug_batch_id' => $lockedBatch->id,
+                'product_id' => $lockedBatch->product_id,
+                'product_batch_id' => $lockedBatch->id,
                 'stock_movement_id' => $movement->id,
                 'stock_location_id' => $returnLocationId,
                 'quantity' => $quantity,
@@ -537,22 +536,22 @@ class PharmacyStockService
             $source = $this->resolveLocationById($data['source_location_id'] ?? null, $vendorsLocation);
             $destination = $this->resolveInternalLocation($data['destination_location_id'] ?? null, $locations);
 
-            if (empty($data['drug_batch_id'])) {
+            if (empty($data['product_batch_id'])) {
                 throw ValidationException::withMessages([
-                    'drug_batch_id' => 'Pilih batch obat tujuan penerimaan stok.',
+                    'product_batch_id' => 'Pilih batch produk tujuan penerimaan stok.',
                 ]);
             }
 
-            /** @var DrugBatch $batch */
-            $batch = DrugBatch::query()
-                ->where('id', (int) $data['drug_batch_id'])
-                ->where('drug_id', (int) $data['drug_id'])
+            /** @var ProductBatch $batch */
+            $batch = ProductBatch::query()
+                ->where('id', (int) $data['product_batch_id'])
+                ->where('product_id', (int) $data['product_id'])
                 ->lockForUpdate()
                 ->first();
 
             if (! $batch) {
                 throw ValidationException::withMessages([
-                    'drug_batch_id' => 'Batch obat tidak ditemukan untuk obat yang dipilih.',
+                    'product_batch_id' => 'Batch produk tidak ditemukan untuk produk yang dipilih.',
                 ]);
             }
 
@@ -561,14 +560,14 @@ class PharmacyStockService
             /** @var StockQuant $quant */
             $quant = StockQuant::query()
                 ->where('stock_location_id', $destination->id)
-                ->where('drug_id', $batch->drug_id)
-                ->where('drug_batch_id', $batch->id)
+                ->where('product_id', $batch->product_id)
+                ->where('product_batch_id', $batch->id)
                 ->lockForUpdate()
                 ->firstOrCreate(
                     [
                         'stock_location_id' => $destination->id,
-                        'drug_id' => $batch->drug_id,
-                        'drug_batch_id' => $batch->id,
+                        'product_id' => $batch->product_id,
+                        'product_batch_id' => $batch->id,
                     ],
                     ['quantity' => 0],
                 );
@@ -587,8 +586,8 @@ class PharmacyStockService
 
             $movement = StockMovement::create([
                 'reference_number' => $referenceNumber,
-                'drug_id' => $batch->drug_id,
-                'drug_batch_id' => $batch->id,
+                'product_id' => $batch->product_id,
+                'product_batch_id' => $batch->id,
                 'source_location_id' => $source->id,
                 'destination_location_id' => $destination->id,
                 'type' => StockMoveType::In->value,
@@ -604,8 +603,8 @@ class PharmacyStockService
             ]);
 
             StockValuationLayer::create([
-                'drug_id' => $batch->drug_id,
-                'drug_batch_id' => $batch->id,
+                'product_id' => $batch->product_id,
+                'product_batch_id' => $batch->id,
                 'stock_movement_id' => $movement->id,
                 'stock_location_id' => $destination->id,
                 'quantity' => $qty,
@@ -653,13 +652,13 @@ class PharmacyStockService
             }
 
             $allowExpired = $destination->usage === StockLocationUsage::Inventory;
-            $drugId = (int) $data['drug_id'];
-            $this->syncMissingQuantsForDrug($drugId, $defaultWarehouse);
+            $productId = (int) $data['product_id'];
+            $this->syncMissingQuantsForProduct($productId, $defaultWarehouse);
 
             $quants = $this->lockCandidateQuants(
-                drugId: $drugId,
+                productId: $productId,
                 sourceLocationId: $source->id,
-                batchId: ! empty($data['drug_batch_id']) ? (int) $data['drug_batch_id'] : null,
+                batchId: ! empty($data['product_batch_id']) ? (int) $data['product_batch_id'] : null,
                 allowExpired: $allowExpired,
             );
 
@@ -679,8 +678,8 @@ class PharmacyStockService
                     break;
                 }
 
-                /** @var DrugBatch $batch */
-                $batch = DrugBatch::query()->where('id', $quant->drug_batch_id)->lockForUpdate()->firstOrFail();
+                /** @var ProductBatch $batch */
+                $batch = ProductBatch::query()->where('id', $quant->product_batch_id)->lockForUpdate()->firstOrFail();
 
                 $take = min($quant->quantity, $remaining);
                 $balanceBefore = $quant->quantity;
@@ -693,8 +692,8 @@ class PharmacyStockService
 
                 $movement = StockMovement::create([
                     'reference_number' => $referenceNumber,
-                    'drug_id' => $drugId,
-                    'drug_batch_id' => $batch->id,
+                    'product_id' => $productId,
+                    'product_batch_id' => $batch->id,
                     'source_location_id' => $source->id,
                     'destination_location_id' => $destination->id,
                     'type' => StockMoveType::Out->value,
@@ -757,13 +756,13 @@ class PharmacyStockService
             }
 
             $allowExpired = $destination->code === StockLocation::CODE_QUARANTINE;
-            $drugId = (int) $data['drug_id'];
-            $this->syncMissingQuantsForDrug($drugId, $defaultWarehouse);
+            $productId = (int) $data['product_id'];
+            $this->syncMissingQuantsForProduct($productId, $defaultWarehouse);
 
             $quants = $this->lockCandidateQuants(
-                drugId: $drugId,
+                productId: $productId,
                 sourceLocationId: $source->id,
-                batchId: ! empty($data['drug_batch_id']) ? (int) $data['drug_batch_id'] : null,
+                batchId: ! empty($data['product_batch_id']) ? (int) $data['product_batch_id'] : null,
                 allowExpired: $allowExpired,
             );
 
@@ -783,8 +782,8 @@ class PharmacyStockService
                     break;
                 }
 
-                /** @var DrugBatch $batch */
-                $batch = DrugBatch::query()->where('id', $sourceQuant->drug_batch_id)->lockForUpdate()->firstOrFail();
+                /** @var ProductBatch $batch */
+                $batch = ProductBatch::query()->where('id', $sourceQuant->product_batch_id)->lockForUpdate()->firstOrFail();
 
                 $take = min($sourceQuant->quantity, $remaining);
                 $sourceBefore = $sourceQuant->quantity;
@@ -795,14 +794,14 @@ class PharmacyStockService
                 /** @var StockQuant $destQuant */
                 $destQuant = StockQuant::query()
                     ->where('stock_location_id', $destination->id)
-                    ->where('drug_id', $drugId)
-                    ->where('drug_batch_id', $batch->id)
+                    ->where('product_id', $productId)
+                    ->where('product_batch_id', $batch->id)
                     ->lockForUpdate()
                     ->firstOrCreate(
                         [
                             'stock_location_id' => $destination->id,
-                            'drug_id' => $drugId,
-                            'drug_batch_id' => $batch->id,
+                            'product_id' => $productId,
+                            'product_batch_id' => $batch->id,
                         ],
                         ['quantity' => 0],
                     );
@@ -815,8 +814,8 @@ class PharmacyStockService
 
                 $movement = StockMovement::create([
                     'reference_number' => $referenceNumber,
-                    'drug_id' => $drugId,
-                    'drug_batch_id' => $batch->id,
+                    'product_id' => $productId,
+                    'product_batch_id' => $batch->id,
                     'source_location_id' => $source->id,
                     'destination_location_id' => $destination->id,
                     'type' => StockMoveType::Transfer->value,
@@ -847,9 +846,9 @@ class PharmacyStockService
      */
     private function executeAdjustmentFromMove(array $data, string $reason, User $user): Collection
     {
-        if (empty($data['drug_batch_id'])) {
+        if (empty($data['product_batch_id'])) {
             throw ValidationException::withMessages([
-                'drug_batch_id' => 'Batch obat wajib dipilih untuk penyesuaian stok.',
+                'product_batch_id' => 'Batch produk wajib dipilih untuk penyesuaian stok.',
             ]);
         }
 
@@ -859,10 +858,10 @@ class PharmacyStockService
             ]);
         }
 
-        /** @var DrugBatch $batch */
-        $batch = DrugBatch::query()
-            ->where('id', (int) $data['drug_batch_id'])
-            ->where('drug_id', (int) $data['drug_id'])
+        /** @var ProductBatch $batch */
+        $batch = ProductBatch::query()
+            ->where('id', (int) $data['product_batch_id'])
+            ->where('product_id', (int) $data['product_id'])
             ->firstOrFail();
 
         $locations = $this->ensureDefaultLocations();
@@ -879,7 +878,7 @@ class PharmacyStockService
      * Consume inbound valuation layers in FIFO order for a specific batch (Specific Batch / FEFO costing).
      */
     private function consumeValuationLayers(
-        DrugBatch $batch,
+        ProductBatch $batch,
         int $quantityToConsume,
         StockMovement $movement,
         int $locationId,
@@ -889,7 +888,7 @@ class PharmacyStockService
     ): StockValuationLayer {
         /** @var EloquentCollection<int, StockValuationLayer> $inboundLayers */
         $inboundLayers = StockValuationLayer::query()
-            ->where('drug_batch_id', $batch->id)
+            ->where('product_batch_id', $batch->id)
             ->where('remaining_qty', '>', 0)
             ->orderBy('id', 'asc')
             ->lockForUpdate()
@@ -931,8 +930,8 @@ class PharmacyStockService
         ]);
 
         return StockValuationLayer::create([
-            'drug_id' => $batch->drug_id,
-            'drug_batch_id' => $batch->id,
+            'product_id' => $batch->product_id,
+            'product_batch_id' => $batch->id,
             'stock_movement_id' => $movement->id,
             'stock_location_id' => $locationId,
             'quantity' => -$quantityToConsume,
@@ -952,33 +951,33 @@ class PharmacyStockService
      * @return EloquentCollection<int, StockQuant>
      */
     private function lockCandidateQuants(
-        int $drugId,
+        int $productId,
         int $sourceLocationId,
         ?int $batchId = null,
         bool $allowExpired = false,
     ): EloquentCollection {
         return StockQuant::query()
             ->select('stock_quants.*')
-            ->join('drug_batches', 'drug_batches.id', '=', 'stock_quants.drug_batch_id')
-            ->where('stock_quants.drug_id', $drugId)
+            ->join('product_batches', 'product_batches.id', '=', 'stock_quants.product_batch_id')
+            ->where('stock_quants.product_id', $productId)
             ->where('stock_quants.stock_location_id', $sourceLocationId)
             ->where('stock_quants.quantity', '>', 0)
-            ->where('drug_batches.is_active', true)
-            ->when($batchId !== null, fn ($q) => $q->where('stock_quants.drug_batch_id', $batchId))
-            ->when(! $allowExpired, fn ($q) => $q->whereDate('drug_batches.expiry_date', '>=', Carbon::today()))
-            ->orderBy('drug_batches.expiry_date', 'asc')
+            ->where('product_batches.is_active', true)
+            ->when($batchId !== null, fn ($q) => $q->where('stock_quants.product_batch_id', $batchId))
+            ->when(! $allowExpired, fn ($q) => $q->whereDate('product_batches.expiry_date', '>=', Carbon::today()))
+            ->orderBy('product_batches.expiry_date', 'asc')
             ->orderBy('stock_quants.id', 'asc')
             ->lockForUpdate()
             ->get();
     }
 
     /**
-     * Sync missing stock_quants for all active batches of a drug (backward compatibility for factory/seeded batches).
+     * Sync missing stock_quants for all active batches of a product (backward compatibility for factory/seeded batches).
      */
-    private function syncMissingQuantsForDrug(int $drugId, StockLocation $defaultWarehouse): void
+    private function syncMissingQuantsForProduct(int $productId, StockLocation $defaultWarehouse): void
     {
-        $batches = DrugBatch::query()
-            ->where('drug_id', $drugId)
+        $batches = ProductBatch::query()
+            ->where('product_id', $productId)
             ->where('current_quantity', '>', 0)
             ->get();
 
@@ -990,34 +989,34 @@ class PharmacyStockService
     /**
      * Ensure a batch with positive quantity has a quant record if none exists yet.
      */
-    private function syncMissingQuantsForBatch(DrugBatch $batch, StockLocation $defaultWarehouse): void
+    private function syncMissingQuantsForBatch(ProductBatch $batch, StockLocation $defaultWarehouse): void
     {
         if ($batch->current_quantity <= 0) {
             return;
         }
 
         $hasAnyQuant = StockQuant::query()
-            ->where('drug_batch_id', $batch->id)
+            ->where('product_batch_id', $batch->id)
             ->exists();
 
         if (! $hasAnyQuant) {
             StockQuant::query()->create([
                 'stock_location_id' => $defaultWarehouse->id,
-                'drug_id' => $batch->drug_id,
-                'drug_batch_id' => $batch->id,
+                'product_id' => $batch->product_id,
+                'product_batch_id' => $batch->id,
                 'quantity' => $batch->current_quantity,
             ]);
         }
     }
 
     /**
-     * Keep drug_batches.current_quantity synchronized as the sum of internal location quants.
+     * Keep product_batches.current_quantity synchronized as the sum of internal location quants.
      */
-    private function syncBatchQuantityFromQuants(DrugBatch $batch): void
+    private function syncBatchQuantityFromQuants(ProductBatch $batch): void
     {
         $totalInternal = (int) StockQuant::query()
             ->join('stock_locations', 'stock_locations.id', '=', 'stock_quants.stock_location_id')
-            ->where('stock_quants.drug_batch_id', $batch->id)
+            ->where('stock_quants.product_batch_id', $batch->id)
             ->where('stock_locations.usage', StockLocationUsage::Internal->value)
             ->sum('stock_quants.quantity');
 
@@ -1061,7 +1060,7 @@ class PharmacyStockService
     }
 
     private function resolveAdjustmentLocation(
-        DrugBatch $batch,
+        ProductBatch $batch,
         ?StockLocation $requested,
         StockLocation $defaultWarehouse,
     ): StockLocation {
@@ -1071,7 +1070,7 @@ class PharmacyStockService
 
         /** @var StockQuant|null $existingQuant */
         $existingQuant = StockQuant::query()
-            ->where('drug_batch_id', $batch->id)
+            ->where('product_batch_id', $batch->id)
             ->orderByDesc('quantity')
             ->first();
 

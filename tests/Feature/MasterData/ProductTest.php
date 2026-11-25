@@ -2,11 +2,13 @@
 
 use App\Enums\ProductType;
 use App\Enums\RoleName;
-use App\Models\Drug;
-use App\Models\DrugCategory;
+use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia;
 
 beforeEach(function () {
@@ -14,12 +16,12 @@ beforeEach(function () {
 });
 
 test('product factory creates valid drug and non-drug products', function () {
-    $category = DrugCategory::factory()->create(['name' => 'Antibiotik']);
-    $drug = Drug::factory()->create([
+    $category = ProductCategory::factory()->create(['name' => 'Antibiotik']);
+    $drug = Product::factory()->create([
         'code' => 'AMX-500',
         'name' => 'Amoxicillin 500mg',
         'product_type' => ProductType::Drug->value,
-        'drug_category_id' => $category->id,
+        'product_category_id' => $category->id,
         'form' => 'Kapsul',
         'strength' => '500 mg',
         'unit_of_measure' => 'Strip',
@@ -28,7 +30,7 @@ test('product factory creates valid drug and non-drug products', function () {
         'is_active' => true,
     ]);
 
-    $supply = Drug::factory()->medicalSupply()->create([
+    $supply = Product::factory()->medicalSupply()->create([
         'code' => 'ALK-001',
         'name' => 'Spuit 3cc Terumo',
     ]);
@@ -42,13 +44,13 @@ test('product factory creates valid drug and non-drug products', function () {
 });
 
 test('product factory inactive state creates inactive product', function () {
-    $product = Drug::factory()->inactive()->create();
+    $product = Product::factory()->inactive()->create();
 
     expect($product->is_active)->toBeFalse();
 });
 
 test('product records activity log on creation and update', function () {
-    $product = Drug::factory()->create([
+    $product = Product::factory()->create([
         'code' => 'PCT-500',
         'name' => 'Paracetamol 500mg',
         'price' => 5000,
@@ -57,7 +59,7 @@ test('product records activity log on creation and update', function () {
     $this->assertDatabaseHas('activity_log', [
         'log_name' => 'master-data',
         'event' => 'created',
-        'subject_type' => Drug::class,
+        'subject_type' => Product::class,
         'subject_id' => $product->id,
     ]);
 
@@ -66,7 +68,7 @@ test('product records activity log on creation and update', function () {
     $this->assertDatabaseHas('activity_log', [
         'log_name' => 'master-data',
         'event' => 'updated',
-        'subject_type' => Drug::class,
+        'subject_type' => Product::class,
         'subject_id' => $product->id,
     ]);
 });
@@ -89,8 +91,8 @@ test('user with product view permission can view product index', function () {
     $doctor = User::factory()->create();
     $doctor->assignRole(RoleName::Doctor->value);
 
-    $category = DrugCategory::factory()->create(['name' => 'Analgesik']);
-    Drug::factory()->count(3)->create(['drug_category_id' => $category->id]);
+    $category = ProductCategory::factory()->create(['name' => 'Analgesik']);
+    Product::factory()->count(3)->create(['product_category_id' => $category->id]);
 
     $this->actingAs($doctor)
         ->get(route('master-data.products.index'))
@@ -107,8 +109,8 @@ test('user with product view permission can view product show page with batches 
     $doctor = User::factory()->create();
     $doctor->assignRole(RoleName::Doctor->value);
 
-    $category = DrugCategory::factory()->create(['name' => 'Antibiotik']);
-    $product = Drug::factory()->create(['drug_category_id' => $category->id]);
+    $category = ProductCategory::factory()->create(['name' => 'Antibiotik']);
+    $product = Product::factory()->create(['product_category_id' => $category->id]);
 
     $this->actingAs($doctor)
         ->get(route('master-data.products.show', $product->id))
@@ -116,6 +118,8 @@ test('user with product view permission can view product show page with batches 
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->component('master-data/product/show/index')
             ->has('product')
+            ->has('categories', 1)
+            ->has('productTypes', 4)
             ->where('product.id', $product->id)
             ->has('statistics.total_stock')
             ->has('statistics.locations_count')
@@ -129,30 +133,30 @@ test('product index filters by search query, product type, category, and active 
     $pharmacist = User::factory()->create();
     $pharmacist->assignRole(RoleName::Pharmacist->value);
 
-    $cat1 = DrugCategory::factory()->create(['name' => 'Kategori A']);
-    $cat2 = DrugCategory::factory()->create(['name' => 'Kategori B']);
+    $cat1 = ProductCategory::factory()->create(['name' => 'Kategori A']);
+    $cat2 = ProductCategory::factory()->create(['name' => 'Kategori B']);
 
-    Drug::factory()->create([
+    Product::factory()->create([
         'code' => 'AMX-500',
         'name' => 'Amoxicillin Trihydrate',
         'product_type' => ProductType::Drug->value,
         'manufacturer' => 'Bernofarm',
-        'drug_category_id' => $cat1->id,
+        'product_category_id' => $cat1->id,
         'is_active' => true,
     ]);
-    Drug::factory()->medicalSupply()->create([
+    Product::factory()->medicalSupply()->create([
         'code' => 'ALK-001',
         'name' => 'Spuit 3cc',
         'manufacturer' => 'Terumo',
-        'drug_category_id' => $cat2->id,
+        'product_category_id' => $cat2->id,
         'is_active' => true,
     ]);
-    Drug::factory()->create([
+    Product::factory()->create([
         'code' => 'PCT-500',
         'name' => 'Paracetamol',
         'product_type' => ProductType::Drug->value,
         'manufacturer' => 'Kalbe',
-        'drug_category_id' => $cat1->id,
+        'product_category_id' => $cat1->id,
         'is_active' => false,
     ]);
 
@@ -180,7 +184,7 @@ test('product index filters by search query, product type, category, and active 
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->component('master-data/product/list/index')
             ->has('products.data', 1)
-            ->where('products.data.0.drug_category_id', $cat1->id)
+            ->where('products.data.0.product_category_id', $cat1->id)
             ->where('products.data.0.is_active', true)
         );
 });
@@ -189,7 +193,7 @@ test('pharmacist can create drug product and non-drug medical supply product', f
     $pharmacist = User::factory()->create();
     $pharmacist->assignRole(RoleName::Pharmacist->value);
 
-    $category = DrugCategory::factory()->create();
+    $category = ProductCategory::factory()->create();
 
     $this->actingAs($pharmacist)
         ->get(route('master-data.products.create'))
@@ -205,7 +209,7 @@ test('pharmacist can create drug product and non-drug medical supply product', f
             'code' => 'CET-10',
             'name' => 'Cetirizine 10mg',
             'product_type' => ProductType::Drug->value,
-            'drug_category_id' => $category->id,
+            'product_category_id' => $category->id,
             'form' => 'Tablet',
             'strength' => '10 mg',
             'unit_of_measure' => 'Strip',
@@ -221,7 +225,7 @@ test('pharmacist can create drug product and non-drug medical supply product', f
             'code' => 'ALK-SP3',
             'name' => 'Spuit 3cc Disposable',
             'product_type' => ProductType::MedicalSupply->value,
-            'drug_category_id' => $category->id,
+            'product_category_id' => $category->id,
             'unit_of_measure' => 'Pcs',
             'price' => 3500,
             'description' => 'Spuit steril sekali pakai 3 ml',
@@ -230,7 +234,7 @@ test('pharmacist can create drug product and non-drug medical supply product', f
         ->assertRedirect(route('master-data.products.index'))
         ->assertSessionHas('success');
 
-    $this->assertDatabaseHas('drugs', [
+    $this->assertDatabaseHas('products', [
         'code' => 'ALK-SP3',
         'product_type' => ProductType::MedicalSupply->value,
         'form' => null,
@@ -242,25 +246,25 @@ test('store drug product requires form and strength while rejecting duplicate co
     $pharmacist = User::factory()->create();
     $pharmacist->assignRole(RoleName::Pharmacist->value);
 
-    Drug::factory()->create(['code' => 'DUP-01']);
+    Product::factory()->create(['code' => 'DUP-01']);
 
     $this->actingAs($pharmacist)
         ->post(route('master-data.products.store'), [
             'code' => 'DUP-01',
-            'name' => 'Duplicate Drug',
+            'name' => 'Duplicate Product',
             'product_type' => ProductType::Drug->value,
-            'drug_category_id' => 99999,
+            'product_category_id' => 99999,
             'unit_of_measure' => 'Tablet',
             'price' => 1000,
         ])
-        ->assertSessionHasErrors(['code', 'drug_category_id', 'form', 'strength']);
+        ->assertSessionHasErrors(['code', 'product_category_id', 'form', 'strength']);
 });
 
 test('pharmacist can edit and update product', function () {
     $pharmacist = User::factory()->create();
     $pharmacist->assignRole(RoleName::Pharmacist->value);
 
-    $product = Drug::factory()->create([
+    $product = Product::factory()->create([
         'code' => 'IBU-400',
         'name' => 'Ibuprofen 400mg',
         'price' => 8000,
@@ -279,7 +283,7 @@ test('pharmacist can edit and update product', function () {
             'code' => 'IBU-400',
             'name' => 'Ibuprofen Forte 400mg',
             'product_type' => ProductType::Drug->value,
-            'drug_category_id' => $product->drug_category_id,
+            'product_category_id' => $product->product_category_id,
             'form' => 'Kaplet',
             'strength' => '400 mg',
             'unit_of_measure' => 'Strip',
@@ -290,7 +294,7 @@ test('pharmacist can edit and update product', function () {
         ->assertRedirect(route('master-data.products.index'))
         ->assertSessionHas('success');
 
-    $this->assertDatabaseHas('drugs', [
+    $this->assertDatabaseHas('products', [
         'id' => $product->id,
         'name' => 'Ibuprofen Forte 400mg',
         'price' => 10000,
@@ -302,12 +306,140 @@ test('pharmacist can delete product', function () {
     $pharmacist = User::factory()->create();
     $pharmacist->assignRole(RoleName::Pharmacist->value);
 
-    $product = Drug::factory()->create();
+    $product = Product::factory()->create();
 
     $this->actingAs($pharmacist)
         ->delete(route('master-data.products.destroy', $product))
         ->assertRedirect(route('master-data.products.index'))
         ->assertSessionHas('success');
 
-    $this->assertDatabaseMissing('drugs', ['id' => $product->id]);
+    $this->assertDatabaseMissing('products', ['id' => $product->id]);
+});
+
+test('pharmacist can upload, replace, and remove product image and destroy cleans up file', function () {
+    Storage::fake('public');
+
+    $pharmacist = User::factory()->create();
+    $pharmacist->assignRole(RoleName::Pharmacist->value);
+
+    $category = ProductCategory::factory()->create();
+
+    $this->actingAs($pharmacist)
+        ->post(route('master-data.products.store'), [
+            'code' => 'IMG-01',
+            'name' => 'Betadine 60ml',
+            'product_type' => ProductType::MedicalSupply->value,
+            'product_category_id' => $category->id,
+            'unit_of_measure' => 'Botol',
+            'price' => 25000,
+            'image' => UploadedFile::fake()->image('betadine.jpg', 300, 300),
+            'is_active' => true,
+        ])
+        ->assertRedirect(route('master-data.products.index'));
+
+    $product = Product::where('code', 'IMG-01')->firstOrFail();
+    $firstImagePath = $product->image_path;
+
+    expect($firstImagePath)->not->toBeNull()
+        ->and($product->image_url)->toContain($firstImagePath);
+    Storage::disk('public')->assertExists($firstImagePath);
+
+    $this->actingAs($pharmacist)
+        ->post(route('master-data.products.update', $product), [
+            '_method' => 'put',
+            'code' => 'IMG-01',
+            'name' => 'Betadine Solution 60ml',
+            'product_type' => ProductType::MedicalSupply->value,
+            'product_category_id' => $category->id,
+            'unit_of_measure' => 'Botol',
+            'price' => 26000,
+            'image' => UploadedFile::fake()->image('betadine-v2.png', 400, 400),
+            'is_active' => true,
+        ])
+        ->assertRedirect(route('master-data.products.index'));
+
+    $product->refresh();
+    $secondImagePath = $product->image_path;
+
+    expect($secondImagePath)->not->toBeNull()
+        ->and($secondImagePath)->not->toBe($firstImagePath);
+    Storage::disk('public')->assertMissing($firstImagePath);
+    Storage::disk('public')->assertExists($secondImagePath);
+
+    $this->actingAs($pharmacist)
+        ->delete(route('master-data.products.destroy', $product))
+        ->assertRedirect(route('master-data.products.index'));
+
+    Storage::disk('public')->assertMissing($secondImagePath);
+});
+
+test('pharmacist can remove existing product image via update', function () {
+    Storage::fake('public');
+
+    $pharmacist = User::factory()->create();
+    $pharmacist->assignRole(RoleName::Pharmacist->value);
+
+    $path = UploadedFile::fake()->image('existing.jpg')->store('products', 'public');
+    $product = Product::factory()->create([
+        'product_type' => ProductType::General->value,
+        'form' => null,
+        'strength' => null,
+        'image_path' => $path,
+    ]);
+
+    Storage::disk('public')->assertExists($path);
+
+    $this->actingAs($pharmacist)
+        ->post(route('master-data.products.update', $product), [
+            '_method' => 'put',
+            'code' => $product->code,
+            'name' => $product->name,
+            'product_type' => ProductType::General->value,
+            'product_category_id' => $product->product_category_id,
+            'unit_of_measure' => $product->unit_of_measure,
+            'price' => $product->price,
+            'remove_image' => true,
+            'is_active' => true,
+        ])
+        ->assertRedirect(route('master-data.products.index'));
+
+    $product->refresh();
+
+    expect($product->image_path)->toBeNull()
+        ->and($product->image_url)->toBeNull();
+    Storage::disk('public')->assertMissing($path);
+});
+
+test('pharmacist can update product inline and stay on product detail page', function () {
+    $pharmacist = User::factory()->create();
+    $pharmacist->assignRole(RoleName::Pharmacist->value);
+
+    $product = Product::factory()->create([
+        'code' => 'INL-01',
+        'name' => 'Inline Awal',
+        'price' => 5000,
+    ]);
+
+    $this->actingAs($pharmacist)
+        ->post(route('master-data.products.update', $product), [
+            '_method' => 'put',
+            'inline' => true,
+            'code' => 'INL-01',
+            'name' => 'Inline Terbarui',
+            'product_type' => ProductType::Drug->value,
+            'product_category_id' => $product->product_category_id,
+            'form' => 'Tablet',
+            'strength' => '500 mg',
+            'unit_of_measure' => 'Tablet',
+            'price' => 7500,
+            'is_active' => true,
+        ])
+        ->assertRedirect(route('master-data.products.show', $product))
+        ->assertSessionHas('success');
+
+    $this->assertDatabaseHas('products', [
+        'id' => $product->id,
+        'name' => 'Inline Terbarui',
+        'price' => 7500,
+    ]);
 });

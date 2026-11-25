@@ -168,15 +168,15 @@ export function StockMoveTable({
             render: (move) => getMovementTypeBadge(move.type),
         },
         {
-            key: 'drug_batch',
-            header: 'Obat & Batch',
+            key: 'product_batch',
+            header: 'Produk & Batch',
             render: (move) => (
                 <div className="space-y-0.5">
                     <div className="text-xs font-medium text-foreground">
-                        {move.drug?.name ?? '-'}
+                        {move.product?.name ?? '-'}
                     </div>
                     <div className="font-mono text-[11px] text-muted-foreground">
-                        {move.drug_batch?.batch_number ?? '-'}
+                        {move.product_batch?.batch_number ?? '-'}
                     </div>
                 </div>
             ),
@@ -226,7 +226,7 @@ export function StockMoveTable({
                                 : isPositive
                                   ? `+${move.quantity}`
                                   : move.quantity}{' '}
-                            {move.drug?.unit_of_measure ?? ''}
+                            {move.product?.unit_of_measure ?? ''}
                         </div>
                         <div className="font-mono text-[10px] text-muted-foreground tabular-nums">
                             {move.balance_before} &rarr; {move.balance_after}

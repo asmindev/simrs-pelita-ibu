@@ -13,7 +13,7 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property int $prescription_id
- * @property int $drug_id
+ * @property int $product_id
  * @property string $dosage
  * @property string $frequency
  * @property string $route
@@ -25,11 +25,11 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Prescription $prescription
- * @property Drug $drug
+ * @property Product $product
  */
 #[Fillable([
     'prescription_id',
-    'drug_id',
+    'product_id',
     'dosage',
     'frequency',
     'route',
@@ -50,6 +50,7 @@ class PrescriptionItem extends Model
     protected function casts(): array
     {
         return [
+            'product_id' => 'integer',
             'duration_days' => 'integer',
             'quantity' => 'integer',
             'dispensed_quantity' => 'integer',
@@ -65,11 +66,11 @@ class PrescriptionItem extends Model
     }
 
     /**
-     * @return BelongsTo<Drug, $this>
+     * @return BelongsTo<Product, $this>
      */
-    public function drug(): BelongsTo
+    public function product(): BelongsTo
     {
-        return $this->belongsTo(Drug::class);
+        return $this->belongsTo(Product::class);
     }
 
     /**

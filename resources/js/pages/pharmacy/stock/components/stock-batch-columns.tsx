@@ -16,7 +16,7 @@ import {
     DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
 
-import type { DrugBatch } from '../../types/pharmacy';
+import type { ProductBatch } from '../../types/pharmacy';
 
 export function getExpiryBadge(expiryDate: string) {
     const today = new Date();
@@ -55,23 +55,24 @@ export function getExpiryBadge(expiryDate: string) {
 }
 
 export function createStockBatchColumns(options: {
-    onAdjust: (batch: DrugBatch) => void;
-    onTransfer: (batch: DrugBatch) => void;
-}): DataTableColumn<DrugBatch>[] {
+    onAdjust: (batch: ProductBatch) => void;
+    onTransfer: (batch: ProductBatch) => void;
+}): DataTableColumn<ProductBatch>[] {
     return [
         {
-            key: 'batch_drug',
-            header: 'No. Batch & Obat',
+            key: 'batch_product',
+            header: 'No. Batch & Produk',
             render: (batch) => (
                 <div className="space-y-0.5">
                     <span className="font-mono text-xs font-semibold text-foreground">
                         {batch.batch_number}
                     </span>
                     <div className="text-xs font-medium text-foreground">
-                        {batch.drug?.name}
+                        {batch.product?.name}
                     </div>
                     <div className="text-[11px] text-muted-foreground">
-                        {batch.drug?.code} &bull; {batch.drug?.form}
+                        {batch.product?.code}
+                        {batch.product?.form ? ` • ${batch.product.form}` : ''}
                     </div>
                 </div>
             ),
@@ -94,7 +95,7 @@ export function createStockBatchColumns(options: {
                         <div className="text-xs font-bold text-foreground tabular-nums">
                             {batch.current_quantity}{' '}
                             <span className="font-normal text-muted-foreground">
-                                {batch.drug?.unit_of_measure}
+                                {batch.product?.unit_of_measure}
                             </span>
                         </div>
                         <div className="text-[11px] text-muted-foreground">

@@ -98,15 +98,15 @@ export function StockQuantTable({
             ),
         },
         {
-            key: 'drug_batch',
-            header: 'Obat & No. Batch',
+            key: 'product_batch',
+            header: 'Produk & No. Batch',
             render: (quant) => (
                 <div className="space-y-0.5">
                     <div className="text-xs font-medium text-foreground">
-                        {quant.drug?.name ?? '-'}
+                        {quant.product?.name ?? '-'}
                     </div>
                     <div className="font-mono text-[11px] text-muted-foreground">
-                        {quant.drug_batch?.batch_number ?? '-'}
+                        {quant.product_batch?.batch_number ?? '-'}
                     </div>
                 </div>
             ),
@@ -115,8 +115,8 @@ export function StockQuantTable({
             key: 'expiry',
             header: 'Kedaluwarsa',
             render: (quant) =>
-                quant.drug_batch?.expiry_date ? (
-                    getExpiryBadge(quant.drug_batch.expiry_date)
+                quant.product_batch?.expiry_date ? (
+                    getExpiryBadge(quant.product_batch.expiry_date)
                 ) : (
                     <span className="text-xs text-muted-foreground">-</span>
                 ),
@@ -129,7 +129,7 @@ export function StockQuantTable({
                 <span className="font-mono text-xs font-bold text-foreground tabular-nums">
                     {quant.quantity.toLocaleString('id-ID')}{' '}
                     <span className="font-normal text-muted-foreground">
-                        {quant.drug?.unit_of_measure ?? ''}
+                        {quant.product?.unit_of_measure ?? ''}
                     </span>
                 </span>
             ),
@@ -139,7 +139,7 @@ export function StockQuantTable({
             header: 'Nilai Lokasi',
             className: 'text-right',
             render: (quant) => {
-                const buyPrice = quant.drug_batch?.buy_price ?? 0;
+                const buyPrice = quant.product_batch?.buy_price ?? 0;
                 return (
                     <span className="font-mono text-xs font-semibold text-primary tabular-nums">
                         {formatCurrency(quant.quantity * buyPrice)}
