@@ -231,7 +231,6 @@ declare module 'ziggy-js' {
             "binding": "id"
         }
     ],
-    "registration.queues.board": [],
     "registration.queues.data": [],
     "registration.queues.call": [
         {

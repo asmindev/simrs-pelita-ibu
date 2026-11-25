@@ -4,6 +4,7 @@ namespace App\Http\Controllers\MedicalRecord;
 
 use App\Enums\EncounterStatus;
 use App\Enums\Permissions\MedicalRecordPermission;
+use App\Enums\Permissions\PharmacyPermission;
 use App\Http\Controllers\Controller;
 use App\Models\BreakGlassGrant;
 use App\Models\Encounter;
@@ -117,6 +118,12 @@ class MedicalRecordController extends Controller
 
         if ($canViewSensitive) {
             $relations[] = 'sensitiveNotes.createdBy:id,name';
+        }
+
+        if ($user->can(PharmacyPermission::PrescriptionView->value)) {
+            $relations['prescriptions'] = fn ($query) => $query
+                ->latest('id')
+                ->with(['items.product:id,code,name,form,unit_of_measure']);
         }
 
         $encounters = $patient->encounters()

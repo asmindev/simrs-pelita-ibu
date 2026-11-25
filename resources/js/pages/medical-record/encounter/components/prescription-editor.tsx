@@ -1,13 +1,5 @@
 import { Link, useForm } from '@inertiajs/react';
-import {
-    CheckCircle2,
-    Clock,
-    ExternalLink,
-    Loader2,
-    Pill,
-    Send,
-    ShieldCheck,
-} from 'lucide-react';
+import { ExternalLink, Loader2, Pill, Send } from 'lucide-react';
 import type { FormEvent } from 'react';
 
 import { Can } from '@/shared/components/can';
@@ -17,9 +9,9 @@ import {
     type PrescriptionDraftItem,
     PrescriptionItemsEditor,
 } from '@/shared/components/prescription-items-editor';
+import { PrescriptionStatusBadge } from '@/shared/components/prescription-status-badge';
 import { formatDateTime } from '@/shared/lib/format';
 import { route } from '@/shared/lib/route';
-import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Label } from '@/shared/ui/label';
@@ -33,50 +25,12 @@ import {
 } from '@/shared/ui/table';
 import { Textarea } from '@/shared/ui/textarea';
 
-import type {
-    EncounterPrescriptionStatus,
-    EncounterWithEmr,
-} from '../../types/medical-record';
+import type { EncounterWithEmr } from '../../types/medical-record';
 
 type Props = {
     encounter: EncounterWithEmr;
     drugs: PrescribableDrug[];
 };
-
-function renderStatusBadge(status: EncounterPrescriptionStatus) {
-    switch (status) {
-        case 'submitted':
-            return (
-                <Badge variant="secondary" className="text-xs">
-                    <Clock className="mr-1 size-3" />
-                    Menunggu Verifikasi
-                </Badge>
-            );
-        case 'verified':
-            return (
-                <Badge variant="default" className="text-xs">
-                    <ShieldCheck className="mr-1 size-3" />
-                    Siap Dispensing
-                </Badge>
-            );
-        case 'dispensed':
-            return (
-                <Badge variant="outline" className="border-border text-xs">
-                    <CheckCircle2 className="mr-1 size-3" />
-                    Selesai Dispensing
-                </Badge>
-            );
-        case 'cancelled':
-            return (
-                <Badge
-                    variant="outline"
-                    className="border-destructive text-xs text-destructive"
-                >
-                    Dibatalkan
-                </Badge>
-            );
-    }
-}
 
 export function PrescriptionEditor({ encounter, drugs }: Props) {
     const { data, setData, post, processing, errors, reset } = useForm<{
@@ -195,7 +149,9 @@ export function PrescriptionEditor({ encounter, drugs }: Props) {
                                         <span className="font-mono text-xs font-semibold text-foreground">
                                             {rx.prescription_number}
                                         </span>
-                                        {renderStatusBadge(rx.status)}
+                                        <PrescriptionStatusBadge
+                                            status={rx.status}
+                                        />
                                         <span className="text-[11px] text-muted-foreground">
                                             {formatDateTime(rx.created_at)}
                                             {rx.doctor

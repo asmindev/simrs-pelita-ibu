@@ -151,14 +151,14 @@ export default function RegistrationIndex({ metrics, units }: Props) {
                                     >
                                         <Link
                                             href={route(
-                                                'registration.queues.board',
+                                                'registration.visits.index',
                                                 {
                                                     unit_id: unit.id,
                                                 },
                                             )}
                                         >
                                             <Clock className="mr-1 size-3.5" />
-                                            Antrean
+                                            Kunjungan
                                         </Link>
                                     </Button>
                                     <Button

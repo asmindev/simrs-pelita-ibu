@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\DiagnosisType;
 use App\Enums\EncounterStatus;
 use App\Enums\Permissions\MedicalRecordPermission;
+use App\Enums\QueueStatus;
 use App\Models\Assessment;
 use App\Models\BreakGlassGrant;
 use App\Models\ClinicalReport;
@@ -17,6 +18,7 @@ use App\Models\RecordDraft;
 use App\Models\SensitiveNote;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class MedicalRecordService
 {
@@ -498,5 +500,59 @@ class MedicalRecordService
             ->where('user_id', $actor->id)
             ->where('form_type', $formType)
             ->first();
+    }
+
+    /**
+     * Complete an active consultation encounter from EMR and close its queue ticket.
+     *
+     * @throws ValidationException
+     */
+    public function completeEncounter(Encounter $encounter, User $actor): Encounter
+    {
+        if (in_array($encounter->status, [EncounterStatus::Finished, EncounterStatus::Cancelled], true)) {
+            throw ValidationException::withMessages([
+                'status' => 'Kunjungan ini sudah selesai atau dibatalkan.',
+            ]);
+        }
+
+        return DB::transaction(function () use ($encounter, $actor): Encounter {
+            $encounter->update([
+                'status' => EncounterStatus::Finished,
+                'consultation_started_at' => $encounter->consultation_started_at ?? now(),
+                'consultation_ended_at' => now(),
+            ]);
+
+            $queue = $encounter->queue;
+            if ($queue && ! in_array($queue->status, [QueueStatus::Completed, QueueStatus::Cancelled], true)) {
+                $queue->update([
+                    'status' => QueueStatus::Completed,
+                    'completed_at' => now(),
+                ]);
+            }
+
+            activity('medical-record')
+                ->causedBy($actor)
+                ->performedOn($encounter)
+                ->event('encounter_completed')
+                ->withProperties([
+                    'encounter_id' => $encounter->id,
+                    'encounter_number' => $encounter->encounter_number,
+                    'patient_id' => $encounter->patient_id,
+                ])
+                ->log("Penyelesaian konsultasi kunjungan {$encounter->encounter_number}");
+
+            PatientAccessLog::create([
+                'user_id' => $actor->id,
+                'patient_id' => $encounter->patient_id,
+                'unit_id' => $encounter->unit_id,
+                'action' => 'complete_encounter',
+                'context' => [
+                    'encounter_id' => $encounter->id,
+                    'encounter_number' => $encounter->encounter_number,
+                ],
+            ]);
+
+            return $encounter->fresh(['queue']);
+        });
     }
 }

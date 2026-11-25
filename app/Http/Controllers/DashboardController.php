@@ -189,8 +189,8 @@ class DashboardController extends Controller
                     'status_label' => 'Menunggu Panggilan',
                     'time' => $q->created_at?->format('H:i') ?? '-',
                     'timestamp' => $q->created_at?->timestamp ?? 0,
-                    'action_label' => 'Papan Antrean',
-                    'action_route' => route('registration.queues.board'),
+                    'action_label' => 'Detail Kunjungan',
+                    'action_route' => route('registration.visits.show', $q->encounter_id),
                     'action_icon' => 'ticket',
                 ]);
 

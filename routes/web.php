@@ -232,9 +232,6 @@ Route::middleware(['auth', 'verified'])
         });
 
         Route::prefix('queues')->name('queues.')->group(function (): void {
-            Route::get('board', [QueueController::class, 'board'])
-                ->middleware('permission:registration.queue.view')
-                ->name('board');
             Route::get('data', [QueueController::class, 'data'])
                 ->middleware('permission:registration.queue.view')
                 ->name('data');
@@ -269,6 +266,10 @@ Route::middleware(['auth', 'verified'])
             Route::get('/', [EncounterRecordController::class, 'show'])
                 ->middleware('permission:medical-record.encounter.view')
                 ->name('show');
+
+            Route::post('complete', [EncounterRecordController::class, 'complete'])
+                ->middleware('permission:medical-record.encounter.update')
+                ->name('complete');
 
             Route::post('assessments', [AssessmentController::class, 'store'])
                 ->middleware('permission:medical-record.assessment.update')

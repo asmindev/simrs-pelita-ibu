@@ -9,6 +9,7 @@ use App\Models\Doctor;
 use App\Models\Encounter;
 use App\Services\MedicalRecordService;
 use App\Services\PrescriptionService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -43,5 +44,17 @@ class EncounterRecordController extends Controller
             'doctors' => $doctors,
             'drugs' => $drugs,
         ]);
+    }
+
+    public function complete(
+        Request $request,
+        Encounter $encounter,
+        MedicalRecordService $service
+    ): RedirectResponse {
+        Gate::authorize('view', $encounter);
+
+        $service->completeEncounter($encounter, $request->user());
+
+        return back()->with('success', "Konsultasi {$encounter->encounter_number} telah diselesaikan.");
     }
 }

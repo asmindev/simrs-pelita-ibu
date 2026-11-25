@@ -231,7 +231,6 @@ declare module 'ziggy-js' {
             "binding": "id"
         }
     ],
-    "registration.queues.board": [],
     "registration.queues.data": [],
     "registration.queues.call": [
         {
@@ -270,6 +269,13 @@ declare module 'ziggy-js' {
         }
     ],
     "medical-record.encounters.show": [
+        {
+            "name": "encounter",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "medical-record.encounters.complete": [
         {
             "name": "encounter",
             "required": true,

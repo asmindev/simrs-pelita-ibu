@@ -7,11 +7,14 @@ import {
     ChevronRight,
     FileText,
     Lock,
+    Pill,
     Stethoscope,
     User,
 } from 'lucide-react';
 
+import { Can } from '@/shared/components/can';
 import { Pagination } from '@/shared/components/pagination';
+import { PrescriptionStatusBadge } from '@/shared/components/prescription-status-badge';
 import { route } from '@/shared/lib/route';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
@@ -126,6 +129,7 @@ export default function PatientMedicalRecordHistory({
                         const assessment = item.assessments?.[0];
                         const diagnoses = item.diagnoses || [];
                         const procedures = item.procedures || [];
+                        const prescriptions = item.prescriptions || [];
                         const reports = item.clinical_reports || [];
                         const sensitive = item.sensitive_notes || [];
 
@@ -318,6 +322,91 @@ export default function PatientMedicalRecordHistory({
                                             )}
                                         </div>
                                     </div>
+
+                                    {/* Resep Obat */}
+                                    <Can permission="pharmacy.prescription.view">
+                                        {prescriptions.length > 0 && (
+                                            <div className="space-y-2 border-t border-border pt-2">
+                                                <div className="flex items-center gap-1 font-semibold text-foreground">
+                                                    <Pill className="size-3.5 text-primary" />
+                                                    Resep Obat (
+                                                    {prescriptions.length})
+                                                </div>
+                                                <div className="space-y-2">
+                                                    {prescriptions.map((rx) => (
+                                                        <div
+                                                            key={rx.id}
+                                                            className="space-y-1.5 rounded-md border border-border bg-muted/20 p-2.5 text-xs"
+                                                        >
+                                                            <div className="flex flex-wrap items-center justify-between gap-2">
+                                                                <div className="flex items-center gap-2">
+                                                                    <Link
+                                                                        href={route(
+                                                                            'pharmacy.prescriptions.show',
+                                                                            rx.id,
+                                                                        )}
+                                                                        className="font-mono font-semibold text-primary hover:underline"
+                                                                    >
+                                                                        {
+                                                                            rx.prescription_number
+                                                                        }
+                                                                    </Link>
+                                                                    <PrescriptionStatusBadge
+                                                                        status={
+                                                                            rx.status
+                                                                        }
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                            {(rx.items ?? [])
+                                                                .length > 0 && (
+                                                                <ul className="space-y-0.5 text-muted-foreground">
+                                                                    {(
+                                                                        rx.items ??
+                                                                        []
+                                                                    ).map(
+                                                                        (
+                                                                            rxItem,
+                                                                        ) => (
+                                                                            <li
+                                                                                key={
+                                                                                    rxItem.id
+                                                                                }
+                                                                            >
+                                                                                <span className="font-medium text-foreground">
+                                                                                    {rxItem
+                                                                                        .product
+                                                                                        ?.name ??
+                                                                                        `Obat #${rxItem.product_id}`}
+                                                                                </span>{' '}
+                                                                                ·{' '}
+                                                                                {
+                                                                                    rxItem.dosage
+                                                                                }{' '}
+                                                                                ·{' '}
+                                                                                {
+                                                                                    rxItem.frequency
+                                                                                }{' '}
+                                                                                (
+                                                                                {
+                                                                                    rxItem.quantity
+                                                                                }{' '}
+                                                                                {rxItem
+                                                                                    .product
+                                                                                    ?.unit_of_measure ??
+                                                                                    'unit'}
+                                                                                )
+                                                                            </li>
+                                                                        ),
+                                                                    )}
+                                                                </ul>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </Can>
 
                                     {/* Laporan Khusus */}
                                     {reports.length > 0 && (

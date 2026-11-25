@@ -1,148 +1,122 @@
-import { Head, useForm } from '@inertiajs/react';
-import { AlertTriangle, Ban } from 'lucide-react';
-import { type FormEvent, useState } from 'react';
+import { Head } from '@inertiajs/react';
+import { ClipboardList, Pill, Receipt } from 'lucide-react';
+import { useState } from 'react';
 
-import { FormField } from '@/shared/components/form-field';
-import { route } from '@/shared/lib/route';
-import { Button } from '@/shared/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/shared/ui/dialog';
-import { Textarea } from '@/shared/ui/textarea';
+import { usePermissions } from '@/shared/hooks/use-permissions';
+import { Badge } from '@/shared/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 
 import type { Encounter } from '../../types/registration';
-import { EncounterDetails } from './components/encounter-details';
-import { QueueWidget } from './components/queue-widget';
+import { CancelVisitDialog } from './components/cancel-visit-dialog';
+import { VisitBillingTab } from './components/visit-billing-tab';
+import { VisitControlBar } from './components/visit-control-bar';
+import { VisitOverviewTab } from './components/visit-overview-tab';
+import { VisitPrescriptionsTab } from './components/visit-prescriptions-tab';
+import {
+    VisitSheetHeader,
+    type VisitShowTab,
+} from './components/visit-sheet-header';
 
 type Props = {
     encounter: Encounter;
 };
 
 export default function EncounterShow({ encounter }: Props) {
+    const { can } = usePermissions();
+    const canViewPrescriptions = can('pharmacy.prescription.view');
+
+    const [activeTab, setActiveTab] = useState<VisitShowTab>('overview');
     const [isCancelOpen, setIsCancelOpen] = useState(false);
 
-    const { data, setData, post, processing, errors, reset } = useForm({
-        cancellation_reason: '',
-    });
-
-    function handleCancelSubmit(e: FormEvent) {
-        e.preventDefault();
-        post(route('registration.visits.cancel', encounter.id), {
-            onSuccess: () => {
-                setIsCancelOpen(false);
-                reset();
-            },
-        });
-    }
-
-    const canCancel =
-        encounter.status !== 'finished' && encounter.status !== 'cancelled';
+    const prescriptionsCount = encounter.prescriptions?.length ?? 0;
+    const invoicesCount = encounter.invoices?.length ?? 0;
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-3">
             <Head
-                title={`Detail Kunjungan ${encounter.encounter_number} — SIMRS`}
+                title={`Kunjungan ${encounter.encounter_number} — ${encounter.patient?.name ?? 'SIMRS'}`}
             />
 
-            {/* Banner if cancelled */}
-            {encounter.status === 'cancelled' && (
-                <div className="space-y-1 rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
-                    <p className="flex items-center gap-1.5 font-semibold">
-                        <AlertTriangle className="size-4" />
-                        Kunjungan Telah Dibatalkan
-                    </p>
-                    <p className="text-xs">
-                        Alasan:{' '}
-                        {encounter.cancellation_reason ||
-                            'Tidak ada keterangan'}
-                        {encounter.cancelled_by &&
-                            ` · Oleh: ${encounter.cancelled_by.name}`}
-                        {encounter.cancelled_at &&
-                            ` · Waktu: ${encounter.cancelled_at.slice(0, 16)}`}
-                    </p>
-                </div>
-            )}
+            <VisitControlBar
+                encounter={encounter}
+                onOpenCancel={() => setIsCancelOpen(true)}
+            />
 
-            {/* Layout 2 Kolom: Kiri (2/3) Detail Pasien & Pelayanan, Kanan (1/3) Widget Antrean */}
-            <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-                <div className="lg:col-span-2">
-                    <EncounterDetails encounter={encounter} />
-                </div>
+            <VisitSheetHeader
+                encounter={encounter}
+                activeTab={activeTab}
+                onSelectTab={setActiveTab}
+            />
 
-                <div className="lg:col-span-1">
-                    <QueueWidget
-                        encounter={encounter}
-                        canCancel={canCancel}
-                        onOpenCancel={() => setIsCancelOpen(true)}
-                    />
-                </div>
-            </div>
+            <Tabs
+                value={activeTab}
+                onValueChange={(value) => setActiveTab(value as VisitShowTab)}
+                className="space-y-3"
+            >
+                <TabsList className="h-9 w-full justify-start gap-1 overflow-x-auto bg-muted/50 p-1 sm:w-auto">
+                    <TabsTrigger
+                        value="overview"
+                        className="h-7 cursor-pointer gap-1.5 px-2.5 text-xs font-medium"
+                    >
+                        <ClipboardList className="size-3.5" />
+                        <span>Ringkasan</span>
+                    </TabsTrigger>
 
-            {/* Cancel Modal Dialog */}
-            <Dialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
-                <DialogContent>
-                    <form onSubmit={handleCancelSubmit} className="space-y-4">
-                        <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2 text-destructive">
-                                <Ban className="size-5" />
-                                Batalkan Kunjungan
-                            </DialogTitle>
-                            <DialogDescription className="text-xs">
-                                Masukkan alasan pembatalan kunjungan pasien.
-                                Tindakan ini akan membatalkan antrean terkait
-                                dan dicatat dalam audit trail.
-                            </DialogDescription>
-                        </DialogHeader>
-
-                        <FormField
-                            label="Alasan Pembatalan *"
-                            htmlFor="cancellation_reason"
-                            error={errors.cancellation_reason}
+                    {canViewPrescriptions && (
+                        <TabsTrigger
+                            value="prescriptions"
+                            className="h-7 cursor-pointer gap-1.5 px-2.5 text-xs font-medium"
                         >
-                            <Textarea
-                                id="cancellation_reason"
-                                rows={3}
-                                value={data.cancellation_reason}
-                                onChange={(e) =>
-                                    setData(
-                                        'cancellation_reason',
-                                        e.target.value,
-                                    )
-                                }
-                                placeholder="Contoh: Pasien berhalangan hadir / salah poli / permintaan keluarga..."
-                                className="bg-background text-xs"
-                            />
-                        </FormField>
+                            <Pill className="size-3.5" />
+                            <span>Resep Obat</span>
+                            {prescriptionsCount > 0 && (
+                                <Badge
+                                    variant="secondary"
+                                    className="px-1.5 py-0 font-mono text-[10px]"
+                                >
+                                    {prescriptionsCount}
+                                </Badge>
+                            )}
+                        </TabsTrigger>
+                    )}
 
-                        <DialogFooter className="gap-2 sm:gap-0">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => setIsCancelOpen(false)}
+                    <TabsTrigger
+                        value="billing"
+                        className="h-7 cursor-pointer gap-1.5 px-2.5 text-xs font-medium"
+                    >
+                        <Receipt className="size-3.5" />
+                        <span>Tagihan & Kasir</span>
+                        {invoicesCount > 0 && (
+                            <Badge
+                                variant="secondary"
+                                className="px-1.5 py-0 font-mono text-[10px]"
                             >
-                                Batal
-                            </Button>
-                            <Button
-                                type="submit"
-                                variant="destructive"
-                                disabled={
-                                    processing ||
-                                    !data.cancellation_reason.trim()
-                                }
-                            >
-                                {processing
-                                    ? 'Membatalkan...'
-                                    : 'Konfirmasi Batal'}
-                            </Button>
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog>
+                                {invoicesCount}
+                            </Badge>
+                        )}
+                    </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="overview" className="m-0">
+                    <VisitOverviewTab encounter={encounter} />
+                </TabsContent>
+
+                {canViewPrescriptions && (
+                    <TabsContent value="prescriptions" className="m-0">
+                        <VisitPrescriptionsTab encounter={encounter} />
+                    </TabsContent>
+                )}
+
+                <TabsContent value="billing" className="m-0">
+                    <VisitBillingTab encounter={encounter} />
+                </TabsContent>
+            </Tabs>
+
+            <CancelVisitDialog
+                encounterId={encounter.id}
+                open={isCancelOpen}
+                onOpenChange={setIsCancelOpen}
+            />
         </div>
     );
 }

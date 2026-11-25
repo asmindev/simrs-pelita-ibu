@@ -2,9 +2,11 @@
 
 use App\Enums\AssessmentType;
 use App\Enums\EncounterStatus;
+use App\Enums\QueueStatus;
 use App\Enums\RoleName;
 use App\Models\Assessment;
 use App\Models\Encounter;
+use App\Models\Queue;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
@@ -165,4 +167,35 @@ test('finalized assessment can have addenda added', function () {
         'patient_id' => $assessment->patient_id,
         'action' => 'addendum_created',
     ]);
+});
+
+test('doctor can complete an active encounter from emr and closes linked queue', function () {
+    $encounter = Encounter::factory()->inConsultation()->create();
+    $queue = Queue::factory()->create([
+        'encounter_id' => $encounter->id,
+        'unit_id' => $encounter->unit_id,
+        'status' => QueueStatus::Serving,
+    ]);
+
+    $this->actingAs($this->staff)
+        ->post(route('medical-record.encounters.complete', $encounter))
+        ->assertForbidden();
+
+    $response = $this->actingAs($this->doctor)
+        ->post(route('medical-record.encounters.complete', $encounter));
+
+    $response->assertSessionHasNoErrors();
+    $response->assertRedirect();
+
+    $encounter->refresh();
+    $queue->refresh();
+
+    expect($encounter->status)->toBe(EncounterStatus::Finished)
+        ->and($encounter->consultation_ended_at)->not->toBeNull()
+        ->and($queue->status)->toBe(QueueStatus::Completed)
+        ->and($queue->completed_at)->not->toBeNull();
+
+    $this->actingAs($this->doctor)
+        ->post(route('medical-record.encounters.complete', $encounter))
+        ->assertSessionHasErrors('status');
 });

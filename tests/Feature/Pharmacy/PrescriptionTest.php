@@ -394,3 +394,46 @@ test('prescription cannot be created for arrived, finished, or cancelled encount
             ->has('drugs', 0)
         );
 });
+
+test('assigned prescriptions appear on registration visit show and patient emr history when permitted', function () {
+    $doctorUser = User::factory()->create();
+    $doctorUser->assignRole(RoleName::Doctor->value);
+
+    $registrationUser = User::factory()->create();
+    $registrationUser->assignRole(RoleName::Registration->value);
+
+    $encounter = Encounter::factory()->inConsultation()->create();
+    $prescription = Prescription::factory()->create([
+        'encounter_id' => $encounter->id,
+        'patient_id' => $encounter->patient_id,
+    ]);
+    PrescriptionItem::factory()->create([
+        'prescription_id' => $prescription->id,
+    ]);
+
+    $this->actingAs($doctorUser)
+        ->get(route('registration.visits.show', $encounter->id))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('registration/visit/show/index')
+            ->has('encounter.prescriptions', 1)
+            ->where('encounter.prescriptions.0.id', $prescription->id)
+        );
+
+    $this->actingAs($doctorUser)
+        ->get(route('medical-record.patient.history', $encounter->patient_id))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('medical-record/patient/history/index')
+            ->has('encounters.data.0.prescriptions', 1)
+            ->where('encounters.data.0.prescriptions.0.id', $prescription->id)
+        );
+
+    $this->actingAs($registrationUser)
+        ->get(route('registration.visits.show', $encounter->id))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('registration/visit/show/index')
+            ->missing('encounter.prescriptions')
+        );
+});

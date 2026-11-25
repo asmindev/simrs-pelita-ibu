@@ -62,6 +62,8 @@ export type Encounter = {
         name: string;
         gender: 'male' | 'female';
         birth_date: string;
+        address?: string | null;
+        phone?: string | null;
     };
     unit?: {
         id: number;
@@ -88,8 +90,33 @@ export type Encounter = {
         id: number;
         invoice_number: string;
         status: string;
-        total_amount: number;
-        paid_amount: number;
+        subtotal?: number | string;
+        discount_amount?: number | string;
+        tax_amount?: number | string;
+        total_amount: number | string;
+        paid_amount: number | string;
+        created_at?: string;
+    }>;
+    prescriptions?: Array<{
+        id: number;
+        prescription_number: string;
+        status: 'draft' | 'submitted' | 'verified' | 'dispensed' | 'cancelled';
+        notes: string | null;
+        created_at: string;
+        items?: Array<{
+            id: number;
+            product_id: number;
+            dosage: string;
+            frequency: string;
+            quantity: number;
+            product?: {
+                id: number;
+                code: string;
+                name: string;
+                form: string | null;
+                unit_of_measure: string;
+            } | null;
+        }>;
     }>;
 };
 

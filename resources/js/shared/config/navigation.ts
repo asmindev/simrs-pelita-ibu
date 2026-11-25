@@ -159,11 +159,6 @@ export const navigationSections: NavSection[] = [
                         routeName: 'registration.visits.index',
                         permission: 'registration.visit.view',
                     },
-                    {
-                        title: 'Papan Antrean',
-                        routeName: 'registration.queues.board',
-                        permission: 'registration.queue.view',
-                    },
                 ],
             },
             {

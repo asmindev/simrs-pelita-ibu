@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useMemo } from 'react';
 
@@ -33,6 +33,11 @@ export default function EncounterList({ encounters, units, filters }: Props) {
                 columns={columns}
                 rows={encounters.data}
                 rowKey={(e) => e.id}
+                onRowClick={(encounter) =>
+                    router.visit(
+                        route('registration.visits.show', encounter.id),
+                    )
+                }
                 empty="Tidak ada data kunjungan yang cocok dengan filter."
                 toolbar={
                     <EncounterFiltersComponent

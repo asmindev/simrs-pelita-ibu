@@ -1,0 +1,1 @@
+import{a as e,n as t,t as n}from"./jsx-runtime-CjTjEmbm.js";import{t as r}from"./prescription-status-badge-DeMMbOFF.js";var i=e({PrescriptionStatusBadge:()=>s}),a=t(),o=n();function s(e){let t=(0,a.c)(2),{status:n}=e,i;return t[0]===n?i=t[1]:(i=(0,o.jsx)(r,{status:n}),t[0]=n,t[1]=i),i}export{i as n,s as t};

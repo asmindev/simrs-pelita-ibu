@@ -20,10 +20,10 @@ beforeEach(function () {
     $this->staff->assignRole(RoleName::Registration->value);
 });
 
-test('guest cannot access queue board or actions', function () {
+test('guest cannot access queue data or actions', function () {
     $queue = Queue::factory()->create();
 
-    $this->get(route('registration.queues.board'))->assertRedirect(route('login'));
+    $this->get(route('registration.queues.data'))->assertRedirect(route('login'));
     $this->post(route('registration.queues.call', $queue))->assertRedirect(route('login'));
 });
 

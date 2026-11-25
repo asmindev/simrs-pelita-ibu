@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Registration;
 
 use App\Enums\EncounterType;
+use App\Enums\Permissions\PharmacyPermission;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CancelEncounterRequest;
 use App\Http\Requests\StoreEncounterRequest;
@@ -135,11 +136,11 @@ class EncounterController extends Controller
             ->with('success', "Pendaftaran berhasil. Nomor Antrean: {$encounter->queue?->queue_code}.");
     }
 
-    public function show(Encounter $encounter): Response
+    public function show(Request $request, Encounter $encounter): Response
     {
         Gate::authorize('view', $encounter);
 
-        $encounter->load([
+        $relations = [
             'patient',
             'unit',
             'doctor',
@@ -149,7 +150,15 @@ class EncounterController extends Controller
             'cancelledBy',
             'createdBy',
             'invoices',
-        ]);
+        ];
+
+        if ($request->user()?->can(PharmacyPermission::PrescriptionView->value)) {
+            $relations['prescriptions'] = fn ($query) => $query
+                ->latest('id')
+                ->with(['items.product:id,code,name,form,unit_of_measure']);
+        }
+
+        $encounter->load($relations);
 
         return Inertia::render('registration/visit/show/index', [
             'encounter' => $encounter,
