@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProductType;
 use Database\Factories\DrugFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,18 +18,32 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property int $id
  * @property string $code
  * @property string $name
+ * @property ProductType $product_type
  * @property int $drug_category_id
- * @property string $form
- * @property string $strength
+ * @property string|null $form
+ * @property string|null $strength
  * @property string $unit_of_measure
  * @property int $price
- * @property string $manufacturer
+ * @property string|null $manufacturer
+ * @property string|null $description
  * @property bool $is_active
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property DrugCategory $category
  */
-#[Fillable(['code', 'name', 'drug_category_id', 'form', 'strength', 'unit_of_measure', 'price', 'manufacturer', 'is_active'])]
+#[Fillable([
+    'code',
+    'name',
+    'product_type',
+    'drug_category_id',
+    'form',
+    'strength',
+    'unit_of_measure',
+    'price',
+    'manufacturer',
+    'description',
+    'is_active',
+])]
 class Drug extends Model
 {
     /** @use HasFactory<DrugFactory> */
@@ -40,6 +55,7 @@ class Drug extends Model
     protected function casts(): array
     {
         return [
+            'product_type' => ProductType::class,
             'drug_category_id' => 'integer',
             'price' => 'integer',
             'is_active' => 'boolean',
@@ -85,6 +101,42 @@ class Drug extends Model
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class);
+    }
+
+    /**
+     * @return HasMany<StockQuant, $this>
+     */
+    public function stockQuants(): HasMany
+    {
+        return $this->hasMany(StockQuant::class);
+    }
+
+    /**
+     * @return HasMany<StockValuationLayer, $this>
+     */
+    public function valuationLayers(): HasMany
+    {
+        return $this->hasMany(StockValuationLayer::class);
+    }
+
+    /**
+     * Scope to prescribable medication products only.
+     *
+     * @param  Builder<Drug>  $query
+     * @return Builder<Drug>
+     */
+    public function scopeDrugs(Builder $query): Builder
+    {
+        return $query->where('product_type', ProductType::Drug->value);
+    }
+
+    /**
+     * @param  Builder<Drug>  $query
+     * @return Builder<Drug>
+     */
+    public function scopeOfType(Builder $query, string $type): Builder
+    {
+        return $query->where('product_type', $type);
     }
 
     /**

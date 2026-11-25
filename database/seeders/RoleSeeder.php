@@ -43,7 +43,7 @@ class RoleSeeder extends Seeder
     {
         $masterDataViews = [
             MasterDataPermission::DoctorView->value,
-            MasterDataPermission::DrugView->value,
+            MasterDataPermission::ProductView->value,
             MasterDataPermission::PatientView->value,
             MasterDataPermission::GuarantorView->value,
             MasterDataPermission::TariffView->value,
@@ -54,7 +54,7 @@ class RoleSeeder extends Seeder
             RoleName::Admin->value => [
                 ...$masterDataViews,
                 MasterDataPermission::DoctorManage->value,
-                MasterDataPermission::DrugManage->value,
+                MasterDataPermission::ProductManage->value,
                 MasterDataPermission::PatientCreate->value,
                 MasterDataPermission::PatientUpdate->value,
                 MasterDataPermission::PatientDelete->value,
@@ -87,7 +87,7 @@ class RoleSeeder extends Seeder
             ],
             RoleName::Doctor->value => [
                 MasterDataPermission::DoctorView->value,
-                MasterDataPermission::DrugView->value,
+                MasterDataPermission::ProductView->value,
                 MasterDataPermission::PatientView->value,
                 MasterDataPermission::TariffView->value,
                 MasterDataPermission::UnitView->value,
@@ -136,8 +136,8 @@ class RoleSeeder extends Seeder
                 RbacPermission::BreakGlassRequest->value,
             ],
             RoleName::Pharmacist->value => [
-                MasterDataPermission::DrugView->value,
-                MasterDataPermission::DrugManage->value,
+                MasterDataPermission::ProductView->value,
+                MasterDataPermission::ProductManage->value,
                 MasterDataPermission::PatientView->value,
                 PharmacyPermission::DispensingCreate->value,
                 PharmacyPermission::DispensingVerify->value,

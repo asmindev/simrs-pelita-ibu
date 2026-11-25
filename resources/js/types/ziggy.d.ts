@@ -91,48 +91,49 @@ declare module 'ziggy-js' {
             "binding": "id"
         }
     ],
-    "master-data.drugs.index": [],
-    "master-data.drugs.create": [],
-    "master-data.drugs.store": [],
-    "master-data.drugs.show": [
+    "master-data.": [],
+    "master-data.products.index": [],
+    "master-data.products.create": [],
+    "master-data.products.store": [],
+    "master-data.products.show": [
         {
-            "name": "drug",
+            "name": "product",
             "required": true,
             "binding": "id"
         }
     ],
-    "master-data.drugs.edit": [
+    "master-data.products.edit": [
         {
-            "name": "drug",
+            "name": "product",
             "required": true,
             "binding": "id"
         }
     ],
-    "master-data.drugs.update": [
+    "master-data.products.update": [
         {
-            "name": "drug",
+            "name": "product",
             "required": true,
             "binding": "id"
         }
     ],
-    "master-data.drugs.destroy": [
+    "master-data.products.destroy": [
         {
-            "name": "drug",
+            "name": "product",
             "required": true,
             "binding": "id"
         }
     ],
-    "master-data.drug-categories.store": [],
-    "master-data.drug-categories.update": [
+    "master-data.product-categories.store": [],
+    "master-data.product-categories.update": [
         {
-            "name": "drugCategory",
+            "name": "productCategory",
             "required": true,
             "binding": "id"
         }
     ],
-    "master-data.drug-categories.destroy": [
+    "master-data.product-categories.destroy": [
         {
-            "name": "drugCategory",
+            "name": "productCategory",
             "required": true,
             "binding": "id"
         }
@@ -422,6 +423,7 @@ declare module 'ziggy-js' {
             "binding": "id"
         }
     ],
+    "pharmacy.stock.moves.store": [],
     "cashier.index": [],
     "cashier.invoices.index": [],
     "cashier.invoices.store": [],
@@ -572,6 +574,8 @@ declare module 'ziggy-js' {
             "binding": "id"
         }
     ],
+    "settings.edit": [],
+    "settings.update": [],
     "audit.index": [],
     "audit.logs.index": [],
     "audit.patient-access.index": [],

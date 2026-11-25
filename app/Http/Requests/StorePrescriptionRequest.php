@@ -3,7 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Enums\Permissions\PharmacyPermission;
+use App\Enums\ProductType;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StorePrescriptionRequest extends FormRequest
 {
@@ -13,7 +15,7 @@ class StorePrescriptionRequest extends FormRequest
     }
 
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, array<int, mixed>>
      */
     public function rules(): array
     {
@@ -21,7 +23,10 @@ class StorePrescriptionRequest extends FormRequest
             'encounter_id' => ['required', 'exists:encounters,id'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'items' => ['required', 'array', 'min:1'],
-            'items.*.drug_id' => ['required', 'exists:drugs,id'],
+            'items.*.drug_id' => [
+                'required',
+                Rule::exists('drugs', 'id')->where('product_type', ProductType::Drug->value),
+            ],
             'items.*.dosage' => ['required', 'string', 'max:100'],
             'items.*.frequency' => ['required', 'string', 'max:100'],
             'items.*.route' => ['nullable', 'string', 'max:50'],

@@ -70,15 +70,15 @@ export default function MasterDataIndex() {
                     </Link>
                 </Can>
 
-                <Can permission="master-data.drug.view">
+                <Can permission="master-data.product.view">
                     <Link
-                        href={route('master-data.drugs.index')}
+                        href={route('master-data.products.index')}
                         className="rounded-lg border p-4 hover:bg-muted/50"
                     >
-                        <p className="font-medium">Obat & Farmasi</p>
+                        <p className="font-medium">Produk</p>
                         <p className="text-sm text-muted-foreground">
-                            Katalog obat, kekuatan sediaan, produsen, dan harga
-                            satuan dasar.
+                            Katalog produk terpadu: obat, alkes/BMHP, reagen,
+                            dan perlengkapan umum.
                         </p>
                     </Link>
                 </Can>

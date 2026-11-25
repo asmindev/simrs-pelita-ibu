@@ -8,8 +8,6 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DiagnosticOrderController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\DoctorScheduleController;
-use App\Http\Controllers\DrugCategoryController;
-use App\Http\Controllers\DrugController;
 use App\Http\Controllers\GuarantorController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MedicalRecord\AssessmentController;
@@ -24,6 +22,8 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PharmacyStockController;
 use App\Http\Controllers\PrescriptionController;
+use App\Http\Controllers\ProductCategoryController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Rbac\BreakGlassController;
 use App\Http\Controllers\Rbac\RoleController;
 use App\Http\Controllers\Rbac\UserController;
@@ -110,39 +110,41 @@ Route::middleware(['auth', 'verified'])
                 ->name('destroy');
         });
 
-        Route::prefix('drugs')->name('drugs.')->group(function (): void {
-            Route::get('/', [DrugController::class, 'index'])
-                ->middleware('permission:master-data.drug.view')
+        Route::redirect('drugs', '/master-data/products');
+
+        Route::prefix('products')->name('products.')->group(function (): void {
+            Route::get('/', [ProductController::class, 'index'])
+                ->middleware('permission:master-data.product.view')
                 ->name('index');
-            Route::get('create', [DrugController::class, 'create'])
-                ->middleware('permission:master-data.drug.manage')
+            Route::get('create', [ProductController::class, 'create'])
+                ->middleware('permission:master-data.product.manage')
                 ->name('create');
-            Route::post('/', [DrugController::class, 'store'])
-                ->middleware('permission:master-data.drug.manage')
+            Route::post('/', [ProductController::class, 'store'])
+                ->middleware('permission:master-data.product.manage')
                 ->name('store');
-            Route::get('{drug}', [DrugController::class, 'show'])
-                ->middleware('permission:master-data.drug.view')
+            Route::get('{product}', [ProductController::class, 'show'])
+                ->middleware('permission:master-data.product.view')
                 ->name('show');
-            Route::get('{drug}/edit', [DrugController::class, 'edit'])
-                ->middleware('permission:master-data.drug.manage')
+            Route::get('{product}/edit', [ProductController::class, 'edit'])
+                ->middleware('permission:master-data.product.manage')
                 ->name('edit');
-            Route::put('{drug}', [DrugController::class, 'update'])
-                ->middleware('permission:master-data.drug.manage')
+            Route::put('{product}', [ProductController::class, 'update'])
+                ->middleware('permission:master-data.product.manage')
                 ->name('update');
-            Route::delete('{drug}', [DrugController::class, 'destroy'])
-                ->middleware('permission:master-data.drug.manage')
+            Route::delete('{product}', [ProductController::class, 'destroy'])
+                ->middleware('permission:master-data.product.manage')
                 ->name('destroy');
         });
 
-        Route::prefix('drug-categories')->name('drug-categories.')->group(function (): void {
-            Route::post('/', [DrugCategoryController::class, 'store'])
-                ->middleware('permission:master-data.drug.manage')
+        Route::prefix('product-categories')->name('product-categories.')->group(function (): void {
+            Route::post('/', [ProductCategoryController::class, 'store'])
+                ->middleware('permission:master-data.product.manage')
                 ->name('store');
-            Route::put('{drugCategory}', [DrugCategoryController::class, 'update'])
-                ->middleware('permission:master-data.drug.manage')
+            Route::put('{productCategory}', [ProductCategoryController::class, 'update'])
+                ->middleware('permission:master-data.product.manage')
                 ->name('update');
-            Route::delete('{drugCategory}', [DrugCategoryController::class, 'destroy'])
-                ->middleware('permission:master-data.drug.manage')
+            Route::delete('{productCategory}', [ProductCategoryController::class, 'destroy'])
+                ->middleware('permission:master-data.product.manage')
                 ->name('destroy');
         });
 
@@ -383,6 +385,10 @@ Route::middleware(['auth', 'verified'])
             Route::post('batches/{batch}/adjust', [PharmacyStockController::class, 'adjust'])
                 ->middleware('permission:pharmacy.stock.adjust')
                 ->name('batches.adjust');
+
+            Route::post('moves', [PharmacyStockController::class, 'storeMove'])
+                ->middleware('permission:pharmacy.stock.adjust')
+                ->name('moves.store');
         });
     });
 

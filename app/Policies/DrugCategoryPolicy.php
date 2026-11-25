@@ -10,26 +10,26 @@ class DrugCategoryPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->can(MasterDataPermission::DrugView->value);
+        return $user->can(MasterDataPermission::ProductView->value);
     }
 
     public function view(User $user, DrugCategory $drugCategory): bool
     {
-        return $user->can(MasterDataPermission::DrugView->value);
+        return $user->can(MasterDataPermission::ProductView->value);
     }
 
     public function create(User $user): bool
     {
-        return $user->can(MasterDataPermission::DrugManage->value);
+        return $user->can(MasterDataPermission::ProductManage->value);
     }
 
     public function update(User $user, DrugCategory $drugCategory): bool
     {
-        return $user->can(MasterDataPermission::DrugManage->value);
+        return $user->can(MasterDataPermission::ProductManage->value);
     }
 
     public function delete(User $user, DrugCategory $drugCategory): bool
     {
-        return $user->can(MasterDataPermission::DrugManage->value);
+        return $user->can(MasterDataPermission::ProductManage->value);
     }
 }
