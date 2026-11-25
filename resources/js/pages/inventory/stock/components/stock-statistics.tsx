@@ -12,7 +12,7 @@ import { Card, CardContent } from '@/shared/ui/card';
 
 type Props = {
     statistics: {
-        total_batches: number;
+        total_items: number;
         active_stock: number;
         expiring_soon: number;
         expired: number;
@@ -28,17 +28,17 @@ export function StockStatistics({ statistics }: Props) {
                 <CardContent className="space-y-1 px-3">
                     <div className="flex items-center justify-between gap-1.5">
                         <p className="truncate text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-                            Batch Aktif
+                            Item di Gudang
                         </p>
                         <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
                             <Boxes className="size-3.5" />
                         </div>
                     </div>
                     <p className="text-xl leading-tight font-semibold text-foreground tabular-nums">
-                        {statistics.total_batches.toLocaleString('id-ID')}
+                        {statistics.total_items.toLocaleString('id-ID')}
                     </p>
                     <p className="truncate text-[11px] text-muted-foreground">
-                        Batch obat terdaftar
+                        Produk aktif tersimpan
                     </p>
                 </CardContent>
             </Card>
@@ -57,7 +57,7 @@ export function StockStatistics({ statistics }: Props) {
                         {statistics.active_stock.toLocaleString('id-ID')}
                     </p>
                     <p className="truncate text-[11px] text-muted-foreground">
-                        Akumulasi seluruh lokasi
+                        Akumulasi seluruh gudang
                     </p>
                 </CardContent>
             </Card>
@@ -79,7 +79,7 @@ export function StockStatistics({ statistics }: Props) {
                         {formatCurrency(statistics.total_valuation)}
                     </p>
                     <p className="truncate text-[11px] text-muted-foreground">
-                        Valuasi layer aktif
+                        Valuasi persediaan
                     </p>
                 </CardContent>
             </Card>
@@ -88,7 +88,7 @@ export function StockStatistics({ statistics }: Props) {
                 <CardContent className="space-y-1 px-3">
                     <div className="flex items-center justify-between gap-1.5">
                         <p className="truncate text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-                            Stock Move Hari Ini
+                            Pergerakan Hari Ini
                         </p>
                         <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-secondary text-secondary-foreground">
                             <ArrowLeftRight className="size-3.5" />
@@ -117,7 +117,7 @@ export function StockStatistics({ statistics }: Props) {
                         {statistics.expiring_soon.toLocaleString('id-ID')}
                     </p>
                     <p className="truncate text-[11px] text-muted-foreground">
-                        &le; 30 hari (Prioritas FEFO)
+                        &le; 30 hari (FEFO)
                     </p>
                 </CardContent>
             </Card>
@@ -126,7 +126,7 @@ export function StockStatistics({ statistics }: Props) {
                 <CardContent className="space-y-1 px-3">
                     <div className="flex items-center justify-between gap-1.5">
                         <p className="truncate text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-                            Batch Kadaluwarsa
+                            Sudah Kadaluwarsa
                         </p>
                         <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-destructive/10 text-destructive">
                             <AlertTriangle className="size-3.5" />
@@ -136,7 +136,7 @@ export function StockStatistics({ statistics }: Props) {
                         {statistics.expired.toLocaleString('id-ID')}
                     </p>
                     <p className="truncate text-[11px] text-muted-foreground">
-                        Perlu karantina / loss
+                        Perlu karantina / opname
                     </p>
                 </CardContent>
             </Card>

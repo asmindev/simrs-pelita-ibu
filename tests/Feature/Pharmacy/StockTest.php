@@ -408,60 +408,81 @@ test('stock move rejects insufficient source stock, same-location transfer, and 
     ])->assertForbidden();
 });
 
-test('pharmacy stock index returns paginated movements, valuation layers, quants, and locations', function () {
+test('stock index returns grouped warehouse-product rows, and standalone moves & valuation routes work', function () {
     $pharmacistUser = User::factory()->create();
     $pharmacistUser->assignRole(RoleName::Pharmacist->value);
 
     $product = Product::factory()->create();
+    $whStock = StockLocation::where('code', StockLocation::CODE_DEFAULT_WAREHOUSE)->firstOrFail();
 
     $this->actingAs($pharmacistUser)->post(route('inventory.stock.batches.store'), [
         'product_id' => $product->id,
-        'batch_number' => 'BATCH-UI-01',
         'expiry_date' => Carbon::today()->addMonths(6)->toDateString(),
         'initial_quantity' => 25,
         'buy_price' => 4000,
     ])->assertSessionHasNoErrors();
 
-    $response = $this->actingAs($pharmacistUser)->get(route('inventory.stock.index', ['tab' => 'layers']));
-
-    $response->assertOk()
+    $this->actingAs($pharmacistUser)
+        ->get(route('inventory.stock.index'))
+        ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('inventory/stock/index')
-            ->where('activeTab', 'layers')
-            ->has('movements.data', 1)
-            ->has('valuationLayers.data', 1)
-            ->has('quants.data', 1)
+            ->has('items.data', 1)
+            ->where('items.data.0.product_id', $product->id)
+            ->where('items.data.0.stock_location_id', $whStock->id)
+            ->where('items.data.0.total_quantity', 25)
+            ->where('items.data.0.total_value', 100000)
             ->has('locations', 7)
+            ->where('statistics.total_valuation', 100000)
+        );
+
+    $this->actingAs($pharmacistUser)
+        ->get(route('inventory.moves.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('inventory/move/index')
+            ->has('movements.data', 1)
+            ->has('locations', 7)
+        );
+
+    $this->actingAs($pharmacistUser)
+        ->get(route('inventory.valuation.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('inventory/valuation/index')
+            ->has('valuationLayers.data', 1)
             ->where('statistics.total_valuation', 100000)
         );
 });
 
-test('pharmacist can view stock batch detail page with quants, movements, and valuation layers', function () {
+test('pharmacist can view warehouse product stock detail page with expiry lots and movements', function () {
     $pharmacistUser = User::factory()->create();
     $pharmacistUser->assignRole(RoleName::Pharmacist->value);
 
     $product = Product::factory()->create();
+    $whStock = StockLocation::where('code', StockLocation::CODE_DEFAULT_WAREHOUSE)->firstOrFail();
 
     $this->actingAs($pharmacistUser)->post(route('inventory.stock.batches.store'), [
         'product_id' => $product->id,
-        'batch_number' => 'BATCH-SHOW-01',
         'expiry_date' => Carbon::today()->addMonths(6)->toDateString(),
         'initial_quantity' => 30,
         'buy_price' => 2500,
     ])->assertSessionHasNoErrors();
 
-    $batch = ProductBatch::where('batch_number', 'BATCH-SHOW-01')->firstOrFail();
-
-    $response = $this->actingAs($pharmacistUser)->get(route('inventory.stock.batches.show', $batch));
+    $response = $this->actingAs($pharmacistUser)->get(route('inventory.stock.show', [
+        'warehouse' => $whStock->id,
+        'product' => $product->id,
+    ]));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('inventory/stock/show/index')
-            ->where('batch.id', $batch->id)
-            ->where('batch.batch_number', 'BATCH-SHOW-01')
-            ->has('batch.stock_quants', 1)
+            ->where('warehouse.id', $whStock->id)
+            ->where('product.id', $product->id)
+            ->where('summary.total_quantity', 30)
+            ->where('summary.total_value', 75000)
+            ->has('quants', 1)
             ->has('movements', 1)
-            ->has('valuationLayers', 1)
             ->has('locations', 7)
         );
 });

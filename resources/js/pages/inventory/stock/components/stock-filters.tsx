@@ -18,40 +18,56 @@ import {
     SelectValue,
 } from '@/shared/ui/select';
 
+import type { StockLocation } from '../../types/inventory';
+
 type Props = {
     filters: {
         search: string;
-        status: string;
+        location_id: string;
+        expiry: string;
     };
+    locations: StockLocation[];
     current: number;
     total: number;
-    onAddBatchClick?: () => void;
+    onAddStockClick?: () => void;
     onCreateMoveClick?: () => void;
 };
 
 export function StockFilters({
     filters,
+    locations,
     current,
     total,
-    onAddBatchClick,
+    onAddStockClick,
     onCreateMoveClick,
 }: Props) {
     const [search, setSearch] = useState(filters.search || '');
-    const [status, setStatus] = useState(filters.status || 'all');
+    const [locationId, setLocationId] = useState(filters.location_id || 'all');
+    const [expiry, setExpiry] = useState(filters.expiry || 'all');
 
-    const activeFilterCount = status !== 'all' ? 1 : 0;
+    const internalLocations = locations.filter((l) => l.usage === 'internal');
+    const activeFilterCount =
+        (locationId !== 'all' ? 1 : 0) + (expiry !== 'all' ? 1 : 0);
 
-    function executeFilter(nextParams?: { search?: string; status?: string }) {
+    function executeFilter(nextParams?: {
+        search?: string;
+        locationId?: string;
+        expiry?: string;
+    }) {
         const s = nextParams?.search !== undefined ? nextParams.search : search;
-        const st =
-            nextParams?.status !== undefined ? nextParams.status : status;
+        const loc =
+            nextParams?.locationId !== undefined
+                ? nextParams.locationId
+                : locationId;
+        const exp =
+            nextParams?.expiry !== undefined ? nextParams.expiry : expiry;
 
         router.get(
             route('inventory.stock.index'),
             {
-                tab: 'batches',
                 search: s || undefined,
-                status: st === 'all' ? undefined : st,
+                location_id: loc === 'all' ? undefined : loc,
+                expiry: exp === 'all' ? undefined : exp,
             },
             { preserveState: true, preserveScroll: true, replace: true },
         );
@@ -62,19 +78,16 @@ export function StockFilters({
         executeFilter();
     }
 
-    function applyPopoverFilter() {
-        executeFilter();
-    }
-
     function resetPopoverFilters() {
-        setStatus('all');
-        executeFilter({ status: 'all' });
+        setLocationId('all');
+        setExpiry('all');
+        executeFilter({ locationId: 'all', expiry: 'all' });
     }
 
     return (
         <TableToolbar
-            title="Inventaris Batch & FEFO"
-            description="Pelacakan batch obat, kadaluwarsa terdekat (FEFO), dan posisi lokasi stok."
+            title="Stok Produk per Gudang"
+            description="Posisi stok per produk di setiap gudang. Klik baris untuk melihat rincian kedaluwarsa, transfer, atau opname."
             icon={Boxes}
             current={current}
             total={total}
@@ -89,17 +102,17 @@ export function StockFilters({
                                 className="h-8 gap-1.5 bg-background text-xs font-medium"
                             >
                                 <ArrowLeftRight className="size-3.5" />
-                                Catat Stock Move
+                                Catat Pergerakan
                             </Button>
                         )}
-                        {onAddBatchClick && (
+                        {onAddStockClick && (
                             <Button
                                 size="sm"
-                                onClick={onAddBatchClick}
+                                onClick={onAddStockClick}
                                 className="h-8 gap-1.5 text-xs font-medium"
                             >
                                 <Plus className="size-3.5" />
-                                Batch Baru
+                                Tambah Stok
                             </Button>
                         )}
                     </div>
@@ -113,12 +126,12 @@ export function StockFilters({
                 <div className="relative min-w-44 flex-1 sm:w-60 sm:flex-none">
                     <Search className="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                        id="batch-search"
+                        id="stock-search"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="No. Batch, Nama Obat..."
+                        placeholder="Nama produk, kode, gudang..."
                         className="h-8 bg-background pl-8 text-xs"
-                        aria-label="Cari batch obat"
+                        aria-label="Cari stok produk"
                     />
                 </div>
 
@@ -131,41 +144,72 @@ export function StockFilters({
                 </Button>
 
                 <FilterPopover
-                    title="Filter Batch"
+                    title="Filter Stok"
                     activeCount={activeFilterCount}
-                    onApply={applyPopoverFilter}
+                    onApply={() => executeFilter()}
                     onReset={resetPopoverFilters}
                 >
-                    <div className="space-y-1.5">
-                        <Label
-                            htmlFor="batch-filter-status"
-                            className="text-xs font-medium"
-                        >
-                            Status Ketersediaan / Kadaluwarsa
-                        </Label>
-                        <Select value={status} onValueChange={setStatus}>
-                            <SelectTrigger
-                                id="batch-filter-status"
-                                className="h-8 bg-background text-xs"
-                                aria-label="Filter status batch"
+                    <div className="space-y-3">
+                        <div className="space-y-1.5">
+                            <Label
+                                htmlFor="stock-filter-location"
+                                className="text-xs font-medium"
                             >
-                                <SelectValue placeholder="Semua Status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">
-                                    Semua Status
-                                </SelectItem>
-                                <SelectItem value="available">
-                                    Tersedia (FEFO Aktif)
-                                </SelectItem>
-                                <SelectItem value="expired">
-                                    Kadaluwarsa (Expired)
-                                </SelectItem>
-                                <SelectItem value="empty">
-                                    Stok Habis
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
+                                Gudang (WH)
+                            </Label>
+                            <Select
+                                value={locationId}
+                                onValueChange={setLocationId}
+                            >
+                                <SelectTrigger
+                                    id="stock-filter-location"
+                                    className="h-8 bg-background text-xs"
+                                >
+                                    <SelectValue placeholder="Semua Gudang" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">
+                                        Semua Gudang
+                                    </SelectItem>
+                                    {internalLocations.map((loc) => (
+                                        <SelectItem
+                                            key={loc.id}
+                                            value={String(loc.id)}
+                                        >
+                                            {loc.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <Label
+                                htmlFor="stock-filter-expiry"
+                                className="text-xs font-medium"
+                            >
+                                Status Kedaluwarsa
+                            </Label>
+                            <Select value={expiry} onValueChange={setExpiry}>
+                                <SelectTrigger
+                                    id="stock-filter-expiry"
+                                    className="h-8 bg-background text-xs"
+                                >
+                                    <SelectValue placeholder="Semua Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">
+                                        Semua Status
+                                    </SelectItem>
+                                    <SelectItem value="expiring_soon">
+                                        Mendekati ED (&le; 30 hari)
+                                    </SelectItem>
+                                    <SelectItem value="expired">
+                                        Sudah Kedaluwarsa
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
                 </FilterPopover>
             </form>

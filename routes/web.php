@@ -388,9 +388,10 @@ Route::middleware(['auth', 'verified'])
                 ->middleware('permission:pharmacy.stock.view')
                 ->name('index');
 
-            Route::get('batches/{batch}', [PharmacyStockController::class, 'showBatch'])
+            Route::get('{warehouse}/{product}', [PharmacyStockController::class, 'show'])
+                ->whereNumber(['warehouse', 'product'])
                 ->middleware('permission:pharmacy.stock.view')
-                ->name('batches.show');
+                ->name('show');
 
             Route::post('batches', [PharmacyStockController::class, 'storeBatch'])
                 ->middleware('permission:pharmacy.stock.adjust')
@@ -404,6 +405,14 @@ Route::middleware(['auth', 'verified'])
                 ->middleware('permission:pharmacy.stock.adjust')
                 ->name('moves.store');
         });
+
+        Route::get('moves', [PharmacyStockController::class, 'moves'])
+            ->middleware('permission:pharmacy.stock.view')
+            ->name('moves.index');
+
+        Route::get('valuation', [PharmacyStockController::class, 'valuation'])
+            ->middleware('permission:pharmacy.stock.view')
+            ->name('valuation.index');
 
         Route::prefix('warehouses')->name('warehouses.')->group(function (): void {
             Route::get('/', [StockLocationController::class, 'index'])

@@ -19,7 +19,7 @@ class StoreProductBatchRequest extends FormRequest
     {
         return [
             'product_id' => ['required', 'exists:products,id'],
-            'batch_number' => ['required', 'string', 'max:50'],
+            'batch_number' => ['nullable', 'string', 'max:50'],
             'expiry_date' => ['required', 'date', 'after:today'],
             'initial_quantity' => ['required', 'integer', 'min:1'],
             'buy_price' => ['nullable', 'integer', 'min:0'],

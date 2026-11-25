@@ -6,6 +6,7 @@ use App\Enums\StockLocationUsage;
 use App\Enums\StockMoveType;
 use App\Models\Dispensing;
 use App\Models\PrescriptionItem;
+use App\Models\Product;
 use App\Models\ProductBatch;
 use App\Models\StockLocation;
 use App\Models\StockMovement;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class PharmacyStockService
@@ -55,10 +57,13 @@ class PharmacyStockService
 
             $qty = (int) $data['initial_quantity'];
             $buyPrice = (int) ($data['buy_price'] ?? 0);
+            $batchNumber = isset($data['batch_number']) && trim((string) $data['batch_number']) !== ''
+                ? trim((string) $data['batch_number'])
+                : 'LOT-'.Carbon::now()->format('YmdHis').'-'.strtoupper(Str::random(4));
 
             $batch = ProductBatch::create([
                 'product_id' => (int) $data['product_id'],
-                'batch_number' => $data['batch_number'],
+                'batch_number' => $batchNumber,
                 'expiry_date' => $data['expiry_date'],
                 'initial_quantity' => $qty,
                 'current_quantity' => $qty,
@@ -536,23 +541,47 @@ class PharmacyStockService
             $source = $this->resolveLocationById($data['source_location_id'] ?? null, $vendorsLocation);
             $destination = $this->resolveInternalLocation($data['destination_location_id'] ?? null, $locations);
 
-            if (empty($data['product_batch_id'])) {
-                throw ValidationException::withMessages([
-                    'product_batch_id' => 'Pilih batch produk tujuan penerimaan stok.',
-                ]);
-            }
+            $productId = (int) $data['product_id'];
 
-            /** @var ProductBatch $batch */
-            $batch = ProductBatch::query()
-                ->where('id', (int) $data['product_batch_id'])
-                ->where('product_id', (int) $data['product_id'])
-                ->lockForUpdate()
-                ->first();
+            if (! empty($data['product_batch_id'])) {
+                /** @var ProductBatch|null $batch */
+                $batch = ProductBatch::query()
+                    ->where('id', (int) $data['product_batch_id'])
+                    ->where('product_id', $productId)
+                    ->lockForUpdate()
+                    ->first();
 
-            if (! $batch) {
-                throw ValidationException::withMessages([
-                    'product_batch_id' => 'Batch produk tidak ditemukan untuk produk yang dipilih.',
-                ]);
+                if (! $batch) {
+                    throw ValidationException::withMessages([
+                        'product_batch_id' => 'Batch produk tidak ditemukan untuk produk yang dipilih.',
+                    ]);
+                }
+            } else {
+                /** @var ProductBatch|null $batch */
+                $batch = ProductBatch::query()
+                    ->where('product_id', $productId)
+                    ->where('is_active', true)
+                    ->latest('id')
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $batch) {
+                    /** @var Product $product */
+                    $product = Product::query()->findOrFail($productId);
+                    $unitCost = isset($data['unit_cost']) && $data['unit_cost'] !== null
+                        ? (int) $data['unit_cost']
+                        : (int) ($product->price ?? 0);
+
+                    $batch = ProductBatch::create([
+                        'product_id' => $productId,
+                        'batch_number' => 'LOT-'.Carbon::now()->format('YmdHis').'-'.strtoupper(Str::random(4)),
+                        'expiry_date' => Carbon::today()->addYear()->toDateString(),
+                        'initial_quantity' => 0,
+                        'current_quantity' => 0,
+                        'buy_price' => $unitCost,
+                        'is_active' => true,
+                    ]);
+                }
             }
 
             $this->syncMissingQuantsForBatch($batch, $defaultWarehouse);
@@ -846,28 +875,47 @@ class PharmacyStockService
      */
     private function executeAdjustmentFromMove(array $data, string $reason, User $user): Collection
     {
-        if (empty($data['product_batch_id'])) {
-            throw ValidationException::withMessages([
-                'product_batch_id' => 'Batch produk wajib dipilih untuk penyesuaian stok.',
-            ]);
-        }
-
         if (! isset($data['new_quantity']) || (int) $data['new_quantity'] < 0) {
             throw ValidationException::withMessages([
                 'new_quantity' => 'Stok fisik baru tidak boleh bernilai negatif.',
             ]);
         }
 
-        /** @var ProductBatch $batch */
-        $batch = ProductBatch::query()
-            ->where('id', (int) $data['product_batch_id'])
-            ->where('product_id', (int) $data['product_id'])
-            ->firstOrFail();
-
         $locations = $this->ensureDefaultLocations();
         $location = ! empty($data['destination_location_id'])
             ? $this->resolveInternalLocation((int) $data['destination_location_id'], $locations)
             : $this->resolveInternalLocation($data['source_location_id'] ?? null, $locations);
+
+        $productId = (int) $data['product_id'];
+
+        if (! empty($data['product_batch_id'])) {
+            /** @var ProductBatch $batch */
+            $batch = ProductBatch::query()
+                ->where('id', (int) $data['product_batch_id'])
+                ->where('product_id', $productId)
+                ->firstOrFail();
+        } else {
+            $quantAtLocation = StockQuant::query()
+                ->where('stock_location_id', $location->id)
+                ->where('product_id', $productId)
+                ->where('quantity', '>', 0)
+                ->orderByDesc('quantity')
+                ->first();
+
+            /** @var ProductBatch|null $batch */
+            $batch = $quantAtLocation?->productBatch
+                ?? ProductBatch::query()
+                    ->where('product_id', $productId)
+                    ->where('is_active', true)
+                    ->latest('id')
+                    ->first();
+
+            if (! $batch) {
+                throw ValidationException::withMessages([
+                    'product_id' => 'Produk belum memiliki riwayat stok untuk disesuaikan. Gunakan Tambah Stok terlebih dahulu.',
+                ]);
+            }
+        }
 
         $movement = $this->adjustStock($batch, (int) $data['new_quantity'], $reason, $user, $location);
 

@@ -415,9 +415,14 @@ declare module 'ziggy-js' {
     ],
     "inventory.index": [],
     "inventory.stock.index": [],
-    "inventory.stock.batches.show": [
+    "inventory.stock.show": [
         {
-            "name": "batch",
+            "name": "warehouse",
+            "required": true,
+            "binding": "id"
+        },
+        {
+            "name": "product",
             "required": true,
             "binding": "id"
         }
@@ -431,6 +436,8 @@ declare module 'ziggy-js' {
         }
     ],
     "inventory.stock.moves.store": [],
+    "inventory.moves.index": [],
+    "inventory.valuation.index": [],
     "inventory.warehouses.index": [],
     "inventory.warehouses.store": [],
     "inventory.warehouses.show": [

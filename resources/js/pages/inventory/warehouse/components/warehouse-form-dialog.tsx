@@ -1,10 +1,10 @@
-import { useForm } from "@inertiajs/react";
-import { type FormEvent, useEffect } from "react";
+import { useForm } from '@inertiajs/react';
+import { type FormEvent, useEffect } from 'react';
 
-import { FormField } from "@/shared/components/form-field";
-import { route } from "@/shared/lib/route";
-import { Button } from "@/shared/ui/button";
-import { Checkbox } from "@/shared/ui/checkbox";
+import { FormField } from '@/shared/components/form-field';
+import { route } from '@/shared/lib/route';
+import { Button } from '@/shared/ui/button';
+import { Checkbox } from '@/shared/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -12,23 +12,23 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/shared/ui/dialog";
-import { Input } from "@/shared/ui/input";
-import { Label } from "@/shared/ui/label";
+} from '@/shared/ui/dialog';
+import { Input } from '@/shared/ui/input';
+import { Label } from '@/shared/ui/label';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/shared/ui/select";
-import { Textarea } from "@/shared/ui/textarea";
+} from '@/shared/ui/select';
+import { Textarea } from '@/shared/ui/textarea';
 
 import type {
     StockLocationUsage,
     UsageOption,
     WarehouseLocation,
-} from "../types/warehouse";
+} from '../types/warehouse';
 
 type Props = {
     warehouse: WarehouseLocation | null;
@@ -45,10 +45,10 @@ export function WarehouseFormDialog({
 }: Props) {
     const { data, setData, post, put, processing, errors, reset, clearErrors } =
         useForm({
-            code: "",
-            name: "",
-            usage: "internal" as StockLocationUsage,
-            description: "",
+            code: '',
+            name: '',
+            usage: 'internal' as StockLocationUsage,
+            description: '',
             is_default_warehouse: false,
             is_active: true,
         });
@@ -65,7 +65,7 @@ export function WarehouseFormDialog({
                 code: warehouse.code,
                 name: warehouse.name,
                 usage: warehouse.usage,
-                description: warehouse.description ?? "",
+                description: warehouse.description ?? '',
                 is_default_warehouse: warehouse.is_default_warehouse,
                 is_active: warehouse.is_active,
             });
@@ -79,7 +79,7 @@ export function WarehouseFormDialog({
             ...prev,
             usage: nextUsage,
             is_default_warehouse:
-                nextUsage === "internal" ? prev.is_default_warehouse : false,
+                nextUsage === 'internal' ? prev.is_default_warehouse : false,
         }));
     }
 
@@ -92,13 +92,13 @@ export function WarehouseFormDialog({
         };
 
         if (warehouse) {
-            put(route("inventory.warehouses.update", warehouse.id), options);
+            put(route('inventory.warehouses.update', warehouse.id), options);
         } else {
-            post(route("inventory.warehouses.store"), options);
+            post(route('inventory.warehouses.store'), options);
         }
     }
 
-    const isInternal = data.usage === "internal";
+    const isInternal = data.usage === 'internal';
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -107,7 +107,7 @@ export function WarehouseFormDialog({
                     <DialogTitle>
                         {warehouse
                             ? `Edit Gudang / Lokasi: ${warehouse.code}`
-                            : "Tambah Gudang / Lokasi Stok"}
+                            : 'Tambah Gudang / Lokasi Stok'}
                     </DialogTitle>
                     <DialogDescription>
                         Atur kode lokasi (contoh: WH/STOCK, OK/STOCK), tipe
@@ -128,7 +128,7 @@ export function WarehouseFormDialog({
                                 value={data.code}
                                 onChange={(e) =>
                                     setData(
-                                        "code",
+                                        'code',
                                         e.target.value.toUpperCase(),
                                     )
                                 }
@@ -140,7 +140,7 @@ export function WarehouseFormDialog({
 
                         <div className="space-y-1.5">
                             <Label htmlFor="warehouse-usage">
-                                Tipe Penggunaan{" "}
+                                Tipe Penggunaan{' '}
                                 <span className="text-destructive">*</span>
                             </Label>
                             <Select
@@ -182,7 +182,7 @@ export function WarehouseFormDialog({
                         <Input
                             id="warehouse-name"
                             value={data.name}
-                            onChange={(e) => setData("name", e.target.value)}
+                            onChange={(e) => setData('name', e.target.value)}
                             placeholder="cth: Depo Farmasi Kamar Operasi"
                             className="bg-background"
                             required
@@ -198,7 +198,7 @@ export function WarehouseFormDialog({
                             id="warehouse-description"
                             value={data.description}
                             onChange={(e) =>
-                                setData("description", e.target.value)
+                                setData('description', e.target.value)
                             }
                             placeholder="Fungsi penyimpanan atau ruang layanan..."
                             rows={2}
@@ -214,7 +214,7 @@ export function WarehouseFormDialog({
                                 disabled={!isInternal}
                                 onCheckedChange={(checked) =>
                                     setData(
-                                        "is_default_warehouse",
+                                        'is_default_warehouse',
                                         Boolean(checked),
                                     )
                                 }
@@ -244,7 +244,7 @@ export function WarehouseFormDialog({
                                 id="warehouse-active"
                                 checked={data.is_active}
                                 onCheckedChange={(checked) =>
-                                    setData("is_active", Boolean(checked))
+                                    setData('is_active', Boolean(checked))
                                 }
                             />
                             <Label
@@ -272,10 +272,10 @@ export function WarehouseFormDialog({
                         </Button>
                         <Button type="submit" disabled={processing}>
                             {processing
-                                ? "Menyimpan..."
+                                ? 'Menyimpan...'
                                 : warehouse
-                                  ? "Simpan Perubahan"
-                                  : "Simpan Gudang"}
+                                  ? 'Simpan Perubahan'
+                                  : 'Simpan Gudang'}
                         </Button>
                     </DialogFooter>
                 </form>

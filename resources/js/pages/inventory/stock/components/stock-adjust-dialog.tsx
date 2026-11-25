@@ -2,6 +2,7 @@ import { useForm } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 import { useEffect } from 'react';
 
+import { formatDate } from '@/shared/lib/format';
 import { route } from '@/shared/lib/route';
 import { Button } from '@/shared/ui/button';
 import {
@@ -23,7 +24,7 @@ import {
 } from '@/shared/ui/select';
 import { Textarea } from '@/shared/ui/textarea';
 
-import type { ProductBatch, StockLocation } from '../types/stock';
+import type { ProductBatch, StockLocation } from '../../types/inventory';
 
 type Props = {
     batch: ProductBatch | null;
@@ -119,8 +120,8 @@ export function StockAdjustDialog({
                 <DialogHeader>
                     <DialogTitle>Penyesuaian Stok (Stock Opname)</DialogTitle>
                     <DialogDescription>
-                        Koreksi stok fisik batch pada lokasi tertentu dengan
-                        jejak audit &amp; valuation layer.
+                        Koreksi stok fisik di gudang tertentu beserta alasan dan
+                        pencatatan nilai persediaan.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -133,15 +134,15 @@ export function StockAdjustDialog({
                     </div>
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">
-                            Nomor Batch:
+                            Kedaluwarsa (ED):
                         </span>
                         <span className="font-mono font-medium">
-                            {batch.batch_number}
+                            {formatDate(batch.expiry_date)}
                         </span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">
-                            Stok Lokasi Saat Ini:
+                            Stok Gudang Saat Ini:
                         </span>
                         <span className="font-bold text-foreground">
                             {currentQty} {batch.product?.unit_of_measure}
@@ -171,7 +172,7 @@ export function StockAdjustDialog({
                                             key={loc.id}
                                             value={String(loc.id)}
                                         >
-                                            {loc.code} — {loc.name}
+                                            {loc.name} ({loc.code})
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -229,7 +230,7 @@ export function StockAdjustDialog({
                             id="adjust-reason"
                             value={data.reason}
                             onChange={(e) => setData('reason', e.target.value)}
-                            placeholder="Contoh: Selisih fisik stok opname akhir bulan, botol pecah, dll..."
+                            placeholder="Contoh: Selisih fisik stok opname akhir bulan, kemasan rusak, dll..."
                             className="resize-none bg-background text-xs"
                             rows={3}
                             required
