@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\StockLocationUsage;
 use App\Http\Requests\AdjustStockRequest;
 use App\Http\Requests\StoreDrugBatchRequest;
+use App\Http\Requests\StoreStockMoveRequest;
 use App\Models\Drug;
 use App\Models\DrugBatch;
+use App\Models\StockLocation;
 use App\Models\StockMovement;
+use App\Models\StockQuant;
+use App\Models\StockValuationLayer;
 use App\Services\PharmacyStockService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,14 +31,29 @@ class PharmacyStockController extends Controller
     {
         Gate::authorize('viewAny', DrugBatch::class);
 
+        $this->stockService->ensureDefaultLocations();
+
+        $tab = $request->string('tab')->toString() ?: 'batches';
         $search = $request->string('search')->trim()->toString();
-        $status = $request->string('status')->toString(); // all, available, expired, empty
+        $status = $request->string('status')->toString();
+
+        $moveSearch = $request->string('move_search')->trim()->toString();
+        $moveType = $request->string('move_type')->toString();
+        $moveLocationId = $request->string('move_location_id')->toString();
+
+        $layerSearch = $request->string('layer_search')->trim()->toString();
+        $layerDirection = $request->string('layer_direction')->toString();
+
+        $quantSearch = $request->string('quant_search')->trim()->toString();
+        $quantLocationId = $request->string('quant_location_id')->toString();
 
         $batches = DrugBatch::query()
-            ->with(['drug.category'])
-            ->when($search !== '', function (Builder $q) use ($search) {
-                $q->where('batch_number', 'like', "%{$search}%")
-                    ->orWhereHas('drug', fn (Builder $dq) => $dq->search($search));
+            ->with(['drug.category', 'stockQuants.location:id,code,name'])
+            ->when($search !== '', function (Builder $q) use ($search): void {
+                $q->where(function (Builder $sub) use ($search): void {
+                    $sub->where('batch_number', 'like', "%{$search}%")
+                        ->orWhereHas('drug', fn (Builder $dq) => $dq->search($search));
+                });
             })
             ->when($status === 'available', fn (Builder $q) => $q->fefoAvailable())
             ->when($status === 'expired', fn (Builder $q) => $q->whereDate('expiry_date', '<', Carbon::today()))
@@ -42,28 +62,114 @@ class PharmacyStockController extends Controller
             ->paginate(15)
             ->withQueryString();
 
+        $movements = StockMovement::query()
+            ->with([
+                'drug:id,name,code,unit_of_measure',
+                'drugBatch:id,batch_number',
+                'sourceLocation:id,code,name,usage',
+                'destinationLocation:id,code,name,usage',
+                'user:id,name',
+            ])
+            ->when($moveSearch !== '', function (Builder $q) use ($moveSearch): void {
+                $q->where(function (Builder $sub) use ($moveSearch): void {
+                    $sub->where('reference_number', 'like', "%{$moveSearch}%")
+                        ->orWhere('origin', 'like', "%{$moveSearch}%")
+                        ->orWhere('reason', 'like', "%{$moveSearch}%")
+                        ->orWhereHas('drug', fn (Builder $dq) => $dq->search($moveSearch))
+                        ->orWhereHas('drugBatch', fn (Builder $bq) => $bq->where('batch_number', 'like', "%{$moveSearch}%"));
+                });
+            })
+            ->when($moveType !== '' && $moveType !== 'all', fn (Builder $q) => $q->where('type', $moveType))
+            ->when($moveLocationId !== '' && $moveLocationId !== 'all', function (Builder $q) use ($moveLocationId): void {
+                $locId = (int) $moveLocationId;
+                $q->where(function (Builder $sub) use ($locId): void {
+                    $sub->where('source_location_id', $locId)
+                        ->orWhere('destination_location_id', $locId);
+                });
+            })
+            ->latest('id')
+            ->paginate(15, ['*'], 'move_page')
+            ->withQueryString();
+
+        $valuationLayers = StockValuationLayer::query()
+            ->with([
+                'drug:id,name,code,unit_of_measure',
+                'drugBatch:id,batch_number',
+                'location:id,code,name',
+                'stockMovement:id,reference_number,type',
+                'user:id,name',
+            ])
+            ->when($layerSearch !== '', function (Builder $q) use ($layerSearch): void {
+                $q->where(function (Builder $sub) use ($layerSearch): void {
+                    $sub->where('reference', 'like', "%{$layerSearch}%")
+                        ->orWhere('description', 'like', "%{$layerSearch}%")
+                        ->orWhereHas('drug', fn (Builder $dq) => $dq->search($layerSearch))
+                        ->orWhereHas('drugBatch', fn (Builder $bq) => $bq->where('batch_number', 'like', "%{$layerSearch}%"));
+                });
+            })
+            ->when($layerDirection === 'in', fn (Builder $q) => $q->where('quantity', '>', 0))
+            ->when($layerDirection === 'out', fn (Builder $q) => $q->where('quantity', '<', 0))
+            ->when($layerDirection === 'remaining', fn (Builder $q) => $q->where('remaining_qty', '>', 0))
+            ->latest('id')
+            ->paginate(15, ['*'], 'layer_page')
+            ->withQueryString();
+
+        $quants = StockQuant::query()
+            ->with([
+                'location:id,code,name,usage',
+                'drug:id,name,code,unit_of_measure',
+                'drugBatch:id,batch_number,expiry_date,buy_price',
+            ])
+            ->where('quantity', '>', 0)
+            ->when($quantSearch !== '', function (Builder $q) use ($quantSearch): void {
+                $q->where(function (Builder $sub) use ($quantSearch): void {
+                    $sub->whereHas('drug', fn (Builder $dq) => $dq->search($quantSearch))
+                        ->orWhereHas('drugBatch', fn (Builder $bq) => $bq->where('batch_number', 'like', "%{$quantSearch}%"))
+                        ->orWhereHas('location', fn (Builder $lq) => $lq->where('name', 'like', "%{$quantSearch}%")->orWhere('code', 'like', "%{$quantSearch}%"));
+                });
+            })
+            ->when($quantLocationId !== '' && $quantLocationId !== 'all', fn (Builder $q) => $q->where('stock_location_id', (int) $quantLocationId))
+            ->orderBy('stock_location_id')
+            ->orderByDesc('quantity')
+            ->paginate(15, ['*'], 'quant_page')
+            ->withQueryString();
+
         $drugs = Drug::query()
+            ->with(['batches' => fn ($q) => $q->where('is_active', true)->orderBy('expiry_date')])
             ->where('is_active', true)
             ->orderBy('name')
-            ->get(['id', 'code', 'name', 'form', 'unit_of_measure', 'price']);
+            ->get(['id', 'code', 'name', 'product_type', 'form', 'unit_of_measure', 'price']);
 
-        $recentMovements = StockMovement::query()
-            ->with(['drug:id,name,code', 'drugBatch:id,batch_number', 'user:id,name'])
-            ->latest('id')
-            ->limit(10)
-            ->get();
+        $locations = StockLocation::query()
+            ->active()
+            ->orderByDesc('is_default_warehouse')
+            ->orderBy('id')
+            ->get(['id', 'code', 'name', 'usage', 'is_default_warehouse'])
+            ->sortBy(fn (StockLocation $loc): int => $loc->usage === StockLocationUsage::Internal ? 0 : 1)
+            ->values();
 
         return Inertia::render('pharmacy/stock/index', [
+            'activeTab' => $tab,
             'batches' => $batches,
+            'movements' => $movements,
+            'valuationLayers' => $valuationLayers,
+            'quants' => $quants,
             'drugs' => $drugs,
-            'recentMovements' => $recentMovements,
+            'locations' => $locations,
             'filters' => [
                 'search' => $search,
                 'status' => $status,
+                'move_search' => $moveSearch,
+                'move_type' => $moveType,
+                'move_location_id' => $moveLocationId,
+                'layer_search' => $layerSearch,
+                'layer_direction' => $layerDirection,
+                'quant_search' => $quantSearch,
+                'quant_location_id' => $quantLocationId,
             ],
             'statistics' => [
                 'total_batches' => DrugBatch::query()->where('is_active', true)->count(),
-                'active_stock' => DrugBatch::query()->where('is_active', true)->sum('current_quantity'),
+                'active_stock' => (int) DrugBatch::query()->where('is_active', true)->sum('current_quantity'),
                 'expiring_soon' => DrugBatch::query()
                     ->where('is_active', true)
                     ->where('current_quantity', '>', 0)
@@ -73,6 +179,8 @@ class PharmacyStockController extends Controller
                     ->where('is_active', true)
                     ->whereDate('expiry_date', '<', Carbon::today())
                     ->count(),
+                'total_valuation' => (int) StockValuationLayer::query()->sum('value'),
+                'today_moves' => StockMovement::query()->whereDate('created_at', Carbon::today())->count(),
             ],
         ]);
     }
@@ -81,28 +189,10 @@ class PharmacyStockController extends Controller
     {
         Gate::authorize('create', DrugBatch::class);
 
-        $validated = $request->validated();
-
-        $batch = DrugBatch::create([
-            'drug_id' => $validated['drug_id'],
-            'batch_number' => $validated['batch_number'],
-            'expiry_date' => $validated['expiry_date'],
-            'initial_quantity' => $validated['initial_quantity'],
-            'current_quantity' => $validated['initial_quantity'],
-            'buy_price' => $validated['buy_price'] ?? 0,
-            'is_active' => true,
-        ]);
-
-        StockMovement::create([
-            'drug_id' => $batch->drug_id,
-            'drug_batch_id' => $batch->id,
-            'type' => 'in',
-            'quantity' => $batch->initial_quantity,
-            'balance_before' => 0,
-            'balance_after' => $batch->initial_quantity,
-            'reason' => 'Penerimaan stok awal batch baru.',
-            'user_id' => $request->user()->id,
-        ]);
+        $batch = $this->stockService->createBatchWithInboundMove(
+            $request->validated(),
+            $request->user(),
+        );
 
         return back()->with('success', "Batch {$batch->batch_number} berhasil ditambahkan dengan stok {$batch->initial_quantity}.");
     }
@@ -111,13 +201,32 @@ class PharmacyStockController extends Controller
     {
         Gate::authorize('adjust', $batch);
 
+        $locationId = $request->validated('stock_location_id');
+        $location = $locationId ? StockLocation::query()->find((int) $locationId) : null;
+
         $this->stockService->adjustStock(
             $batch,
             (int) $request->validated('new_quantity'),
             $request->validated('reason'),
-            $request->user()
+            $request->user(),
+            $location,
         );
 
         return back()->with('success', "Stok batch {$batch->batch_number} berhasil disesuaikan.");
+    }
+
+    public function storeMove(StoreStockMoveRequest $request): RedirectResponse
+    {
+        Gate::authorize('create', DrugBatch::class);
+
+        $movements = $this->stockService->recordStockMove(
+            $request->validated(),
+            $request->user(),
+        );
+
+        $count = $movements->count();
+        $firstRef = $movements->first()?->reference_number ?? 'Stock Move';
+
+        return back()->with('success', "Pergerakan stok {$firstRef} berhasil dicatat ({$count} baris mutasi).");
     }
 }

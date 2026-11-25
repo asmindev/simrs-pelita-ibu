@@ -1,8 +1,9 @@
 import { router } from '@inertiajs/react';
-import { Boxes, Search } from 'lucide-react';
+import { ArrowLeftRight, Boxes, Plus, Search } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 
+import { Can } from '@/shared/components/can';
 import { FilterPopover } from '@/shared/components/filter-popover';
 import { TableToolbar } from '@/shared/components/table-toolbar';
 import { route } from '@/shared/lib/route';
@@ -25,6 +26,7 @@ type Props = {
     current: number;
     total: number;
     onAddBatchClick?: () => void;
+    onCreateMoveClick?: () => void;
 };
 
 export function StockFilters({
@@ -32,6 +34,7 @@ export function StockFilters({
     current,
     total,
     onAddBatchClick,
+    onCreateMoveClick,
 }: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || 'all');
@@ -46,6 +49,7 @@ export function StockFilters({
         router.get(
             route('pharmacy.stock.index'),
             {
+                tab: 'batches',
                 search: s || undefined,
                 status: st === 'all' ? undefined : st,
             },
@@ -67,41 +71,46 @@ export function StockFilters({
         executeFilter({ status: 'all' });
     }
 
-    function resetAll() {
-        setSearch('');
-        setStatus('all');
-
-        router.get(
-            route('pharmacy.stock.index'),
-            {},
-            { preserveState: true, preserveScroll: true, replace: true },
-        );
-    }
-
     return (
         <TableToolbar
             title="Inventaris Batch & FEFO"
-            description="Pelacakan batch obat, kadaluwarsa terdekat (FEFO), dan penyesuaian stok opname."
+            description="Pelacakan batch obat, kadaluwarsa terdekat (FEFO), dan posisi lokasi stok."
             icon={Boxes}
             current={current}
             total={total}
             actions={
-                onAddBatchClick ? (
-                    <Button
-                        size="sm"
-                        onClick={onAddBatchClick}
-                        className="h-8 text-xs font-medium"
-                    >
-                        Tambah Batch Baru
-                    </Button>
-                ) : undefined
+                <Can permission="pharmacy.stock.adjust">
+                    <div className="flex items-center gap-2">
+                        {onCreateMoveClick && (
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={onCreateMoveClick}
+                                className="h-8 gap-1.5 bg-background text-xs font-medium"
+                            >
+                                <ArrowLeftRight className="size-3.5" />
+                                Catat Stock Move
+                            </Button>
+                        )}
+                        {onAddBatchClick && (
+                            <Button
+                                size="sm"
+                                onClick={onAddBatchClick}
+                                className="h-8 gap-1.5 text-xs font-medium"
+                            >
+                                <Plus className="size-3.5" />
+                                Batch Baru
+                            </Button>
+                        )}
+                    </div>
+                </Can>
             }
         >
             <form
                 onSubmit={handleSearchSubmit}
                 className="flex w-full flex-wrap items-center gap-2 sm:w-auto"
             >
-                <div className="relative min-w-48 flex-1 sm:w-64 sm:flex-none">
+                <div className="relative min-w-44 flex-1 sm:w-60 sm:flex-none">
                     <Search className="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
                     <Input
                         id="batch-search"
@@ -153,24 +162,12 @@ export function StockFilters({
                                     Kadaluwarsa (Expired)
                                 </SelectItem>
                                 <SelectItem value="empty">
-                                    Stok Habis (0)
+                                    Stok Habis
                                 </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                 </FilterPopover>
-
-                {(activeFilterCount > 0 || search !== '') && (
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 shrink-0 text-xs text-muted-foreground hover:text-foreground"
-                        onClick={resetAll}
-                    >
-                        Reset
-                    </Button>
-                )}
             </form>
         </TableToolbar>
     );

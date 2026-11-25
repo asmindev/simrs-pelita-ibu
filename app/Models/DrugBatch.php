@@ -88,6 +88,22 @@ class DrugBatch extends Model
     }
 
     /**
+     * @return HasMany<StockQuant, $this>
+     */
+    public function stockQuants(): HasMany
+    {
+        return $this->hasMany(StockQuant::class);
+    }
+
+    /**
+     * @return HasMany<StockValuationLayer, $this>
+     */
+    public function valuationLayers(): HasMany
+    {
+        return $this->hasMany(StockValuationLayer::class);
+    }
+
+    /**
      * Scope FEFO: first expired first out, only available non-expired batches.
      *
      * @param  Builder<DrugBatch>  $query

@@ -1,15 +1,50 @@
+export type StockLocationUsage =
+    | 'internal'
+    | 'supplier'
+    | 'customer'
+    | 'inventory';
+
+export type StockLocation = {
+    id: number;
+    code: string;
+    name: string;
+    usage: StockLocationUsage;
+    is_default_warehouse: boolean;
+};
+
+export type DrugBatchSummary = {
+    id: number;
+    drug_id: number;
+    batch_number: string;
+    expiry_date: string;
+    current_quantity: number;
+    buy_price: number;
+};
+
 export type DrugInfo = {
     id: number;
     code: string;
     name: string;
-    form: string;
+    product_type?: 'drug' | 'medical_supply' | 'reagent' | 'general';
+    form: string | null;
     unit_of_measure: string;
     price?: number;
     category?: {
         id: number;
         name: string;
     };
-    batches?: DrugBatch[];
+    batches?: DrugBatchSummary[];
+};
+
+export type StockQuant = {
+    id: number;
+    stock_location_id: number;
+    drug_id: number;
+    drug_batch_id: number;
+    quantity: number;
+    location?: StockLocation;
+    drug?: DrugInfo;
+    drug_batch?: DrugBatch;
 };
 
 export type DrugBatch = {
@@ -23,6 +58,7 @@ export type DrugBatch = {
     is_active: boolean;
     created_at: string;
     drug?: DrugInfo;
+    stock_quants?: StockQuant[];
 };
 
 export type DispensingRecord = {
@@ -127,25 +163,94 @@ export type Prescription = {
     returns?: StockReturnRecord[];
 };
 
+export type StockMovementType =
+    | 'in'
+    | 'out'
+    | 'transfer'
+    | 'dispensing'
+    | 'adjustment'
+    | 'return'
+    | 'opname';
+
 export type StockMovement = {
     id: number;
+    reference_number: string | null;
     drug_id: number;
     drug_batch_id: number | null;
-    type: 'in' | 'out' | 'dispensing' | 'adjustment' | 'return' | 'opname';
+    source_location_id: number | null;
+    destination_location_id: number | null;
+    type: StockMovementType;
     quantity: number;
     balance_before: number;
     balance_after: number;
+    unit_cost: number;
+    total_value: number;
+    origin: string | null;
+    state: string;
     reason: string | null;
     created_at: string;
     drug?: {
         id: number;
         name: string;
         code: string;
+        unit_of_measure?: string;
     };
     drug_batch?: {
         id: number;
         batch_number: string;
     };
+    source_location?: {
+        id: number;
+        code: string;
+        name: string;
+        usage?: StockLocationUsage;
+    } | null;
+    destination_location?: {
+        id: number;
+        code: string;
+        name: string;
+        usage?: StockLocationUsage;
+    } | null;
+    user?: {
+        id: number;
+        name: string;
+    };
+};
+
+export type StockValuationLayer = {
+    id: number;
+    drug_id: number;
+    drug_batch_id: number | null;
+    stock_movement_id: number;
+    stock_location_id: number | null;
+    quantity: number;
+    remaining_qty: number;
+    unit_cost: number;
+    value: number;
+    remaining_value: number;
+    reference: string | null;
+    description: string | null;
+    created_at: string;
+    drug?: {
+        id: number;
+        name: string;
+        code: string;
+        unit_of_measure?: string;
+    };
+    drug_batch?: {
+        id: number;
+        batch_number: string;
+    } | null;
+    location?: {
+        id: number;
+        code: string;
+        name: string;
+    } | null;
+    stock_movement?: {
+        id: number;
+        reference_number: string | null;
+        type: StockMovementType;
+    } | null;
     user?: {
         id: number;
         name: string;

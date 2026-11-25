@@ -21,21 +21,34 @@ import {
     SelectValue,
 } from '@/shared/ui/select';
 
-import type { DrugInfo } from '../../types/pharmacy';
+import type { DrugInfo, StockLocation } from '../../types/pharmacy';
 
 type Props = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     drugs: DrugInfo[];
+    locations: StockLocation[];
 };
 
-export function NewBatchDialog({ open, onOpenChange, drugs }: Props) {
+export function NewBatchDialog({
+    open,
+    onOpenChange,
+    drugs,
+    locations,
+}: Props) {
+    const internalLocations = locations.filter((l) => l.usage === 'internal');
+    const defaultWarehouse =
+        internalLocations.find((l) => l.is_default_warehouse) ??
+        internalLocations[0];
+
     const { data, setData, post, processing, errors, reset } = useForm({
         drug_id: '',
         batch_number: '',
         expiry_date: '',
         initial_quantity: '',
         buy_price: '',
+        stock_location_id: defaultWarehouse ? String(defaultWarehouse.id) : '',
+        origin: '',
     });
 
     function handleSubmit(event: FormEvent) {
@@ -52,17 +65,17 @@ export function NewBatchDialog({ open, onOpenChange, drugs }: Props) {
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Penerimaan Batch Obat Baru</DialogTitle>
+                    <DialogTitle>Penerimaan Batch Produk Baru</DialogTitle>
                     <DialogDescription>
-                        Catat nomor batch, masa kedaluwarsa, kuantitas awal, dan
-                        harga beli obat.
+                        Catat batch baru, lokasi simpan, kuantitas awal, serta
+                        layer valuasi persediaan.
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-3.5">
                     <div className="space-y-1.5">
                         <Label htmlFor="batch-drug-select">
-                            Pilih Obat{' '}
+                            Pilih Produk{' '}
                             <span className="text-destructive">*</span>
                         </Label>
                         <Select
@@ -73,12 +86,13 @@ export function NewBatchDialog({ open, onOpenChange, drugs }: Props) {
                                 id="batch-drug-select"
                                 className="bg-background"
                             >
-                                <SelectValue placeholder="Pilih obat dari master..." />
+                                <SelectValue placeholder="Pilih produk dari master..." />
                             </SelectTrigger>
                             <SelectContent className="max-h-60">
                                 {drugs.map((d) => (
                                     <SelectItem key={d.id} value={String(d.id)}>
-                                        {d.name} ({d.form}) — Satuan:{' '}
+                                        {d.name}
+                                        {d.form ? ` (${d.form})` : ''} — Satuan:{' '}
                                         {d.unit_of_measure}
                                     </SelectItem>
                                 ))}
@@ -91,29 +105,46 @@ export function NewBatchDialog({ open, onOpenChange, drugs }: Props) {
                         )}
                     </div>
 
-                    <div className="space-y-1.5">
-                        <Label htmlFor="batch-number">
-                            Nomor Batch{' '}
-                            <span className="text-destructive">*</span>
-                        </Label>
-                        <Input
-                            id="batch-number"
-                            value={data.batch_number}
-                            onChange={(e) =>
-                                setData(
-                                    'batch_number',
-                                    e.target.value.toUpperCase(),
-                                )
-                            }
-                            placeholder="Contoh: BATCH-2026-001"
-                            className="bg-background uppercase"
-                            required
-                        />
-                        {errors.batch_number && (
-                            <p className="text-xs text-destructive">
-                                {errors.batch_number}
-                            </p>
-                        )}
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                            <Label htmlFor="batch-number">
+                                Nomor Batch{' '}
+                                <span className="text-destructive">*</span>
+                            </Label>
+                            <Input
+                                id="batch-number"
+                                value={data.batch_number}
+                                onChange={(e) =>
+                                    setData(
+                                        'batch_number',
+                                        e.target.value.toUpperCase(),
+                                    )
+                                }
+                                placeholder="BATCH-2026-001"
+                                className="bg-background uppercase"
+                                required
+                            />
+                            {errors.batch_number && (
+                                <p className="text-xs text-destructive">
+                                    {errors.batch_number}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <Label htmlFor="batch-origin">
+                                No. Faktur / PO
+                            </Label>
+                            <Input
+                                id="batch-origin"
+                                value={data.origin}
+                                onChange={(e) =>
+                                    setData('origin', e.target.value)
+                                }
+                                placeholder="PO-2026-001"
+                                className="bg-background"
+                            />
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
@@ -164,26 +195,57 @@ export function NewBatchDialog({ open, onOpenChange, drugs }: Props) {
                         </div>
                     </div>
 
-                    <div className="space-y-1.5">
-                        <Label htmlFor="batch-buy-price">
-                            Harga Beli Per Satuan (Opsional)
-                        </Label>
-                        <Input
-                            id="batch-buy-price"
-                            type="number"
-                            min={0}
-                            value={data.buy_price}
-                            onChange={(e) =>
-                                setData('buy_price', e.target.value)
-                            }
-                            placeholder="0"
-                            className="bg-background"
-                        />
-                        {errors.buy_price && (
-                            <p className="text-xs text-destructive">
-                                {errors.buy_price}
-                            </p>
-                        )}
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                            <Label htmlFor="batch-buy-price">
+                                Harga Beli / Unit
+                            </Label>
+                            <Input
+                                id="batch-buy-price"
+                                type="number"
+                                min={0}
+                                value={data.buy_price}
+                                onChange={(e) =>
+                                    setData('buy_price', e.target.value)
+                                }
+                                placeholder="0"
+                                className="bg-background"
+                            />
+                            {errors.buy_price && (
+                                <p className="text-xs text-destructive">
+                                    {errors.buy_price}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <Label htmlFor="batch-location">
+                                Lokasi Tujuan
+                            </Label>
+                            <Select
+                                value={data.stock_location_id}
+                                onValueChange={(val) =>
+                                    setData('stock_location_id', val)
+                                }
+                            >
+                                <SelectTrigger
+                                    id="batch-location"
+                                    className="bg-background"
+                                >
+                                    <SelectValue placeholder="Gudang Utama" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {internalLocations.map((loc) => (
+                                        <SelectItem
+                                            key={loc.id}
+                                            value={String(loc.id)}
+                                        >
+                                            {loc.code} — {loc.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
 
                     <DialogFooter className="gap-2 sm:gap-0">

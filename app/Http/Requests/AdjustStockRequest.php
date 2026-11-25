@@ -21,6 +21,7 @@ class AdjustStockRequest extends FormRequest
         return [
             'new_quantity' => ['required', 'integer', 'min:0'],
             'reason' => ['required', 'string', 'min:3', 'max:500'],
+            'stock_location_id' => ['nullable', 'exists:stock_locations,id'],
         ];
     }
 }

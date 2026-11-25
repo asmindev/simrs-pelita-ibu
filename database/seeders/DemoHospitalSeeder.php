@@ -32,6 +32,10 @@ use App\Models\Prescription;
 use App\Models\PrescriptionItem;
 use App\Models\Procedure;
 use App\Models\Queue;
+use App\Models\StockLocation;
+use App\Models\StockMovement;
+use App\Models\StockQuant;
+use App\Models\StockValuationLayer;
 use App\Models\Tariff;
 use App\Models\Unit;
 use App\Models\User;
@@ -184,7 +188,7 @@ class DemoHospitalSeeder extends Seeder
         );
 
         // Batches Obat (FEFO)
-        DrugBatch::firstOrCreate(
+        $batchPct = DrugBatch::firstOrCreate(
             ['batch_number' => 'BATCH-PCT-2026A'],
             [
                 'drug_id' => $drugParacetamol->id,
@@ -196,7 +200,7 @@ class DemoHospitalSeeder extends Seeder
             ]
         );
 
-        DrugBatch::firstOrCreate(
+        $batchAmx = DrugBatch::firstOrCreate(
             ['batch_number' => 'BATCH-AMX-2026A'],
             [
                 'drug_id' => $drugAmoxicillin->id,
@@ -208,7 +212,7 @@ class DemoHospitalSeeder extends Seeder
             ]
         );
 
-        DrugBatch::firstOrCreate(
+        $batchOmz = DrugBatch::firstOrCreate(
             ['batch_number' => 'BATCH-OMZ-2026A'],
             [
                 'drug_id' => $drugOmeprazole->id,
@@ -219,6 +223,59 @@ class DemoHospitalSeeder extends Seeder
                 'is_active' => true,
             ]
         );
+
+        $stockLocations = StockLocationSeeder::ensureDefaults();
+        $whStock = $stockLocations[StockLocation::CODE_DEFAULT_WAREHOUSE];
+        $vendorsLoc = $stockLocations[StockLocation::CODE_VENDORS];
+        $demoStockUser = User::query()->first();
+
+        foreach ([$batchPct, $batchAmx, $batchOmz] as $demoBatch) {
+            StockQuant::firstOrCreate(
+                [
+                    'stock_location_id' => $whStock->id,
+                    'drug_id' => $demoBatch->drug_id,
+                    'drug_batch_id' => $demoBatch->id,
+                ],
+                ['quantity' => $demoBatch->current_quantity]
+            );
+
+            if ($demoStockUser && ! StockMovement::where('drug_batch_id', $demoBatch->id)->exists()) {
+                $val = $demoBatch->current_quantity * $demoBatch->buy_price;
+                $ref = 'WH/IN/'.$today->format('Ymd').'-'.str_pad((string) $demoBatch->id, 4, '0', STR_PAD_LEFT);
+                $move = StockMovement::create([
+                    'reference_number' => $ref,
+                    'drug_id' => $demoBatch->drug_id,
+                    'drug_batch_id' => $demoBatch->id,
+                    'source_location_id' => $vendorsLoc->id,
+                    'destination_location_id' => $whStock->id,
+                    'type' => 'in',
+                    'quantity' => $demoBatch->current_quantity,
+                    'balance_before' => 0,
+                    'balance_after' => $demoBatch->current_quantity,
+                    'unit_cost' => $demoBatch->buy_price,
+                    'total_value' => $val,
+                    'origin' => 'SEED-DEMO',
+                    'state' => 'done',
+                    'reason' => 'Saldo awal inventaris farmasi demo.',
+                    'user_id' => $demoStockUser->id,
+                ]);
+
+                StockValuationLayer::create([
+                    'drug_id' => $demoBatch->drug_id,
+                    'drug_batch_id' => $demoBatch->id,
+                    'stock_movement_id' => $move->id,
+                    'stock_location_id' => $whStock->id,
+                    'quantity' => $demoBatch->current_quantity,
+                    'remaining_qty' => $demoBatch->current_quantity,
+                    'unit_cost' => $demoBatch->buy_price,
+                    'value' => $val,
+                    'remaining_value' => $val,
+                    'reference' => $ref,
+                    'description' => 'Saldo awal inventaris farmasi demo.',
+                    'user_id' => $demoStockUser->id,
+                ]);
+            }
+        }
 
         // 5. KAMAR & BED RAWAT INAP (BANGSAL MELATI)
         $bedsData = [
