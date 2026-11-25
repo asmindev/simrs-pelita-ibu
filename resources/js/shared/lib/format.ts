@@ -15,14 +15,30 @@ const dateTimeFormatter = new Intl.DateTimeFormat('id-ID', {
     timeZone: 'Asia/Jakarta',
 });
 
-export function formatCurrency(value: number): string {
-    return currencyFormatter.format(value);
+export function formatCurrency(value: number | null | undefined): string {
+    const numeric = typeof value === 'number' ? value : Number(value ?? 0);
+
+    return currencyFormatter.format(Number.isFinite(numeric) ? numeric : 0);
 }
 
-export function formatDate(value: string | Date): string {
-    return dateFormatter.format(new Date(value));
+export function formatDate(value: string | Date | null | undefined): string {
+    if (!value) {
+        return '-';
+    }
+
+    const date = new Date(value);
+
+    return Number.isNaN(date.getTime()) ? '-' : dateFormatter.format(date);
 }
 
-export function formatDateTime(value: string | Date): string {
-    return dateTimeFormatter.format(new Date(value));
+export function formatDateTime(
+    value: string | Date | null | undefined,
+): string {
+    if (!value) {
+        return '-';
+    }
+
+    const date = new Date(value);
+
+    return Number.isNaN(date.getTime()) ? '-' : dateTimeFormatter.format(date);
 }

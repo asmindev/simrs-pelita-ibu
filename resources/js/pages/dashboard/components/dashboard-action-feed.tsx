@@ -1,8 +1,9 @@
 import { Link } from '@inertiajs/react';
 import {
-    ArrowRight,
+    ArrowUpRight,
     BedDouble,
-    Clock,
+    CheckCircle2,
+    ClipboardList,
     FileText,
     Microscope,
     Pill,
@@ -28,59 +29,71 @@ interface Props {
     items: ActionFeedItem[];
 }
 
-export function DashboardActionFeed({ items }: Props) {
-    function renderIcon(icon: ActionFeedItem['action_icon']) {
-        switch (icon) {
-            case 'stethoscope':
-                return <Stethoscope className="size-4 text-primary" />;
-            case 'pill':
-                return <Pill className="size-4 text-primary" />;
-            case 'wallet':
-                return <Wallet className="size-4 text-primary" />;
-            case 'microscope':
-                return <Microscope className="size-4 text-primary" />;
-            case 'ticket':
-                return <Ticket className="size-4 text-primary" />;
-            case 'bed':
-                return <BedDouble className="size-4 text-primary" />;
-            case 'shield':
-                return <Shield className="size-4 text-primary" />;
-            default:
-                return <FileText className="size-4 text-primary" />;
-        }
+function renderIcon(icon: ActionFeedItem['action_icon']) {
+    switch (icon) {
+        case 'stethoscope':
+            return <Stethoscope className="size-4" />;
+        case 'pill':
+            return <Pill className="size-4" />;
+        case 'wallet':
+            return <Wallet className="size-4" />;
+        case 'microscope':
+            return <Microscope className="size-4" />;
+        case 'ticket':
+            return <Ticket className="size-4" />;
+        case 'bed':
+            return <BedDouble className="size-4" />;
+        case 'shield':
+            return <Shield className="size-4" />;
+        default:
+            return <FileText className="size-4" />;
     }
+}
 
+export function DashboardActionFeed({ items }: Props) {
     return (
-        <Card className="flex flex-col border-border/80 shadow-xs">
-            <CardHeader className="border-b border-border/60 pb-3">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle className="text-base font-semibold">
-                            Tugas & Pasien Memerlukan Tindakan
-                        </CardTitle>
-                        <CardDescription className="text-xs">
-                            Antrean otomatis disusun sesuai urutan waktu datang
-                            dan peran aktif Anda.
-                        </CardDescription>
+        <Card
+            size="sm"
+            className="h-full gap-0 py-0 [--card-spacing:--spacing(2.5)]"
+        >
+            <CardHeader className="border-b border-border/60 px-3.5 pt-2.5">
+                <div className="flex items-center justify-between gap-2.5">
+                    <div className="flex items-center gap-2.5">
+                        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <ClipboardList className="size-4" />
+                        </div>
+                        <div>
+                            <CardTitle className="text-sm font-semibold">
+                                Tugas & Pasien Perlu Tindakan
+                            </CardTitle>
+                            <CardDescription className="text-xs">
+                                Antrean disusun otomatis sesuai waktu datang dan
+                                peran aktif Anda.
+                            </CardDescription>
+                        </div>
                     </div>
+
                     {items.length > 0 && (
                         <Badge
                             variant="secondary"
-                            className="font-mono text-xs"
+                            className="shrink-0 font-mono text-xs"
                         >
-                            {items.length} tugas aktif
+                            {items.length} aktif
                         </Badge>
                     )}
                 </div>
             </CardHeader>
-            <CardContent className="flex-1 p-0">
+
+            <CardContent className="p-0">
                 {items.length === 0 ? (
-                    <div className="flex min-h-64 flex-col items-center justify-center p-6 text-center text-muted-foreground">
-                        <Clock className="mb-2 size-8 text-muted-foreground/50" />
-                        <div className="text-sm font-medium">
-                            Semua Tugas Sudah Selesai
+                    <div className="flex flex-col items-center justify-center gap-1.5 px-4 py-8 text-center">
+                        <div className="flex size-9 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                            <CheckCircle2 className="size-4.5" />
                         </div>
-                        <p className="mt-1 max-w-xs text-xs">
+                        <p className="text-sm font-medium text-foreground">
+                            Semua tugas sudah selesai
+                        </p>
+                        <p className="max-w-xs text-xs text-muted-foreground">
                             Tidak ada pasien atau antrean yang sedang menunggu
                             tindakan Anda saat ini.
                         </p>
@@ -90,49 +103,51 @@ export function DashboardActionFeed({ items }: Props) {
                         {items.map((item) => (
                             <div
                                 key={item.id}
-                                className="flex flex-col justify-between gap-3 p-3.5 transition-colors hover:bg-muted/30 sm:flex-row sm:items-center"
+                                className="group flex items-center gap-2.5 px-3.5 py-2 transition-colors hover:bg-muted/40"
                             >
-                                <div className="flex items-start gap-3">
-                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-card">
-                                        {renderIcon(item.action_icon)}
-                                    </div>
-                                    <div className="space-y-0.5">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xs font-semibold text-foreground">
-                                                {item.title}
-                                            </span>
-                                            <Badge
-                                                variant="outline"
-                                                className="border-border text-[10px] text-muted-foreground"
-                                            >
-                                                {item.badge}
-                                            </Badge>
-                                        </div>
-                                        <div className="text-xs text-muted-foreground">
-                                            {item.subtitle}
-                                        </div>
-                                    </div>
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border bg-background text-primary">
+                                    {renderIcon(item.action_icon)}
                                 </div>
 
-                                <div className="flex items-center justify-between gap-3 sm:justify-end">
-                                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground sm:flex-col sm:items-end sm:gap-0.5">
-                                        <span className="font-medium text-foreground">
-                                            {item.status_label}
+                                <div className="min-w-0 flex-1 space-y-0.5">
+                                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                        <span className="truncate text-sm font-medium text-foreground">
+                                            {item.title}
                                         </span>
-                                        <span>Jam {item.time}</span>
+                                        <Badge
+                                            variant="outline"
+                                            className="h-4 border-border px-1.5 text-[10px] font-normal text-muted-foreground"
+                                        >
+                                            {item.badge}
+                                        </Badge>
                                     </div>
-                                    <Button
-                                        asChild
-                                        size="sm"
-                                        variant="default"
-                                        className="h-8 gap-1.5 text-xs font-medium"
-                                    >
-                                        <Link href={item.action_route}>
-                                            {item.action_label}
-                                            <ArrowRight className="size-3" />
-                                        </Link>
-                                    </Button>
+                                    <p className="truncate text-xs text-muted-foreground">
+                                        {item.subtitle}
+                                    </p>
                                 </div>
+
+                                <div className="hidden shrink-0 flex-col items-end gap-0.5 text-right sm:flex">
+                                    <span className="text-xs font-medium text-foreground">
+                                        {item.status_label}
+                                    </span>
+                                    <span className="font-mono text-[10px] text-muted-foreground tabular-nums">
+                                        {item.time}
+                                    </span>
+                                </div>
+
+                                <Button
+                                    asChild
+                                    size="sm"
+                                    variant="secondary"
+                                    className="shrink-0 gap-1.5 text-xs"
+                                >
+                                    <Link href={item.action_route}>
+                                        <span className="hidden sm:inline">
+                                            {item.action_label}
+                                        </span>
+                                        <ArrowUpRight className="size-3.5" />
+                                    </Link>
+                                </Button>
                             </div>
                         ))}
                     </div>

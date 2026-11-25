@@ -3,13 +3,14 @@ import { Head } from '@inertiajs/react';
 import { DashboardActionFeed } from './components/dashboard-action-feed';
 import { DashboardFacilitySnapshot } from './components/dashboard-facility-snapshot';
 import { DashboardFinancialSummaryTable } from './components/dashboard-financial-summary-table';
+import { DashboardHeader } from './components/dashboard-header';
 import { DashboardPipelineBar } from './components/dashboard-pipeline-bar';
 import { DashboardUnitQueueTable } from './components/dashboard-unit-queue-table';
 import type { DashboardPageProps } from './types/dashboard';
 
 export default function Dashboard({
-    assignedRoles: _assignedRoles,
-    isSuperAdmin: _isSuperAdmin,
+    assignedRoles,
+    isSuperAdmin,
     pipeline,
     actionFeed,
     facilitySnapshot,
@@ -17,14 +18,18 @@ export default function Dashboard({
     financialSummaries,
 }: DashboardPageProps) {
     return (
-        <div className="space-y-4">
-            <Head title="Dashboard Operasional Terpadu — SIMRS" />
+        <div className="space-y-3">
+            <Head title="Dashboard Operasional — SIMRS" />
 
-            {/* 1. Baris Alur Pasien Utama (Pipeline) */}
+            <DashboardHeader
+                assignedRoles={assignedRoles}
+                isSuperAdmin={isSuperAdmin}
+                todayRevenue={pipeline.today_revenue}
+            />
+
             <DashboardPipelineBar pipeline={pipeline} />
 
-            {/* 2. Grid Utama (Feed Tugas 65% + Fasilitas 35%) */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
                 <div className="lg:col-span-2">
                     <DashboardActionFeed items={actionFeed} />
                 </div>
@@ -33,8 +38,7 @@ export default function Dashboard({
                 </div>
             </div>
 
-            {/* 3. Grid Tabel Operasional Tambahan (Antrean Poli & Billing Penjamin) */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
                 <DashboardUnitQueueTable items={unitQueueSummaries} />
                 <DashboardFinancialSummaryTable items={financialSummaries} />
             </div>

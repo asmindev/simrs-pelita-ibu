@@ -22,6 +22,7 @@ type Props<T> = {
     columns: DataTableColumn<T>[];
     rows: T[];
     rowKey: (row: T) => string | number;
+    onRowClick?: (row: T) => void;
     empty?: ReactNode;
     toolbar?: ReactNode;
     footer?: ReactNode;
@@ -32,6 +33,7 @@ export function DataTable<T>({
     columns,
     rows,
     rowKey,
+    onRowClick,
     empty,
     toolbar,
     footer,
@@ -70,7 +72,30 @@ export function DataTable<T>({
                                 {rows.map((row, index) => (
                                     <TableRow
                                         key={rowKey(row)}
-                                        className="transition-colors duration-150 hover:bg-accent/40"
+                                        onClick={
+                                            onRowClick
+                                                ? () => onRowClick(row)
+                                                : undefined
+                                        }
+                                        onKeyDown={
+                                            onRowClick
+                                                ? (event) => {
+                                                      if (
+                                                          event.key ===
+                                                              'Enter' ||
+                                                          event.key === ' '
+                                                      ) {
+                                                          event.preventDefault();
+                                                          onRowClick(row);
+                                                      }
+                                                  }
+                                                : undefined
+                                        }
+                                        tabIndex={onRowClick ? 0 : undefined}
+                                        className={cn(
+                                            'transition-colors duration-150 hover:bg-accent/40',
+                                            onRowClick && 'cursor-pointer',
+                                        )}
                                     >
                                         {columns.map((column) => (
                                             <TableCell
