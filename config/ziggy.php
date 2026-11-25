@@ -13,6 +13,7 @@ return [
         'registration.*',
         'medical-record.*',
         'pharmacy.*',
+        'inventory.*',
         'cashier.*',
         'diagnostics.*',
         'inpatient.*',

@@ -176,7 +176,7 @@ export default function ProductShow({
                                     className="h-8 gap-1.5 bg-card text-xs font-medium"
                                 >
                                     <Link
-                                        href={route('pharmacy.stock.index', {
+                                        href={route('inventory.stock.index', {
                                             search: product.code,
                                         })}
                                     >

@@ -69,19 +69,6 @@ export default function MasterDataIndex() {
                         </p>
                     </Link>
                 </Can>
-
-                <Can permission="master-data.product.view">
-                    <Link
-                        href={route('master-data.products.index')}
-                        className="rounded-lg border p-4 hover:bg-muted/50"
-                    >
-                        <p className="font-medium">Produk</p>
-                        <p className="text-sm text-muted-foreground">
-                            Katalog produk terpadu: obat, alkes/BMHP, reagen,
-                            dan perlengkapan umum.
-                        </p>
-                    </Link>
-                </Can>
             </div>
         </div>
     );

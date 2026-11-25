@@ -148,7 +148,7 @@ class PharmacyStockController extends Controller
             ->sortBy(fn (StockLocation $loc): int => $loc->usage === StockLocationUsage::Internal ? 0 : 1)
             ->values();
 
-        return Inertia::render('pharmacy/stock/index', [
+        return Inertia::render('inventory/stock/index', [
             'activeTab' => $tab,
             'batches' => $batches,
             'movements' => $movements,

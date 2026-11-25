@@ -61,7 +61,7 @@ export default function PrescriptionList({
                                 size="sm"
                                 className="h-8 gap-1.5 text-xs font-medium"
                             >
-                                <Link href={route('pharmacy.stock.index')}>
+                                <Link href={route('inventory.stock.index')}>
                                     <Boxes className="size-3.5" />
                                     Stok & Batch Obat
                                 </Link>

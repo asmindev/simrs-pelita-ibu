@@ -31,6 +31,7 @@ use App\Http\Controllers\Registration\EncounterController;
 use App\Http\Controllers\Registration\QueueController;
 use App\Http\Controllers\Registration\RegistrationController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\StockLocationController;
 use App\Http\Controllers\TariffController;
 use App\Http\Controllers\UnitController;
 use Illuminate\Support\Facades\Route;
@@ -371,6 +372,17 @@ Route::middleware(['auth', 'verified'])
                 ->name('return');
         });
 
+    });
+
+Route::redirect('/pharmacy/stock', '/inventory/stock')
+    ->middleware(['auth', 'verified']);
+
+Route::middleware(['auth', 'verified'])
+    ->prefix('inventory')
+    ->name('inventory.')
+    ->group(function (): void {
+        Route::redirect('/', '/inventory/warehouses')->name('index');
+
         Route::prefix('stock')->name('stock.')->group(function (): void {
             Route::get('/', [PharmacyStockController::class, 'index'])
                 ->middleware('permission:pharmacy.stock.view')
@@ -387,6 +399,24 @@ Route::middleware(['auth', 'verified'])
             Route::post('moves', [PharmacyStockController::class, 'storeMove'])
                 ->middleware('permission:pharmacy.stock.adjust')
                 ->name('moves.store');
+        });
+
+        Route::prefix('warehouses')->name('warehouses.')->group(function (): void {
+            Route::get('/', [StockLocationController::class, 'index'])
+                ->middleware('permission:pharmacy.stock.view')
+                ->name('index');
+            Route::post('/', [StockLocationController::class, 'store'])
+                ->middleware('permission:pharmacy.stock.adjust')
+                ->name('store');
+            Route::get('{warehouse}', [StockLocationController::class, 'show'])
+                ->middleware('permission:pharmacy.stock.view')
+                ->name('show');
+            Route::put('{warehouse}', [StockLocationController::class, 'update'])
+                ->middleware('permission:pharmacy.stock.adjust')
+                ->name('update');
+            Route::delete('{warehouse}', [StockLocationController::class, 'destroy'])
+                ->middleware('permission:pharmacy.stock.adjust')
+                ->name('destroy');
         });
     });
 

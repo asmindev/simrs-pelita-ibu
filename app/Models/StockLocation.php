@@ -70,6 +70,43 @@ class StockLocation extends Model
     }
 
     /**
+     * @return HasMany<StockMovement, $this>
+     */
+    public function outgoingMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class, 'source_location_id');
+    }
+
+    /**
+     * @return HasMany<StockMovement, $this>
+     */
+    public function incomingMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class, 'destination_location_id');
+    }
+
+    /**
+     * @return HasMany<StockValuationLayer, $this>
+     */
+    public function valuationLayers(): HasMany
+    {
+        return $this->hasMany(StockValuationLayer::class);
+    }
+
+    /**
+     * @param  Builder<StockLocation>  $query
+     * @return Builder<StockLocation>
+     */
+    public function scopeSearch(Builder $query, string $term): Builder
+    {
+        return $query->where(function (Builder $q) use ($term): void {
+            $q->where('code', 'like', "%{$term}%")
+                ->orWhere('name', 'like', "%{$term}%")
+                ->orWhere('description', 'like', "%{$term}%");
+        });
+    }
+
+    /**
      * @param  Builder<StockLocation>  $query
      * @return Builder<StockLocation>
      */

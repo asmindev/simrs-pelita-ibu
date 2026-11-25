@@ -91,7 +91,6 @@ declare module 'ziggy-js' {
             "binding": "id"
         }
     ],
-    "master-data.": [],
     "master-data.products.index": [],
     "master-data.products.create": [],
     "master-data.products.store": [],
@@ -414,16 +413,40 @@ declare module 'ziggy-js' {
             "binding": "id"
         }
     ],
-    "pharmacy.stock.index": [],
-    "pharmacy.stock.batches.store": [],
-    "pharmacy.stock.batches.adjust": [
+    "inventory.index": [],
+    "inventory.stock.index": [],
+    "inventory.stock.batches.store": [],
+    "inventory.stock.batches.adjust": [
         {
             "name": "batch",
             "required": true,
             "binding": "id"
         }
     ],
-    "pharmacy.stock.moves.store": [],
+    "inventory.stock.moves.store": [],
+    "inventory.warehouses.index": [],
+    "inventory.warehouses.store": [],
+    "inventory.warehouses.show": [
+        {
+            "name": "warehouse",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "inventory.warehouses.update": [
+        {
+            "name": "warehouse",
+            "required": true,
+            "binding": "id"
+        }
+    ],
+    "inventory.warehouses.destroy": [
+        {
+            "name": "warehouse",
+            "required": true,
+            "binding": "id"
+        }
+    ],
     "cashier.index": [],
     "cashier.invoices.index": [],
     "cashier.invoices.store": [],
