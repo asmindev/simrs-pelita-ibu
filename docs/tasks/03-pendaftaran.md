@@ -1,6 +1,6 @@
 # Fase 3 — Pendaftaran
 
-Status: selesai (kunjungan encounters, penomoran antrean queues unik per unit per hari, insurance coverages, policy unit scoping, pencegahan kunjungan ganda, dan queue board live dengan usePoll selesai).
+Status: selesai (kunjungan `encounters`, penomoran antrean `queues` unik per unit per hari, `insurance_coverages`, policy unit scoping, pencegahan kunjungan ganda, serta penyederhanaan flow tanpa `queue/board` dengan redesign halaman Detail Kunjungan selesai).
 
 ## Referensi legacy
 
@@ -13,28 +13,26 @@ Status: selesai (kunjungan encounters, penomoran antrean queues unik per unit pe
 ## Backend
 
 - [x] Migration `encounters`, `queues`, `insurance_coverages`.
-- [x] Dukung kunjungan terjadwal dari appointment legacy dan walk-in.
-- [x] Model + relasi.
-- [x] Controller kunjungan dan antrean.
-- [x] FormRequest.
-- [x] Policy scoping unit.
-- [x] Pencegahan kunjungan ganda.
-- [x] Penomoran antrean unik per unit per hari.
+- [x] Dukung kunjungan terjadwal dan walk-in dalam satu alur antrean.
+- [x] Model + relasi (`Encounter`, `Queue`, `InsuranceCoverage`).
+- [x] Controller kunjungan (`EncounterController`, `RegistrationController`) dan endpoint aksi antrean (`QueueController`: `call`, `serve`, `complete`, `skip`, `data`).
+- [x] Eager-loading `prescriptions.items.product` pada `EncounterController::show` hanya jika user memiliki `pharmacy.prescription.view`.
+- [x] FormRequest & Policy scoping unit.
+- [x] Pencegahan kunjungan ganda dan penomoran antrean unik per unit per hari.
 - [x] Permission enum Registration.
-- [x] Test alur, jadwal vs walk-in, dan konkurensi.
+- [x] Test alur kunjungan, siklus antrean, scoping unit, dan visibilitas resep.
 
 ## Frontend
 
-- [x] `pages/registration/home/index.tsx`.
-- [x] `pages/registration/visit/{list,create}/index.tsx`.
-- [x] Tampilkan jadwal dokter dari Master Data di form kunjungan.
-- [x] `QueueBoard` dan `EncounterForm` di components.
-- [x] `usePoll` untuk antrean.
-- [x] Filter dan pagination di URL.
-- [x] Aksi panggil/batal dibungkus `Can`.
+- [x] `pages/registration/home/index.tsx` (ringkasan unit mengarah langsung ke daftar kunjungan terfilter `unit_id`).
+- [x] `pages/registration/visit/list/index.tsx`: tabel kompak (`py-1.5`), tanpa kolom RM ganda dan tanpa kolom action, klik baris langsung ke Detail Kunjungan (`onRowClick`).
+- [x] `pages/registration/visit/create/index.tsx` (`EncounterForm` + `SelectedPatientCard`).
+- [x] `pages/registration/visit/show/index.tsx`: redesign sheet detail kunjungan berbasis Tabs & UX Pro Max (`VisitControlBar` + journey stepper, `VisitSheetHeader` + 4 summary tiles, `VisitOverviewTab`, `VisitPrescriptionsTab`, `VisitBillingTab`, `CancelVisitDialog`).
+- [x] Menghapus halaman `Papan Antrean` (`queue/board`) dan memindahkan aksi antrean langsung ke Detail Kunjungan + tautan _Buka EMR_.
+- [x] Filter dan pagination di URL; aksi dibungkus `Can`.
 
 ## Kriteria
 
-- Pendaftaran tanpa reload penuh.
+- Pendaftaran dan transisi status kunjungan berjalan tanpa reload penuh.
 - Nomor antrean tidak duplikat saat bersamaan.
-- Permission dan scoping unit diuji.
+- Permission, scoping unit, dan omisi resep tanpa izin teruji.

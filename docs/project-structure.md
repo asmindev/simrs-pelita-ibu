@@ -41,37 +41,87 @@ resources/js/
       types/
       lib/
       patient/
-        list/index.tsx
+        list/
+          index.tsx
+          components/             # patient-columns, patient-form-dialog
         create/index.tsx
         edit/index.tsx
-        components/             # PatientForm/PatientFilters
-        hooks/                  # use-patient-duplicates
+        components/               # PatientForm/PatientFilters
+        hooks/                    # use-patient-duplicates
         types/
-        lib/
       doctor/
-        list/index.tsx
+        list/
+          index.tsx
+          components/             # doctor-columns, doctor-form-dialog
         create/index.tsx
         edit/index.tsx
         components/
         types/
       unit/
+        list/
+          index.tsx
+          components/             # unit-columns, unit-form-dialog
+        create/index.tsx
+        edit/index.tsx
+        components/
+        types/
+      guarantor/
+        list/
+          index.tsx
+          components/             # guarantor-columns
+        create/index.tsx
+        edit/index.tsx
+        components/
+        types/
+      tariff/
+        list/
+          index.tsx
+          components/             # tariff-columns
+        create/index.tsx
+        edit/index.tsx
+        components/
+        types/
+      product/
         list/index.tsx
         create/index.tsx
+        show/index.tsx
         edit/index.tsx
         components/
         types/
     registration/
       home/index.tsx
-      components/
-      hooks/
       types/
-      lib/
       visit/
-        list/index.tsx
+        list/
+          index.tsx
+          components/             # encounter-columns (tanpa RM/action), encounter-filters
         create/index.tsx
+        show/
+          index.tsx
+          components/             # visit-control-bar, visit-sheet-header, visit-*-tab, cancel-visit-dialog
+    medical-record/
+      home/index.tsx
+      encounter/
+        show/index.tsx
+        components/               # patient-context-bar (+ selesai konsultasi), assessment-form, diagnosis-editor, procedure-editor, prescription-editor, sensitive-note-box, report-list-tab
+      patient/history/index.tsx
+      report/{list,create,show}/index.tsx
+    pharmacy/
+      prescription/
+        list/
+          index.tsx
+          components/             # create-prescription-dialog, prescription-columns, ...
+        show/index.tsx
+        components/
+    inventory/
+      components/                 # stock-move-dialog
+      stock/{index.tsx,show/index.tsx}
+      warehouse/list/index.tsx
+      move/index.tsx
+      valuation/index.tsx
   shared/
-    ui/                         # primitive shadcn (button, input, dialog, ...)
-    components/                 # komposisi generik lintas domain
+    ui/                           # primitive shadcn (button, calendar, input, dialog, tabs, ...)
+    components/                   # DataTable, Combobox, DatePicker, PrescriptionItemsEditor, PrescriptionStatusBadge, Can, ...
     layouts/                    # AppLayout dan sub-layout domain
     hooks/                      # hook lintas domain
     lib/                        # route, format, utils

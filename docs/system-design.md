@@ -120,15 +120,15 @@ Tetap hindari hook yang hanya meneruskan props.
 ### 4.7 Tabel dan filter
 
 - **Standarisasi Desain Tabel (`DataTable`)**:
-  - Seluruh tabel di aplikasi (baik halaman daftar utama, modal, tab, maupun detail riwayat) wajib menggunakan komponen terpadu `DataTable` dari `@/shared/components/data-table`.
-  - Dilarang membungkus tabel secara inkonsisten (misal manual wrapper border/card ganda di luar `DataTable`).
-  - Seluruh tabel wajib menyertakan header dan ringkasan toolbar standar melalui `TableToolbar` (`@/shared/components/table-toolbar`), minimal memuat:
-    - Judul tabel (`title`) & deskripsi konteks (`description`).
-    - Ikon modul/entitas (`icon`).
-    - Indikator counter baris data (`current` & `total`).
-    - Input pencarian cepat (*search field*) di sisi kanan toolbar untuk kenyamanan pengguna saat memfilter data.
-    - **Konsistensi Background Input Toolbar**: Setiap input field (seperti search input, text input, dan select trigger dropdown) di dalam toolbar tabel **wajib memakai kelas `bg-background`** (bukan tombol / button) agar kontras terhadap background toolbar `bg-muted` tetap tajam, konsisten, dan rapi di seluruh sistem.
-- API `DataTable` props-only (`columns`, `rows`, `rowKey`, `empty`, `toolbar`, `footer`).
+    - Seluruh tabel di aplikasi (baik halaman daftar utama, modal, tab, maupun detail riwayat) wajib menggunakan komponen terpadu `DataTable` dari `@/shared/components/data-table`.
+    - Dilarang membungkus tabel secara inkonsisten (misal manual wrapper border/card ganda di luar `DataTable`).
+    - Seluruh tabel wajib menyertakan header dan ringkasan toolbar standar melalui `TableToolbar` (`@/shared/components/table-toolbar`), minimal memuat:
+        - Judul tabel (`title`) & deskripsi konteks (`description`).
+        - Ikon modul/entitas (`icon`).
+        - Indikator counter baris data (`current` & `total`).
+        - Input pencarian cepat (_search field_) di sisi kanan toolbar untuk kenyamanan pengguna saat memfilter data.
+        - **Konsistensi Background Input Toolbar**: Setiap input field (seperti search input, text input, dan select trigger dropdown) di dalam toolbar tabel **wajib memakai kelas `bg-background`** (bukan tombol / button) agar kontras terhadap background toolbar `bg-muted` tetap tajam, konsisten, dan rapi di seluruh sistem.
+- API `DataTable` props-only (`columns`, `rows`, `rowKey`, `onRowClick`, `empty`, `toolbar`, `footer`). Untuk tabel operasional yang ringkas (seperti Kunjungan Pasien & Stok), gunakan `onRowClick` untuk masuk langsung ke halaman detail serta padding baris kompak (`py-1` / `py-1.5`).
 - Filter/sort/page/search pada halaman utama disimpan di query string; reload dengan `router.get(..., { preserveState: true, preserveScroll: true })`.
 - Data tabel pada halaman daftar utama selalu dipaginasi server-side.
 
@@ -349,18 +349,18 @@ Perilaku:
 
 ## 10. Ringkasan status implementasi
 
-| Area                                                              | Status      |
-| ----------------------------------------------------------------- | ----------- |
-| Feature skeleton di `pages/<domain>`                              | Implemented |
-| Ziggy + whitelist + tipe route                                    | Implemented |
-| Import boundary check di `npm run check`                          | Implemented |
-| `AppLayout`, `PageHeader`, `EmptyState`, `DataTable`, `Can` dasar | Implemented |
-| `usePermissions` dasar                                            | Implemented |
-| Upgrade `Can` (any/all), `usePoll`, `useUnsavedChanges`           | PLANNED     |
-| Permission type generator                                         | PLANNED     |
-| spatie + registry + seeder + middleware                           | PLANNED     |
-| Policy + unit scoping                                             | PLANNED     |
-| 403 + break-glass                                                 | PLANNED     |
-| Audit access pasien                                               | PLANNED     |
-| react-i18next                                                     | PLANNED     |
-| Vitest                                                            | PLANNED     |
+| Area                                                                  | Status      |
+| --------------------------------------------------------------------- | ----------- |
+| Feature skeleton di `pages/<domain>`                                  | Implemented |
+| Ziggy + whitelist + tipe route                                        | Implemented |
+| Import boundary & no-hardcoded-colors check di `npm run check`        | Implemented |
+| `AppLayout`, `TableToolbar`, `EmptyState`, `DataTable`, `Can`         | Implemented |
+| `Combobox`, `DatePicker`/`Calendar`, `PrescriptionItemsEditor`        | Implemented |
+| `usePermissions`, `usePoll`, `useUnsavedChanges`, `useDebouncedValue` | Implemented |
+| Permission type generator (`simrs:permissions --types`)               | Implemented |
+| spatie + registry + seeder + middleware                               | Implemented |
+| Policy + unit scoping                                                 | Implemented |
+| 403 + break-glass                                                     | Implemented |
+| Audit access pasien (`PatientAccessLog` + activity log)               | Implemented |
+| react-i18next                                                         | PLANNED     |
+| Vitest                                                                | PLANNED     |

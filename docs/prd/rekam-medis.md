@@ -1,11 +1,13 @@
 # PRD — Rekam Medis
 
-Status: PLANNED
+Status: IMPLEMENTED
 
 ## Tujuan
 
-Menyediakan rekam medis elektronik per kunjungan: asesmen, diagnosis, tindakan,
-catatan, dan order penunjang, dengan kontrol akses ketat.
+Menyediakan rekam medis elektronik (EMR) per kunjungan: asesmen SOAP,
+diagnosis ICD-10, tindakan ICD-9-CM, penulisan E-Resep, catatan sensitif,
+laporan klinis khusus, serta penyelesaian konsultasi dengan kontrol akses
+ketat dan audit trail.
 
 ## Aktor
 
@@ -18,60 +20,45 @@ catatan, dan order penunjang, dengan kontrol akses ketat.
 
 Termasuk:
 
-- Buka encounter dari pendaftaran.
-- Asesmen awal dan lanjutan.
-- Diagnosis (utama dan sekunder).
-- Tindakan/prosedur.
-- Catatan sensitif (psikiatri, HIV) dengan permission khusus.
-- Order penunjang dan resep.
+- Buka encounter dari Pendaftaran (tombol _Buka EMR_) atau daftar Rekam Medis.
+- Asesmen SOAP & tanda vital (otomatis mengubah status `arrived` → `in_consultation`).
+- Finalisasi asesmen + addendum untuk koreksi pasca-final.
+- Diagnosis ICD-10 (utama dan sekunder).
+- Tindakan/prosedur medis (ICD-9-CM).
+- Pembuatan **E-Resep** multi-obat langsung di tab **E-Resep** (aktif hanya saat kunjungan berstatus `in_consultation` / _Sedang Dilayani_, menampilkan stok tersedia FEFO dan peringatan stok).
+- Tombol **Selesai Konsultasi** langsung dari bar konteks pasien EMR (`finished` + menutup antrean terkait).
+- Catatan sensitif (psikiatri, HIV, dll.) dengan permission khusus dan break-glass.
 - Laporan tindakan/operasi, kelahiran, dan kematian.
 - Draft autosave untuk form panjang.
-- Riwayat kunjungan pasien.
-- Audit akses baca/tulis.
+- Riwayat kunjungan pasien lengkap beserta daftar resep obat yang diterbitkan.
+- Audit akses baca/tulis (`PatientAccessLog`).
 
 Tidak termasuk:
 
-- Penulisan resep final (ada di Farmasi).
-- Hasil penunjang (ada di Penunjang).
+- Telaah/verifikasi apoteker dan dispensing stok FEFO (ada di Farmasi).
+- Hasil pemeriksaan laboratorium/radiologi (ada di Penunjang).
 
 ## Alur utama
 
-1. Dokter/perawat membuka encounter dari antrean.
-2. Sistem memeriksa Policy unit dan permission.
-3. Pengguna mengisi asesmen; draft disimpan otomatis.
-4. Diagnosis dan tindakan ditambahkan.
-5. Order penunjang/resep dikirim ke domain terkait.
-6. Encounter ditutup setelah selesai.
-7. Setiap akses data pasien tercatat.
-
-## Referensi legacy
-
-- `doctor/manage_prescription.php`: `case_history`, `medication`, `description`
-  → asesmen + resep terstruktur.
-- `doctor/manage_report.php` dan `nurse/manage_report.php`: laporan
-  operasi/kelahiran/kematian.
-- Upload `diagnosis_report` legacy masuk domain Penunjang, bukan Rekam Medis.
-- Diperluas menjadi SOAP, diagnosis terstruktur, alergi, catatan sensitif, dan
-  addendum.
+1. Dokter/perawat membuka encounter dari daftar EMR atau Detail Kunjungan Pendaftaran.
+2. Sistem memeriksa Policy unit dan permission serta mencatat `PatientAccessLog`.
+3. Pengguna mengisi asesmen SOAP (otomatis mengubah `arrived` → `in_consultation`), diagnosis, dan tindakan.
+4. Saat kunjungan berstatus `in_consultation`, dokter dapat menulis **E-Resep** di tab _E-Resep_ menuju antrean Farmasi (`submitted`).
+5. Setelah pelayanan selesai, dokter/staf menekan **Selesai Konsultasi** di EMR (atau _Selesai Layani_ di Pendaftaran) untuk menutup kunjungan menjadi `finished`.
+6. Seluruh riwayat kunjungan termasuk resep obat dapat ditinjau di halaman **Riwayat Pasien**.
 
 ## Field sensitif
 
-- Backend tidak mengirim field jika user tidak punya permission.
-- Permission contoh:
-    - `medical-record.sensitive-note.view`
-    - `medical-record.sensitive-note.update`
-- FE membungkus field dengan `<Can>`.
-- Akses darurat memakai break-glass dengan alasan dan audit.
+- Backend tidak mengirim `sensitive_notes` jika user tidak punya `medical-record.sensitive-note.view` atau break-glass grant aktif.
+- Backend juga tidak mengirim daftar obat (`drugs`) jika kunjungan tidak berstatus `in_consultation` atau user tidak memiliki `pharmacy.prescription.create`.
+- FE membungkus field dan aksi dengan `<Can>`.
 
 ## Entitas
 
-- `medical_records` / `encounters`
-- `assessments`
-- `diagnoses`
-- `procedures`
-- `sensitive_notes`
-- `record_drafts`
-- `patient_access_logs`
+- `encounters`, `assessments`, `record_addenda`, `diagnoses`, `procedures`
+- `sensitive_notes`, `clinical_reports`, `record_drafts`
+- `prescriptions`, `prescription_items`
+- `patient_access_logs`, `break_glass_grants`
 
 ## Permission
 
@@ -87,6 +74,8 @@ medical-record.report.manage
 medical-record.sensitive-note.view
 medical-record.sensitive-note.update
 medical-record.resume.export
+pharmacy.prescription.create   # untuk menulis e-resep di EMR
+pharmacy.prescription.view     # untuk melihat riwayat e-resep di EMR & riwayat pasien
 ```
 
 ## Aturan
@@ -94,18 +83,10 @@ medical-record.resume.export
 - Draft autosave tidak boleh menimpa data final tanpa konfirmasi.
 - Edit bersamaan memakai optimistic lock `updated_at`.
 - Catatan yang sudah final tidak boleh dihapus; koreksi memakai addendum.
-- Semua akses field sensitif tercatat.
-- Perawat hanya encounter di ruang yang ditugaskan; dokter hanya poli terkait.
-
-## Kriteria penerimaan
-
-- Form panjang tidak kehilangan data saat navigasi tidak sengaja.
-- Konflik edit terdeteksi dan diberi pesan.
-- Field sensitif tidak ada di payload untuk user tanpa izin.
-- Audit akses tercatat untuk setiap buka/simpan.
-- Break-glass berfungsi dan dapat ditinjau auditor.
+- E-Resep baru hanya boleh dibuat ketika status kunjungan `in_consultation`.
+- Semua akses dan aksi penulisan tercatat di `patient_access_logs` dan activity log.
 
 ## Ketergantungan
 
-- Pendaftaran.
+- Pendaftaran, Farmasi (E-Resep), dan Master Data.
 - Fondasi RBAC, audit, dan break-glass.

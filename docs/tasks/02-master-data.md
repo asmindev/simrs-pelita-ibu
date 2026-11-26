@@ -1,73 +1,29 @@
 # Fase 2 — Master Data
 
-Status: selesai (pasien, unit, dokter, jadwal, penjamin, tarif, obat, dan merge pasien selesai).
-
-## Referensi legacy
-
-- Unit: `admin/manage_department.php`.
-- Dokter: `admin/manage_doctor.php`.
-- Obat: `pharmacist/manage_medicine_category.php` + `manage_medicine.php`.
-- Pasien: `admin/manage_patient.php` (selesai).
-- User/staff: `admin/manage_*.php` (dikerjakan bersama Fase 7).
+Status: selesai (pasien, unit, dokter, jadwal, penjamin, tarif, produk, dan merge pasien selesai, termasuk tabel daftar Master Data bergaya kompak).
 
 ## Backend
 
-- [x] Migration `patients`.
-- [x] Migration deskripsi `units`.
-- [x] Migration `doctors`.
-- [x] Migration `doctor_schedules`.
-- [x] Migration `guarantors` dan `tariffs`.
-- [x] Migration `drug_categories` dan `drugs`.
-- [x] Model + factory + cast pasien.
-- [x] Model + factory unit.
-- [x] Model + factory dokter.
-- [x] Model + factory jadwal dokter.
-- [x] Model + factory penjamin dan tarif.
-- [x] Model + factory kategori/obat.
-- [x] Controller pasien (index/create/store/edit/update/destroy).
-- [x] CRUD unit (tabel `units` sudah ada).
-- [x] CRUD dokter (profil).
-- [x] CRUD jadwal praktik dokter (validasi tumpang tindih).
-- [x] CRUD penjamin dan tarif/tindakan.
-- [x] CRUD kategori + obat (harga, produsen, status).
-- [x] FormRequest validasi pasien.
-- [x] FormRequest penjamin dan tarif.
-- [x] FormRequest kategori dan obat.
-- [ ] Policy scoping unit untuk data yang terikat unit.
-- [x] Deteksi duplikat pasien (NIK atau nama + tanggal lahir).
-- [x] Endpoint merge pasien.
-- [ ] Field golongan darah pasien (ditunda sampai blood bank disetujui).
-- [x] Permission enum Master Data.
-- [x] Test CRUD pasien + permission + duplikat.
-- [x] Test CRUD unit + permission + audit.
-- [x] Test CRUD dokter + permission + audit.
-- [x] Test CRUD jadwal dokter + permission + audit.
-- [x] Test CRUD penjamin dan tarif + permission + audit.
-- [x] Test CRUD obat.
-- [x] Test merge pasien.
+- [x] Migration `patients`, `units`, `doctors`, `doctor_schedules`, `guarantors`, `tariffs`, `product_categories`, `products`.
+- [x] Model + factory + cast untuk seluruh entitas Master Data.
+- [x] Controller CRUD pasien, unit, dokter + jadwal praktik, penjamin, tarif, kategori & produk.
+- [x] Deteksi duplikat pasien dan endpoint merge pasien.
+- [x] Permission enum Master Data (`master-data.*`) & activity log.
+- [x] Feature tests CRUD, permission matrix, duplikat, merge, dan jadwal praktik.
 
 ## Frontend
 
 - [x] `pages/master-data/home/index.tsx` sebagai landing.
-- [x] `pages/master-data/patient/{list,create,edit}/index.tsx`.
-- [x] `pages/master-data/unit/{list,create,edit}/index.tsx`.
-- [x] `pages/master-data/doctor/{list,create,edit}/index.tsx`.
-- [x] Jadwal praktik di halaman edit dokter.
-- [x] `pages/master-data/guarantor/{list,create,edit}/index.tsx`.
-- [x] `pages/master-data/tariff/{list,create,edit}/index.tsx`.
-- [x] `pages/master-data/drug/{list,create,edit}/index.tsx`.
-- [x] `PatientPicker` di `pages/master-data/patient/components`.
-- [x] `PatientFilters`, `PatientForm` di
-      `pages/master-data/patient/components`.
-- [x] `use-patient-duplicates` di `pages/master-data/patient/hooks`.
-- [x] Tabel pasien dengan filter di URL.
-- [x] Aksi create/update/delete dibungkus `Can`.
-- [x] Format tanggal/uang memakai `shared/lib/format`.
+- [x] `pages/master-data/patient/{list,create,edit}/index.tsx` (`patient-columns.tsx`, `PatientFormDialog`, `PatientMergeDialog`).
+- [x] `pages/master-data/unit/{list,create,edit}/index.tsx` (`unit-columns.tsx`, `UnitFormDialog`).
+- [x] `pages/master-data/doctor/{list,create,edit}/index.tsx` (`doctor-columns.tsx`, `DoctorFormDialog`, `DoctorScheduleManager`).
+- [x] `pages/master-data/guarantor/{list,create,edit}/index.tsx` (`guarantor-columns.tsx`).
+- [x] `pages/master-data/tariff/{list,create,edit}/index.tsx` (`tariff-columns.tsx`).
+- [x] `pages/master-data/product/{list,create,show,edit}/index.tsx` (halaman `ProductShow` bergaya Odoo dengan inline edit, tab stok/batch/mutasi/valuasi).
+- [x] Tabel daftar Master Data memakai padding rapat (`py-1`, `text-xs`) dan kolom terpisah sesuai konvensi.
 
 ## Kriteria
 
-- Pencarian dan duplikat berfungsi.
-- CRUD unit dan dokter berfungsi dan perubahan tercatat di activity log.
-- Jadwal dokter menolak jam tumpang tindih dan unit nonaktif.
-- Permission diuji; scoping unit menyusul saat data terikat unit ada.
-- Audit perubahan referensi tercatat.
+- Pencarian, deteksi duplikat, dan merge berfungsi.
+- CRUD seluruh entitas Master Data teruji dan masuk audit log.
+- Permission matrix menyembunyikan aksi tanpa izin dan menolaknya di backend.
